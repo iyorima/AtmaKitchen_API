@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->bigIncrements('id_role');
-            $table->string('role');
+        Schema::create('presensi_absens', function (Blueprint $table) {
+            $table->bigIncrements('id_presensi');
+            $table->unsignedBigInteger('id_karyawan');
+            $table->foreign('id_karyawan')->references('id_karyawan')->on('karyawans')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('presensi_absens');
     }
 };

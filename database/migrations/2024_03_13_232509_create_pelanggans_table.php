@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->bigIncrements('id_role');
-            $table->string('role');
+        Schema::create('pelanggans', function (Blueprint $table) {
+            $table->bigIncrements('id_pelanggan');
+            $table->unsignedBigInteger('id_akun');
+            $table->foreign('id_akun')->references('id_akun')->on('akuns')->onDelete('cascade');
+            $table->string('nama', 255);
+            $table->date('tgl_lahir');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('pelanggans');
     }
 };

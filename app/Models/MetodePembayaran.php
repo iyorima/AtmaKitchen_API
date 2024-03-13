@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model
+class MetodePembayaran extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = "id_role";
+    protected $primaryKey = "id_metode_pembayaran";
 
     protected $fillable = [
-        'id_role',
-        'role',
-        
+        'id_metode_pembayaran',
+        'nama',
     ];
+
 
 }

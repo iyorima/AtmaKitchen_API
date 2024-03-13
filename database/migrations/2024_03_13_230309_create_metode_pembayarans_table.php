@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->bigIncrements('id_role');
-            $table->string('role');
+        Schema::create('metode_pembayarans', function (Blueprint $table) {
+            $table->id('id_metode_pembayaran');
+            $table->string('nama', 50);
             $table->timestamps();
-            $table->softDeletes();
+            $table->softDeletes(); 
         });
     }
 
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('metode_pembayarans');
     }
 };
