@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('alamat')->nullable();
             $table->date('tanggal_lahir');
             $table->unsignedBigInteger('id_role');
-            $table->foreign('id_role')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('id_role')->references('id_role')->on('roles')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('is_verified');
             $table->softDeletes();
             $table->rememberToken();

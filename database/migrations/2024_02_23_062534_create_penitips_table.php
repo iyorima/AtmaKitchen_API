@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('penitips', function (Blueprint $table) {
             $table->string('id_penitip', 15)->primary();
-            $table->string('nama',255);
-            $table->timestamps();
+            $table->string('nama', 255);
             $table->timestamps();
             $table->softDeletes();
         });

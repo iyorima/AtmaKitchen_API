@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pengiriman extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $primaryKey = "id_pengiriman";
 
@@ -19,6 +20,4 @@ class Pengiriman extends Model
         'jarak',
         'harga',
     ];
-
-
 }

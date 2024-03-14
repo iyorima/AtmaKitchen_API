@@ -17,7 +17,8 @@ class PelangganFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nama' => fake()->name(),
+            'tgl_lahir' => fake()->date()
         ];
     }
 }

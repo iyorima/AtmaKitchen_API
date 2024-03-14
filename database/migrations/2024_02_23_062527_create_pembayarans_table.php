@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pembayarans', function (Blueprint $table) {
             $table->bigIncrements('id_pembayaran');
-            $table->unsignedBigInteger('id_pesanan');
+            $table->string('id_pesanan', 15);
             $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanans')->onDelete('cascade');
             $table->unsignedBigInteger('id_metode_pembayaran');
             $table->foreign('id_metode_pembayaran')->references('id_metode_pembayaran')->on('metode_pembayarans')->onDelete('cascade');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->double('total_tip', 15, 2);
             $table->timestamp('verified_at')->nullable();
             $table->timestamps();
-            $table->softDeletes(); 
+            $table->softDeletes();
         });
     }
 

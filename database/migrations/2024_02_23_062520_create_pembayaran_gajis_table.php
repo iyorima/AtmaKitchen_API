@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('pembayaran_gajis', function (Blueprint $table) {
             $table->bigIncrements('id_pembayaran_gaji');
-            $table->unsignedBigInteger('id_karyawan');
-            $table->foreign('id_karyawan')->references('id_karyawan')->on('karyawans')->onDelete('cascade');
+            $table->unsignedBigInteger('id_karyawan')->foreign('id_karyawan')->references('id_karyawan')->on('karyawans')->onDelete('cascade');
             $table->double('total', 15, 2);
             $table->double('bonus', 15, 2)->nullable();
             $table->timestamps();

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Akun;
 use Illuminate\Database\Seeder;
 
 class AkunSeeder extends Seeder
@@ -12,6 +12,6 @@ class AkunSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        Akun::factory()->count(10)->create();
     }
 }

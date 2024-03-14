@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PenarikanSaldo extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $primaryKey = "id_penarikan_saldo";
 
@@ -17,5 +18,4 @@ class PenarikanSaldo extends Model
         'jumlah_penarikan',
         'transfer_at',
     ];
-
 }

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BahanBaku extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $primaryKey = "id_bahan_baku";
 
     protected $fillable = [
@@ -16,6 +17,4 @@ class BahanBaku extends Model
         'satuan',
         'stok',
     ];
-
-
 }

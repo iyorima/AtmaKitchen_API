@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\KategoriProduk;
 use Illuminate\Database\Seeder;
 
 class KategoriProdukSeeder extends Seeder
@@ -12,6 +12,15 @@ class KategoriProdukSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        // TODO: Buat apa ya ini? titipan bisa di cek dari produk kan ada id_penitip :(
+        KategoriProduk::factory()->create([
+            'kategori' => 'Pre-Order'
+        ]);
+        KategoriProduk::factory()->create([
+            'kategori' => 'Ready Stock'
+        ]);
+        KategoriProduk::factory()->create([
+            'kategori' => 'Titipan'
+        ]);
     }
 }

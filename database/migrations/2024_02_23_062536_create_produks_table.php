@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('produks', function (Blueprint $table) {
             $table->bigIncrements('id_produk');
             $table->unsignedBigInteger('id_kategori');
-            $table->unsignedBigInteger('id_penitip')->nullable();
+            $table->string('id_penitip', 15)->nullable();
             $table->string('nama', 255);
             $table->integer('kapasitas');
             $table->double('harga_jual', 15, 2);
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('id_kategori')->references('id_kategori')->on('kategoris')->onDelete('cascade');
-            $table->foreign('id_penitip')->references('id_penitip')->on('penitips')->onDelete('set null');
+            $table->foreign('id_kategori')->references('id_kategori')->on('kategori_produks')->onDelete('cascade');
+            $table->foreign('id_penitip')->references('id_penitip')->on('penitips');
         });
     }
 

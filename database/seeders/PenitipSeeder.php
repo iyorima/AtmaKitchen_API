@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Penitip;
 use Illuminate\Database\Seeder;
 
 class PenitipSeeder extends Seeder
@@ -12,6 +12,20 @@ class PenitipSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        Penitip::factory()->create([
+            'id_penitip' => 'penitip-01'
+        ]);
+        Penitip::factory()->create([
+            'id_penitip' => 'penitip-02'
+        ]);
+        Penitip::factory()->create([
+            'id_penitip' => 'penitip-03'
+        ]);
+        Penitip::factory()->create([
+            'id_penitip' => 'penitip-04'
+        ]);
+        Penitip::factory()->create([
+            'id_penitip' => 'penitip-05'
+        ]);
     }
 }

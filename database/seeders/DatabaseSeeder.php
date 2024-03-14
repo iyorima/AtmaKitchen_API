@@ -12,12 +12,35 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::factory(10)->create();
-
-        \App\Models\User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => '123'
+        $this->call([
+            // ============= Nathan =============
+            // RoleSeeder::class,
+            // PenitipSeeder::class,
+            // AkunSeeder::class,
+            // PelangganSeeder::class,
+            // AlamatSeeder::class,
+            // KategoriProdukSeeder::class,
+            // ProdukSeeder::class,
+            // ProdukHampersSeeder::class,
+            // ============= Jeha =============
+            BahanBakuSeeder::class,
+            KaryawanSeeder::class,
+            KategoriPengirimanSeeder::class,
+            MetodePembayaranSeeder::class,
+            PembayaranGajiSeeder::class,
+            PemesananBahanBakuSeeder::class,
+            PenarikanSaldoSeeder::class,
+            PengeluaranLainnyaSeeder::class,
+            // ============= Yori =============
+            PresensiAbsenSeeder::class,
+            ResepProdukSeeder::class,
+            PesananSeeder::class,
+            SaldoPelangganSeeder::class,
+            PoinSeeder::class,
+            PengirimanSeeder::class,
+            PembayaranSeeder::class,
+            DetailPesananSeeder::class,
+            StatusPesananSeeder::class,
         ]);
     }
 }

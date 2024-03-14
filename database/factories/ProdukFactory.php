@@ -17,7 +17,7 @@ class ProdukFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'kapasitas' => fake()->numberBetween(15, 35),
         ];
     }
 }
