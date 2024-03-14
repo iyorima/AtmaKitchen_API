@@ -17,7 +17,8 @@ class KategoriPengirimanFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'jarak_minimum' => $this->faker->randomNumber(2), 
+            'harga' => $this->faker->numberBetween(10000, 50000),
         ];
     }
 }

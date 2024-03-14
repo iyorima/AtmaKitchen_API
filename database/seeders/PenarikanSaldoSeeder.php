@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\PenarikanSaldo;
 
 class PenarikanSaldoSeeder extends Seeder
 {
@@ -11,6 +12,6 @@ class PenarikanSaldoSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        PenarikanSaldo::factory()->count(10)->create();
     }
 }

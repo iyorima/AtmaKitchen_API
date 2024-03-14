@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\KategoriPengiriman;
 use Illuminate\Database\Seeder;
 
 class KategoriPengirimanSeeder extends Seeder
@@ -11,6 +12,6 @@ class KategoriPengirimanSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        KategoriPengiriman::factory()->count(10)->create();
     }
 }

@@ -17,7 +17,10 @@ class KaryawanFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'id_akun' => $this->faker->numberBetween(1, 10),
+            'nama' => $this->faker->name(),
+            'gaji_harian' => $this->faker->numberBetween(50000, 100000),
+            'bonus' => $this->faker->numberBetween(10000, 200000),
         ];
     }
 }

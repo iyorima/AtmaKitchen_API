@@ -17,7 +17,9 @@ class PenarikanSaldoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'id_akun' => $this->faker->numberBetween(1, 10),
+            'jumlah_penarikan' => $this->faker->randomFloat(2, 100, 500000),
+            'transfer_at' => $this->faker->dateTimeThisMonth(),
         ];
     }
 }

@@ -17,7 +17,7 @@ class BahanBakuFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'stok' => $this->faker->numberBetween(1, 10000),
         ];
     }
 }
