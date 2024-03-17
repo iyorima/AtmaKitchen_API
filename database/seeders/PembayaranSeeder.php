@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Pembayaran;
 use Illuminate\Database\Seeder;
 
 class PembayaranSeeder extends Seeder
@@ -11,6 +12,39 @@ class PembayaranSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        Pembayaran::factory()->create([
+            'id_pesanan' => '17.03.24.00001',
+            'id_metode_pembayaran' => 1,
+            'total_dibayarkan' => 450000,
+            'total_tip' => 0
+        ]);
+
+        Pembayaran::factory()->create([
+            'id_pesanan' => '17.03.24.00002',
+            'id_metode_pembayaran' => 2,
+            'total_dibayarkan' => 120000,
+            'total_tip' => 30000
+        ]);
+
+        Pembayaran::factory()->create([
+            'id_pesanan' => '17.03.24.00003',
+            'id_metode_pembayaran' => 1,
+            'total_dibayarkan' => 850000,
+            'total_tip' => 0
+        ]);
+
+        Pembayaran::factory()->create([
+            'id_pesanan' => '17.03.24.00004',
+            'id_metode_pembayaran' => 1,
+            'total_dibayarkan' => 75000,
+            'total_tip' => 5000
+        ]);
+
+        Pembayaran::factory()->create([
+            'id_pesanan' => '17.03.24.00005',
+            'id_metode_pembayaran' => 1,
+            'total_dibayarkan' => 300000,
+            'total_tip' => 0
+        ]);
     }
 }

@@ -14,13 +14,19 @@ class KategoriProdukSeeder extends Seeder
     {
         // TODO: Buat apa ya ini? titipan bisa di cek dari produk kan ada id_penitip :(
         KategoriProduk::factory()->create([
-            'kategori' => 'Pre-Order'
+            'kategori' => 'Cake'
         ]);
         KategoriProduk::factory()->create([
-            'kategori' => 'Ready Stock'
+            'kategori' => 'Roti'
+        ]);
+        KategoriProduk::factory()->create([
+            'kategori' => 'Minuman'
         ]);
         KategoriProduk::factory()->create([
             'kategori' => 'Titipan'
+        ]);
+        KategoriProduk::factory()->create([
+            'kategori' => 'Hampers'
         ]);
     }
 }

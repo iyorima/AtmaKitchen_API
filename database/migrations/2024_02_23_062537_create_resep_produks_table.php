@@ -15,7 +15,6 @@ return new class extends Migration
             $table->bigIncrements('id_resep_produk');
             $table->unsignedBigInteger('id_produk');
             $table->unsignedBigInteger('id_bahan_baku');
-            $table->string('satuan', 15);
             $table->double('jumlah');
             $table->timestamps();
             $table->softDeletes();

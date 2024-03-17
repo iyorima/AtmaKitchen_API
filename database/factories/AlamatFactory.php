@@ -17,7 +17,8 @@ class AlamatFactory extends Factory
     public function definition(): array
     {
         return [
-            'alamat' => fake()->address()
+            'alamat' => fake()->address(),
+            'telepon' => fake()->phoneNumber()
         ];
     }
 }

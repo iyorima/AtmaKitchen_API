@@ -15,11 +15,13 @@ return new class extends Migration
             $table->bigIncrements('id_karyawan');
             $table->unsignedBigInteger('id_akun');
             $table->foreign('id_akun')->references('id_akun')->on('akuns')->onDelete('cascade');
-            $table->string('nama', 255); 
+            $table->string('nama', 255);
             $table->double('gaji_harian', 10, 2);
             $table->double('bonus', 10, 2)->nullable();
+            $table->string('alamat');
+            $table->string('telepon');
             $table->timestamps();
-            $table->softDeletes(); 
+            $table->softDeletes();
         });
     }
 

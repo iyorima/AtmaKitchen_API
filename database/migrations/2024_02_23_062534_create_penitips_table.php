@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('penitips', function (Blueprint $table) {
             $table->string('id_penitip', 15)->primary();
             $table->string('nama', 255);
+            $table->string('alamat');
+            $table->string('telepon');
             $table->timestamps();
             $table->softDeletes();
         });

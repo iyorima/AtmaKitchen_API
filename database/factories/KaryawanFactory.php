@@ -21,6 +21,8 @@ class KaryawanFactory extends Factory
             'nama' => $this->faker->name(),
             'gaji_harian' => $this->faker->numberBetween(50000, 100000),
             'bonus' => $this->faker->numberBetween(10000, 200000),
+            'alamat' => fake()->address(),
+            'telepon' => fake()->phoneNumber()
         ];
     }
 }
