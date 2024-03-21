@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pelanggans', function (Blueprint $table) {
             $table->bigIncrements('id_pelanggan');
-            $table->unsignedBigInteger('id_akun');
+            $table->unsignedBigInteger('id_akun'); // Add unique for one-to-one relationship
             $table->foreign('id_akun')->references('id_akun')->on('akuns')->onDelete('cascade')->constrained(); // Constrained for one-to-one relationship
             $table->string('nama', 255);
             $table->date('tgl_lahir');

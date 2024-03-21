@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enum\SatuanEnum;
 use App\Models\BahanBaku;
 use Illuminate\Database\Seeder;
 
@@ -14,142 +15,142 @@ class BahanBakuSeeder extends Seeder
     {
         BahanBaku::factory()->create([
             'nama' => 'Butter',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Creamer',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Telur',
-            'satuan' => 'butir',
+            'satuan' => SatuanEnum::BUTIR,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Gula Pasir',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Susu Bubuk',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Tepung Terigu',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Tepung Maizena',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Garam',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Coklat Bubuk',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Selai Strawberry',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Coklat Batang',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Minyak Goreng',
-            'satuan' => 'ml',
+            'satuan' => SatuanEnum::ML,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Baking Powder',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Kacang Kenari',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Ragi',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Kuning Telur',
-            'satuan' => 'buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Susu Cair',
-            'satuan' => 'ml',
+            'satuan' => SatuanEnum::ML,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Sosis Blackpapper',
-            'satuan' => 'buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Whipped Cream',
-            'satuan' => 'ml',
+            'satuan' => SatuanEnum::ML,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Susu Full Cream',
-            'satuan' => 'ml',
+            'satuan' => SatuanEnum::ML,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Keju Mozzarella',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Matcha Bubuk',
-            'satuan' => 'gr',
+            'satuan' => SatuanEnum::GRAM,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Box 20x20 cm',
-            'satuan' => 'Buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Box 20x10 cm',
-            'satuan' => 'Buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Botol 1 Liter',
-            'satuan' => 'Buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Box Premium',
-            'satuan' => 'Buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Kartu Ucapan',
-            'satuan' => 'Buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
 
         BahanBaku::factory()->create([
             'nama' => 'Tas Spunbond',
-            'satuan' => 'Buah',
+            'satuan' => SatuanEnum::BUAH,
         ]);
     }
 }

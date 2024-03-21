@@ -17,5 +17,16 @@ class AlamatSeeder extends Seeder
                 'id_pelanggan' => $i
             ]);
         }
+        Alamat::factory()->create([
+            'id_pelanggan' => 1
+        ]);
+        Alamat::factory()->create([
+            'id_pelanggan' => 1
+        ]);
+        for ($i = 1; $i < 10; $i++) {
+            Alamat::factory()->create([
+                'id_pelanggan' => fake()->numberBetween(1, 5)
+            ]);
+        }
     }
 }
