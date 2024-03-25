@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('alamats', function (Blueprint $table) {
             $table->bigIncrements('id_alamat');
             $table->unsignedBigInteger('id_pelanggan');
-            $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggans')->onDelete('cascade');
+            $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggans')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('nama', 255);
             $table->string('alamat');
-            $table->string('telepon');
+            $table->string('telepon', 15);
             $table->timestamps();
             $table->softDeletes();
         });

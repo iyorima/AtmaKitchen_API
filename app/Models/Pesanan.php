@@ -14,10 +14,15 @@ class Pesanan extends Model
 
     protected $fillable = [
         'id_pesanan',
+        'id_metode_pembayaran',
         'id_pelanggan',
+        'tgl_order',
         'total_diskon_poin',
         'total_pesanan',
         'total_setelah_diskon',
+        'total_dibayarkan',
+        'total_tip',
+        'verified_at',
         'accepted_at',
     ];
 }

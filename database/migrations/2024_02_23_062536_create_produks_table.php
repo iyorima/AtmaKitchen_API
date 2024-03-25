@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('id_penitip', 15)->nullable();
             $table->string('nama', 255);
             $table->integer('kapasitas');
+            $table->string('ukuran', 15);
             $table->double('harga_jual', 15, 2);
             $table->timestamps();
             $table->softDeletes();

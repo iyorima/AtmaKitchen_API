@@ -12,12 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pesanans', function (Blueprint $table) {
-            $table->string('id_pesanan', 15)->primary(); 
+            $table->string('id_pesanan', 15)->primary();
+            $table->unsignedBigInteger('id_metode_pembayaran');
+            $table->foreign('id_metode_pembayaran')->references('id_metode_pembayaran')->on('metode_pembayarans')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('id_pelanggan');
-            $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggans')->onDelete('cascade');
+            $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggans')->onDelete('cascade')->onUpdate('cascade');
+            $table->date('tgl_order');
             $table->integer('total_diskon_poin');
             $table->double('total_pesanan', 15, 2);
             $table->double('total_setelah_diskon', 15, 2);
+            $table->double('total_dibayarkan');
+            $table->double('total_tip');
+            $table->timestamp('verified_at')->nullable();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
             $table->softDeletes();

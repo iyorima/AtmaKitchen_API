@@ -17,6 +17,7 @@ class Akun extends Model
         'email',
         'password',
         'id_role',
+        'profile_image',
         'email_verified_at',
         'remember_token',
     ];

@@ -18,7 +18,7 @@ class Produk extends Model
         'id_penitip',
         'nama',
         'kapasitas',
+        'ukuran',
         'harga_jual'
-
     ];
 }

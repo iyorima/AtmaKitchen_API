@@ -19,5 +19,8 @@ class Pengiriman extends Model
         'id_kurir',
         'jarak',
         'harga',
+        'nama',
+        'telepon',
+        'alamat'
     ];
 }

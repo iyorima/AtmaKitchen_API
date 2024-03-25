@@ -14,6 +14,8 @@ class Alamat extends Model
     protected $fillable = [
         'id_alamat',
         'id_pelanggan',
+        'nama',
         'alamat',
+        'telepon'
     ];
 }

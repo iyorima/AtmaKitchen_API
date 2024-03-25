@@ -15,10 +15,12 @@ return new class extends Migration
             $table->bigIncrements('id_pengeluaran_lainnya');
             $table->unsignedBigInteger('id_karyawan');
             $table->foreign('id_karyawan')->references('id_karyawan')->on('karyawans')->onDelete('cascade');
-            $table->string('nama', 255); 
+            $table->string('nama', 255);
             $table->double('biaya', 15, 2);
+            $table->date('tanggal');
+            $table->string('kategori', 15);
             $table->timestamps();
-            $table->softDeletes(); 
+            $table->softDeletes();
         });
     }
 

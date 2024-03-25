@@ -14,9 +14,7 @@ class ProdukHampers extends Model
 
     protected $fillable = [
         'id_produk_hampers',
-        'id_produk',
         'nama',
-        'satuan',
-        'jumlah',
+        'harga_jual',
     ];
 }

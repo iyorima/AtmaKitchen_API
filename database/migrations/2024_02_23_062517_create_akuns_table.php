@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('akuns', function (Blueprint $table) {
             $table->bigIncrements('id_akun');
-            $table->string('email', 255)->unique(); 
-            $table->string('password', 255); 
+            $table->string('email', 255)->unique();
+            $table->string('password', 255);
             $table->unsignedBigInteger('id_role');
+            $table->string('profile_image', 255);
             $table->foreign('id_role')->references('id_role')->on('roles')->onDelete('cascade');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

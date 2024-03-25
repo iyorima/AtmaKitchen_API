@@ -17,5 +17,7 @@ class PengeluaranLainnya extends Model
         'id_karyawan',
         'nama',
         'biaya',
+        'tanggal',
+        'kategori'
     ];
 }

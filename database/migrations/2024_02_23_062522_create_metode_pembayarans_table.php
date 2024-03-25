@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('produk_hampers', function (Blueprint $table) {
-            $table->bigIncrements('id_produk_hampers');
-            $table->string('nama', 255);
-            $table->double('harga_jual');
+        Schema::create('metode_pembayarans', function (Blueprint $table) {
+            $table->id('id_metode_pembayaran');
+            $table->string('nama', 50);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('produk_hampers');
+        Schema::dropIfExists('metode_pembayarans');
     }
 };

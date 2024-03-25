@@ -18,5 +18,7 @@ class Karyawan extends Model
         'nama',
         'gaji_harian',
         'bonus',
+        'telepon',
+        'alamat',
     ];
 }
