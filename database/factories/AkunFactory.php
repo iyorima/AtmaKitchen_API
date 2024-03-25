@@ -20,6 +20,7 @@ class AkunFactory extends Factory
         return [
             'email' => fake()->email(),
             'password' => Hash::make(fake()->password, ['rounds' => 12]),
+            'profile_image' => fake()->imageUrl(),
             'id_role' => fake()->numberBetween(1, 6)
         ];
     }

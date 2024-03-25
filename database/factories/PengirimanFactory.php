@@ -17,7 +17,10 @@ class PengirimanFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nama' => $this->faker->name(),
+            'telepon' => $this->faker->regexify('[0-9]{0,15}'),
+            'alamat' => fake()->address(),
+           
         ];
     }
 }

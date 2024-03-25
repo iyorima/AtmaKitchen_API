@@ -17,9 +17,10 @@ class PenitipFactory extends Factory
     public function definition(): array
     {
         return [
-            'nama' => fake()->name(),
-            'alamat' => fake()->address(),
-            'telepon' => fake()->phoneNumber()
+            'id_penitip' => $this->faker->unique()->word(),
+            'nama' => $this->faker->name(),
+            'alamat' => $this->faker->address(),
+            'telepon' => $this->faker->phoneNumber(),
         ];
     }
 }

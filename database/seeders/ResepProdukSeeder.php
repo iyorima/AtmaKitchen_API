@@ -28,7 +28,7 @@ class ResepProdukSeeder extends Seeder
         ResepProduk::factory()->create([
             'id_produk' => 1,
             'id_bahan_baku' => 3,
-            'jumlah' => 500
+            'jumlah' => 50
         ]);
 
         ResepProduk::factory()->create([

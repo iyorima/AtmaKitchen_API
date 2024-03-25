@@ -17,7 +17,8 @@ class PesananFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'tgl_order' => $this->faker->dateTimeBetween('-1 month', 'now'), 
+            'verified_at' => $this->faker->dateTimeBetween('-1 month', 'now'), 
         ];
     }
 }

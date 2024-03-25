@@ -17,8 +17,9 @@ class AlamatFactory extends Factory
     public function definition(): array
     {
         return [
-            'alamat' => fake()->address(),
-            'telepon' => fake()->phoneNumber()
+            'nama' => $this->faker->name(),
+            'alamat' => $this->faker->address(),
+            'telepon' => $this->faker->regexify('[0-9]{0,15}')
         ];
     }
 }

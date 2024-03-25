@@ -38,7 +38,6 @@ class DatabaseSeeder extends Seeder
             SaldoPelangganSeeder::class,
             PoinSeeder::class,
             PengirimanSeeder::class,
-            PembayaranSeeder::class,
             DetailPesananSeeder::class,
             StatusPesananSeeder::class,
         ]);
