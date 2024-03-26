@@ -130,23 +130,5 @@ class ProdukSeeder extends Seeder
             'ukuran' => '100 gr',
             'harga_jual' => 120000
         ]);
-        Produk::factory()->create([
-            'id_kategori' => 2,
-            'nama' => 'Hampers Paket A',
-            'ukuran' => '',
-            'harga_jual' => 650000
-        ]);
-        Produk::factory()->create([
-            'id_kategori' => 2,
-            'nama' => 'Hampers Paket B',
-            'ukuran' => '',
-            'harga_jual' => 500000
-        ]);
-        Produk::factory()->create([
-            'id_kategori' => 2,
-            'nama' => 'Hampers Paket C',
-            'ukuran' => '',
-            'harga_jual' => 350000
-        ]);
     }
 }

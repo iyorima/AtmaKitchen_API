@@ -152,5 +152,15 @@ class BahanBakuSeeder extends Seeder
             'nama' => 'Tas Spunbond',
             'satuan' => SatuanEnum::BUAH,
         ]);
+
+        BahanBaku::factory()->create([
+            'nama' => 'Exclusive Box',
+            'satuan' => SatuanEnum::BUAH,
+        ]);
+
+        BahanBaku::factory()->create([
+            'nama' => 'Card',
+            'satuan' => SatuanEnum::BUAH,
+        ]);
     }
 }

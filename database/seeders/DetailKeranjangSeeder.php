@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\DetailKeranjang;
 use Illuminate\Database\Seeder;
 
 class DetailKeranjangSeeder extends Seeder
@@ -12,6 +12,6 @@ class DetailKeranjangSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        DetailKeranjang::factory()->count(50)->create();
     }
 }

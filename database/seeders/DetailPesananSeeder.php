@@ -22,6 +22,24 @@ class DetailPesananSeeder extends Seeder
         ]);
 
         DetailPesanan::factory()->create([
+            'id_pesanan' => '17.03.24.001',
+            'id_produk' => 12,
+            'kategori' => 'Roti',
+            'nama_produk' => 'Milk Bun',
+            'harga' => 120000,
+            'jumlah' => 2
+        ]);
+
+        DetailPesanan::factory()->create([
+            'id_pesanan' => '17.03.24.001',
+            'id_produk' => 1,
+            'kategori' => 'Cake',
+            'nama_produk' => 'Lapis Legit',
+            'harga' => 850000,
+            'jumlah' => 5
+        ]);
+
+        DetailPesanan::factory()->create([
             'id_pesanan' => '17.03.24.002',
             'id_produk' => 12,
             'kategori' => 'Roti',

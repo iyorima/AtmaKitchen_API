@@ -11,21 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('alamat')->nullable();
-            $table->date('tanggal_lahir');
-            $table->unsignedBigInteger('id_role');
-            $table->foreign('id_role')->references('id_role')->on('roles')->onDelete('cascade')->onUpdate('cascade');
-            $table->integer('is_verified');
-            $table->softDeletes();
-            $table->rememberToken();
-            $table->timestamps();
-        });
+        // Schema::create('users', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->string('nama');
+        //     $table->string('email')->unique();
+        //     $table->timestamp('email_verified_at')->nullable();
+        //     $table->string('password');
+        //     $table->string('alamat')->nullable();
+        //     $table->date('tanggal_lahir');
+        //     $table->unsignedBigInteger('id_role');
+        //     $table->foreign('id_role')->references('id_role')->on('roles')->onDelete('cascade')->onUpdate('cascade');
+        //     $table->integer('is_verified');
+        //     $table->softDeletes();
+        //     $table->rememberToken();
+        //     $table->timestamps();
+        // });
     }
 
     /**

@@ -40,6 +40,10 @@ class DatabaseSeeder extends Seeder
             PengirimanSeeder::class,
             DetailPesananSeeder::class,
             StatusPesananSeeder::class,
+            DetailHampersSeeder::class,
+            KeranjangSeeder::class,
+            DetailKeranjangSeeder::class,
+            ProdukImageSeeder::class
         ]);
     }
 }

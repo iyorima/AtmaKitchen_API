@@ -17,11 +17,11 @@ class PesananSeeder extends Seeder
             'id_pelanggan' => 1,
             'id_metode_pembayaran' => rand(1, 2),
             'total_diskon_poin' => 0,
-            'total_pesanan' => 450000, // Mandarin
-            'total_setelah_diskon' => 450000,
-            'total_dibayarkan' => 450000, 
+            'total_pesanan' => 4940000, // Mandarin
+            'total_setelah_diskon' => 4940000,
+            'total_dibayarkan' => 4940000,
             'total_tip' => 0
-            
+
         ]);
 
         Pesanan::factory()->create([
@@ -31,7 +31,7 @@ class PesananSeeder extends Seeder
             'total_diskon_poin' => 0,
             'total_pesanan' => 120000, // Milk Bun
             'total_setelah_diskon' => 120000,
-            'total_dibayarkan' => 150000, 
+            'total_dibayarkan' => 150000,
             'total_tip' => 30000
         ]);
 
@@ -42,7 +42,7 @@ class PesananSeeder extends Seeder
             'total_diskon_poin' => 0,
             'total_pesanan' => 850000, // Lapis legit
             'total_setelah_diskon' => 850000,
-            'total_dibayarkan' => 900000, 
+            'total_dibayarkan' => 900000,
             'total_tip' => 50000
         ]);
 
@@ -53,7 +53,7 @@ class PesananSeeder extends Seeder
             'total_diskon_poin' => 0,
             'total_pesanan' => 75000, // Keripik kentang
             'total_setelah_diskon' => 75000,
-            'total_dibayarkan' => 75000, 
+            'total_dibayarkan' => 75000,
             'total_tip' => 0
         ]);
 
@@ -64,7 +64,7 @@ class PesananSeeder extends Seeder
             'total_diskon_poin' => 0,
             'total_pesanan' => 120000, // Chocolate Bar 100gr
             'total_setelah_diskon' => 120000,
-            'total_dibayarkan' => 120000, 
+            'total_dibayarkan' => 120000,
             'total_tip' => 0
         ]);
 
@@ -75,7 +75,7 @@ class PesananSeeder extends Seeder
             'total_diskon_poin' => 6000,
             'total_pesanan' => 270000, // Chocolate Bar 100gr + Keripik kentang (2)
             'total_setelah_diskon' => 264000,
-            'total_dibayarkan' => 270000, 
+            'total_dibayarkan' => 270000,
             'total_tip' => 6000
         ]);
     }
