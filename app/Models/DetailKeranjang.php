@@ -9,10 +9,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class DetailKeranjang extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $primaryKey = "id_detail_keranjang";
 
     protected $fillable = [
+        'id_detail_keranjang',
         'id_keranjang',
         'id_produk',
+        'id_produk_hampers',
         'jumlah'
     ];
 }

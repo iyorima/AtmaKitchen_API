@@ -16,6 +16,7 @@ class DetailPesanan extends Model
         'id_detail_pesanan',
         'id_pesanan',
         'id_produk',
+        'id_produk_hampers',
         'kategori',
         'nama_produk',
         'harga',
