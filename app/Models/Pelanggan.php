@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Akun;
 
 class Pelanggan extends Model
 {
@@ -17,5 +18,11 @@ class Pelanggan extends Model
         'id_akun',
         'nama',
         'tgl_lahir',
+        'telepon'
     ];
+
+    public function id_akun()
+    {
+        return $this->belongsTo(Akun::class, 'id_akun');
+    }
 }

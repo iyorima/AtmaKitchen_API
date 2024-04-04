@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_produk_hampers');
             $table->string('nama', 255);
             $table->double('harga_jual');
+            $table->string('image');
             $table->timestamps();
             $table->softDeletes();
         });

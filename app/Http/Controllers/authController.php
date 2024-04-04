@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Models\User;
+use App\Models\Akun;
+use App\Models\Pelanggan;
+use App\Models\Alamat;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -20,9 +22,11 @@ class AuthController extends Controller
 
         $validate = Validator::make($registrationData, [
             'nama' => 'required',
-            'email' => 'required|email:rfc,dns|unique:users',
+            'email' => 'required|email:rfc,dns|unique:akuns',
             'password' => 'required',
-            'tanggal_lahir' => 'required',
+            'nama_alamat' => 'required',
+            'alamat' => 'required',
+            'telepon' => 'required'
         ]);
 
         if ($validate->fails()) {
@@ -30,10 +34,8 @@ class AuthController extends Controller
         }
 
         $str = Str::random(100);
-        $registrationData['id_role'] = 4;
+        $registrationData['id_role'] = 1; // customer
         $registrationData['verify_key'] = $str;
-        // TODO: aktifkan is_verified
-        $registrationData['is_verified'] = 1;
         $registrationData['password'] = bcrypt($request->password);
 
         // $details = [
@@ -44,21 +46,40 @@ class AuthController extends Controller
         // ];
 
         // Mail::to($request->email)->send(new Mailsend($details));
-        $user = User::create($registrationData);
+        $akun = Akun::create([
+            'email' => $registrationData['email'],
+            'password' => $registrationData['password'],
+            'id_role' => $registrationData['id_role']
+        ]);
+
+        $pelanggan = Pelanggan::create([
+            'id_akun' => $akun->id_akun,
+            'nama' => $registrationData['nama']
+        ]);
+
+        $alamat = Alamat::create([
+            'id_pelanggan' => $pelanggan->id_pelanggan,
+            'nama' => $registrationData['nama_alamat'],
+            'alamat' => $registrationData['alamat'],
+            'telepon' => $registrationData['telepon']
+        ]);
 
         return response([
             'message' => 'Registrasi Berhasil, silahkan verifikasi akun',
-            'data' => $user
+            'data' => [
+                'akun' => $akun,
+                'pelanggan' => $pelanggan,
+                'alamat' => $alamat,
+            ]
         ], 200);
     }
 
     public function verify($verify_key)
     {
-        $user = User::where('verify_key', $verify_key)->first();
+        $akun = Akun::where('verify_key', $verify_key)->first();
 
-        if ($user) {
-            $user->update([
-                'is_verified' => 1,
+        if ($akun) {
+            $akun->update([
                 'email_verified_at' => now(),
             ]);
 
@@ -85,16 +106,20 @@ class AuthController extends Controller
             return response(['message' => 'Email atau password salah!'], 401);
         }
 
-        /** @var \App\Models\User $user **/
-        $user = Auth::user();
-        if ($user->is_verified == 1) {
-            $token = $user->createToken('Authentication Token')->accessToken;
+        /** @var \App\Models\Akun $akun **/
+        $akun = Auth::user();
+        $data = Akun::with('role')->where('id_role', '=', $akun->id_role)->get();
+        // TODO: fix verifikasi email
+        if ($akun->email_verified_at == null) {
+            $token = $akun->createToken('Authentication Token')->accessToken;
 
             return response([
                 'message' => 'Berhasil login',
-                'user' => $user,
-                'token_type' => 'Bearer',
-                'access_token' => $token
+                'data' => [
+                    'akun' => $data,
+                    'token_type' => 'Bearer',
+                    'access_token' => $token
+                ]
             ], 200);
         } else {
             return response([

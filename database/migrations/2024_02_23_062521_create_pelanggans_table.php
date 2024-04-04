@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_akun'); // Add unique for one-to-one relationship
             $table->foreign('id_akun')->references('id_akun')->on('akuns')->onDelete('cascade')->constrained(); // Constrained for one-to-one relationship
             $table->string('nama', 255);
-            $table->date('tgl_lahir');
+            $table->date('tgl_lahir')->nullable();
+            $table->string('telepon', 15)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

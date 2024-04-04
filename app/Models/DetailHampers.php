@@ -16,4 +16,15 @@ class DetailHampers extends Model
         'id_produk_hampers',
         'id_produk',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'id_produk');
+    }
 }

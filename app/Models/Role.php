@@ -15,6 +15,11 @@ class Role extends Model
     protected $fillable = [
         'id_role',
         'role',
+    ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 }

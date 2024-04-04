@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\usersController;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\roleController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\ProdukHampersController;
+use App\Http\Controllers\PemesananBahanBakuController;
+use App\Models\PemesananBahanBaku;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +33,26 @@ Route::post('/role', [roleController::class, 'store']);
 Route::get('/role/{id}', [roleController::class, 'show']);
 Route::post('/role/{id}', [roleController::class, 'update']);
 Route::delete('/role/{id}', [roleController::class, 'destroy']);
+
+Route::get('/produk', [ProdukController::class, 'index']);
+Route::post('/produk', [ProdukController::class, 'store']);
+Route::get('/produk/{id}', [ProdukController::class, 'show']);
+Route::get('/produk/kategori/{id}', [ProdukController::class, 'showByKategori']);
+Route::get('/produk/penitip/{id}', [ProdukController::class, 'showByPenitip']);
+Route::post('/produk/{id}', [ProdukController::class, 'update']);
+Route::delete('/produk/{id}', [ProdukController::class, 'destroy']);
+
+Route::get('/hampers', [ProdukHampersController::class, 'index']);
+Route::post('/hampers', [ProdukHampersController::class, 'store']);
+Route::get('/hampers/{id}', [ProdukHampersController::class, 'show']);
+Route::post('/hampers/{id}', [ProdukHampersController::class, 'update']);
+Route::delete('/hampers/{id}', [ProdukHampersController::class, 'destroy']);
+
+Route::get('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'index']);
+Route::post('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'store']);
+Route::get('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'show']);
+Route::post('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'update']);
+Route::delete('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'destroy']);
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', [usersController::class, 'index']);

@@ -16,5 +16,17 @@ class ProdukHampers extends Model
         'id_produk_hampers',
         'nama',
         'harga_jual',
+        'image'
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    public function detailHampers()
+    {
+        return $this->hasMany(DetailHampers::class, 'id_produk_hampers');
+    }
 }

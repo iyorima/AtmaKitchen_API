@@ -21,4 +21,9 @@ class PemesananBahanBaku extends Model
         'harga_beli',
         'total',
     ];
+
+    public function bahan_baku()
+    {
+        return $this->belongsTo(BahanBaku::class, 'id_bahan_baku');
+    }
 }

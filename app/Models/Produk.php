@@ -21,4 +21,9 @@ class Produk extends Model
         'ukuran',
         'harga_jual'
     ];
+
+    public function images()
+    {
+        return $this->hasMany(ProdukImage::class, 'id_produk');
+    }
 }
