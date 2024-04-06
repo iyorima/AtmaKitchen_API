@@ -9,6 +9,8 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProdukHampersController;
 use App\Http\Controllers\PemesananBahanBakuController;
 use App\Models\PemesananBahanBaku;
+use App\Http\Controllers\PenitipController;
+use App\Http\Controllers\BahanBakuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +55,18 @@ Route::post('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'stor
 Route::get('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'show']);
 Route::post('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'update']);
 Route::delete('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'destroy']);
+
+Route::get('/penitip', [PenitipController::class, 'index']);
+Route::post('/penitip', [PenitipController::class, 'store']);
+Route::get('/penitip/{id}', [PenitipController::class, 'show']);
+Route::put('/penitip/{id}', [PenitipController::class, 'update']);
+Route::delete('/penitip/{id}', [PenitipController::class, 'destroy']);
+
+Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
+Route::post('/bahan-baku', [BahanBakuController::class, 'store']);
+Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
+Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
+Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', [usersController::class, 'index']);

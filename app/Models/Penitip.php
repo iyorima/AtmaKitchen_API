@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Penitip extends Model
 {
     use HasFactory, SoftDeletes;
-
+    public $incrementing=false;
     protected $primaryKey = "id_penitip";
 
     protected $fillable = [
