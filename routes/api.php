@@ -11,6 +11,7 @@ use App\Http\Controllers\PemesananBahanBakuController;
 use App\Models\PemesananBahanBaku;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\KaryawanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,6 +68,12 @@ Route::post('/bahan-baku', [BahanBakuController::class, 'store']);
 Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
 Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
 Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
+
+Route::get('/karyawan', [KaryawanController::class, 'index']);
+Route::post('/karyawan', [KaryawanController::class, 'store']);
+Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
+Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
+Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', [usersController::class, 'index']);
