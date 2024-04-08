@@ -104,28 +104,28 @@ class ProdukSeeder extends Seeder
         ]);
         Produk::factory()->create([
             'id_kategori' => 3,
-            'id_penitip' => 'Penitip-01',
+            'id_penitip' => 'penitip-01',
             'nama' => 'Keripik Kentang',
             'ukuran' => '250 gr',
             'harga_jual' => 75000
         ]);
         Produk::factory()->create([
             'id_kategori' => 3,
-            'id_penitip' => 'Penitip-01',
+            'id_penitip' => 'penitip-01',
             'nama' => 'Kopi Luwak Bubuk',
             'ukuran' => '250 gr',
             'harga_jual' => 250000
         ]);
         Produk::factory()->create([
             'id_kategori' => 3,
-            'id_penitip' => 'Penitip-02',
+            'id_penitip' => 'penitip-02',
             'nama' => 'Matcha Organik Bubuk',
             'ukuran' => '100 gr',
             'harga_jual' => 300000
         ]);
         Produk::factory()->create([
             'id_kategori' => 3,
-            'id_penitip' => 'Penitip-01',
+            'id_penitip' => 'penitip-01',
             'nama' => 'Chocolate Bar',
             'ukuran' => '100 gr',
             'harga_jual' => 120000

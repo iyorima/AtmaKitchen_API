@@ -26,4 +26,9 @@ class Produk extends Model
     {
         return $this->hasMany(ProdukImage::class, 'id_produk');
     }
+
+    public function penitip()
+    {
+        return $this->belongsTo(Penitip::class, 'id_penitip');
+    }
 }
