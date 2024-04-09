@@ -72,7 +72,7 @@ Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
 Route::get('/karyawan', [KaryawanController::class, 'index']);
 Route::post('/karyawan', [KaryawanController::class, 'store']);
 Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
-Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
+Route::post('/karyawan/{id}', [KaryawanController::class, 'update']);
 Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
 
 Route::group(['middleware' => 'auth:api'], function () {
