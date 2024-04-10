@@ -11,7 +11,7 @@ class roleController extends Controller
     // menampilkan seluruh role
     public function index()
     {
-        $role = Role::all();
+        $role = Role::withCount('akun')->get();
 
         if (count($role) > 0) {
             return response([
@@ -104,6 +104,7 @@ class roleController extends Controller
     // menghapus role
     public function destroy(string $id)
     {
+        // TODO: Delete cascade
         $role = Role::find($id);
 
         if (is_null($role)) {

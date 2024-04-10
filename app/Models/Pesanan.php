@@ -11,6 +11,8 @@ class Pesanan extends Model
     use HasFactory, SoftDeletes;
 
     protected $primaryKey = "id_pesanan";
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'id_pesanan',
@@ -25,4 +27,9 @@ class Pesanan extends Model
         'verified_at',
         'accepted_at',
     ];
+
+    public function detail_pesanan()
+    {
+        return $this->hasMany(DetailPesanan::class, 'id_pesanan');
+    }
 }

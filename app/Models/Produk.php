@@ -22,8 +22,19 @@ class Produk extends Model
         'harga_jual'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
     public function images()
     {
         return $this->hasMany(ProdukImage::class, 'id_produk');
+    }
+
+    public function resep()
+    {
+        return $this->hasMany(ResepProduk::class, 'id_produk');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use App\Models\ProdukImage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
@@ -51,6 +52,9 @@ class ProdukController extends Controller
             'image5' => 'image|mimes:jpeg,png,jpg',
         ]);
 
+        // ✅ Use this to upload image to Cloudinary. References: https://cloudinary.com/. https://github.com/cloudinary-community/cloudinary-laravel
+        // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
+
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
@@ -77,6 +81,9 @@ class ProdukController extends Controller
             $imageKey = 'image' . $i;
             if ($request->hasFile($imageKey)) {
                 $imagePath = $request->file($imageKey)->store('public/product');
+
+                // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
+
                 ProdukImage::create([
                     'id_produk' => $produk->id_produk,
                     'image' => $imagePath
@@ -85,7 +92,16 @@ class ProdukController extends Controller
             }
         }
 
+        // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
+
+        // ✅ Changes: Added image paths from cloudinary to database
+        // ProdukImage::create([
+        //     'id_produk' => $produk->id_produk,
+        //     'image' => $uploadedFileUrl
+        // ]);
+
         $produk['images'] = $imagePaths;
+        // $produk['cloudinary'] = $uploadedFileUrl;
 
         return response([
             'message' => 'Add Product Success',
@@ -99,8 +115,11 @@ class ProdukController extends Controller
     public function show($id)
     {
         $produk = Produk::with('images')->find($id);
-
-        if ($produk->isNotEmpty()) {
+        // return response([
+        //     // 'message' => 'produk ' . $produk->nama . ' ditemukan',
+        //     'data' => $produk
+        // ], 200);
+        if ($produk) {
             return response([
                 'message' => 'produk ' . $produk->nama . ' ditemukan',
                 'data' => $produk

@@ -17,4 +17,10 @@ class BahanBaku extends Model
         'satuan',
         'stok',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 }

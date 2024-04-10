@@ -1,0 +1,54 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "AtmaKitchen API",
+        "version": "1.0",
+        "description": "Documentation of AtmaKitchen API"
+    },
+    "servers": [
+        {
+            "url": "https://{environment}.server.test/v1",
+            "description": "AtmaKitchen RESTFul API Server",
+            "variables": {
+                "environment": {
+                    "default": "development",
+                    "enum": ["development", "production"]
+                }
+            }
+        }
+    ],
+    "paths": {
+        "/karyawan": {
+            "get": {
+                "summary": "Get all karyawan",
+                "description": "Get all active karyawan",
+                "responses": {}
+            },
+            "post": {
+                "summary": "Create karyawan",
+                "description": "Create active karyawan",
+                "responses": {}
+            }
+        },
+        "/karyawan/{id}": {
+            "put": {
+                "summary": "Update karyawan by id",
+                "description": "Update active karyawan by id",
+                "responses": {}
+            },
+            "delete": {
+                "summary": "Delete karyawan by id",
+                "description": "Delete active karyawan by id",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Karyawan id for delete"
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
+}

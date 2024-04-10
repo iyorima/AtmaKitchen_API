@@ -35,10 +35,12 @@ class KaryawanController extends Controller
     public function store(Request $request)
     {
         $storeData = $request->all();
-        // TODO: unique disabled when akuns with that email have been deleted
+
+        // 📃 Validator
+        // Docs: 'email' => 'unique:table,email_column_to_check,id_to_ignore,custom_column_to_ignore'
         $validate = Validator::make($storeData, [
-            'email' => 'required|email:rfc,dns|unique:akuns',
-            'password' => 'required',
+            'email' => 'required|email:rfc,dns|unique:akuns,email,' . $storeData['email'] . ',id_akun',
+            'password' => 'required|min:6',
             'nama' => 'required',
             'telepon' => 'required',
             'gaji_harian' => 'required',
@@ -50,6 +52,7 @@ class KaryawanController extends Controller
             return response(['message' => $validate->errors()], 400);
         }
 
+        // 📃 Create akun and karyawan
         $akun = Akun::create([
             'email' => $request->email,
             'password' => bcrypt($request->password),
@@ -111,21 +114,18 @@ class KaryawanController extends Controller
     {
         $storeData = $request->all();
 
-        $validate = Validator::make($storeData, [
-            // 'id_akun' => 'required|int',
-            'email' => 'required|email:rfc,dns|unique:akuns,email,' . $storeData['id_akun'],
-            'password' => 'nullable',
-            'nama' => 'required',
-            'telepon' => 'required',
-            'gaji_harian' => 'required',
-            'alamat' => 'required',
-            'id_role' => 'required',
+        // 📃 Validator
+        // Docs: 'email' => 'unique:table,email_column_to_check,id_to_ignore,custom_column_to_ignore'
+        $validator = Validator::make($storeData, [
+            'id_akun' => 'required|int',
+            'email' => 'required|email:rfc,dns|unique:akuns,email,' . $storeData['id_akun'] . ',id_akun',
         ]);
 
-        if ($validate->fails()) {
-            return response(['message' => $validate->errors()], 400);
+        if ($validator->fails()) {
+            return response(['message' => $validator->errors()], 400);
         }
 
+        // 📃 Find the karyawan from id (from path)
         $karyawan = Karyawan::with('akun')->find($id);
 
         if (!$karyawan) {
@@ -134,22 +134,24 @@ class KaryawanController extends Controller
 
         $akun = $karyawan->akun;
 
+        // 📃 Update the akun and karyawan. Also, check if there is no change in response body, use its value instead.
         $akun->update([
-            'password' => bcrypt($request->password), // Update password if provided
-            'id_role' => $request->id_role
+            'password' => bcrypt($request->password) ?? $akun->password,
+            'id_role' => $request->id_role ?? $akun->id_role
         ]);
 
         $karyawan->update([
-            'nama' => $request->nama,
-            'gaji_harian' => $request->gaji_harian,
-            'bonus' => $request->bonus, // Assuming bonus is also an update field
-            'alamat' => $request->alamat,
-            'telepon' => $request->telepon
+            'nama' => $request->nama ?? $karyawan->nama,
+            'gaji_harian' => $request->gaji_harian ?? $karyawan->gaji_harian,
+            'bonus' => $request->bonus ?? $karyawan->bonus,
+            'alamat' => $request->alamat ?? $karyawan->alamat,
+            'telepon' => $request->telepon ?? $karyawan->telepon
         ]);
 
+        // 📃 Return the response
         return response([
             'message' => 'Karyawan berhasil diubah',
-            'data' => $karyawan->load('akun.role') // Eager load data for response
+            'data' => $karyawan
         ], 200);
     }
 

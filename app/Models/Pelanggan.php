@@ -25,4 +25,9 @@ class Pelanggan extends Model
     {
         return $this->belongsTo(Akun::class, 'id_akun');
     }
+
+    public function history_order()
+    {
+        return $this->hasMany(Pesanan::class, 'id_pelanggan');
+    }
 }

@@ -16,4 +16,9 @@ class PresensiAbsen extends Model
         'id_presensi',
         'id_karyawan',
     ];
+
+    public function id_karyawan()
+    {
+        return $this->belongsTo(Karyawan::class, 'id_karyawan');
+    }
 }

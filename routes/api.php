@@ -8,10 +8,13 @@ use App\Http\Controllers\roleController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProdukHampersController;
 use App\Http\Controllers\PemesananBahanBakuController;
-use App\Models\PemesananBahanBaku;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\PoinController;
+use App\Http\Controllers\PresensiAbsenController;
+use App\Http\Controllers\ResepProdukController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +37,7 @@ Route::post('/login', [authController::class, 'login']);
 Route::get('/role', [roleController::class, 'index']);
 Route::post('/role', [roleController::class, 'store']);
 Route::get('/role/{id}', [roleController::class, 'show']);
-Route::post('/role/{id}', [roleController::class, 'update']);
+Route::put('/role/{id}', [roleController::class, 'update']);
 Route::delete('/role/{id}', [roleController::class, 'destroy']);
 
 Route::get('/produk', [ProdukController::class, 'index']);
@@ -72,8 +75,19 @@ Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
 Route::get('/karyawan', [KaryawanController::class, 'index']);
 Route::post('/karyawan', [KaryawanController::class, 'store']);
 Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
-Route::post('/karyawan/{id}', [KaryawanController::class, 'update']);
+Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
 Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
+
+Route::get('/resep', [ResepProdukController::class, 'index']);
+Route::post('/resep', [ResepProdukController::class, 'store']);
+Route::get('/resep/{id}', [ResepProdukController::class, 'show']); // id: id produk @Produk
+Route::put('/resep/{id}', [ResepProdukController::class, 'update']); // id: id produk @Produk
+Route::delete('/resep/{id}', [ResepProdukController::class, 'destroy']); // id: id resep @ResepProduk ⛔ It doesnt needed anymore!
+
+Route::resource('presensi', PresensiAbsenController::class);
+
+Route::resource('pelanggan', PelangganController::class);
+
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user', [usersController::class, 'index']);
