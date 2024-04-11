@@ -17,4 +17,9 @@ class KategoriPengiriman extends Model
         'jarak_minimum',
         'harga',
     ];
+
+    public function kategoriPengiriman()
+{
+    return $this->belongsTo(KategoriPengiriman::class, 'id_kategori_pengiriman');
+}
 }

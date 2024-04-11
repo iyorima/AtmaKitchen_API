@@ -19,7 +19,7 @@ class PesananSeeder extends Seeder
             'total_diskon_poin' => 0,
             'total_pesanan' => 4940000, // Mandarin
             'total_setelah_diskon' => 4940000,
-            'total_dibayarkan' => 4940000,
+            'total_dibayarkan' => null,
             'total_tip' => 0
 
         ]);
