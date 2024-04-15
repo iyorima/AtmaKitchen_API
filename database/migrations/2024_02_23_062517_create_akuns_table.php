@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('akuns', function (Blueprint $table) {
             $table->bigIncrements('id_akun');
-            $table->string('email', 255)->unique();
+            $table->string('email', 255);
             $table->string('password', 255);
             $table->unsignedBigInteger('id_role');
             $table->string('profile_image', 255)->nullable();

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Produk;
 
 class Penitip extends Model
 {
@@ -18,4 +19,10 @@ class Penitip extends Model
         'telepon',
         'alamat'
     ];
+
+    public function produk()
+    {
+        return $this->hasMany(Produk::class, 'id_penitip');
+    }
+
 }

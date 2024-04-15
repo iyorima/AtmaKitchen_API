@@ -20,4 +20,9 @@ class PengeluaranLainnya extends Model
         'tanggal',
         'kategori'
     ];
+
+    public function karyawan()
+    {
+        return $this->belongsTo(Karyawan::class, 'id_karyawan');
+    }
 }

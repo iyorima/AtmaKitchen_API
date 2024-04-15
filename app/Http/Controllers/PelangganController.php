@@ -33,7 +33,35 @@ class PelangganController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $storeData = $request->all();
+
+        $validate = Validator::make($storeData, [
+            'nama' => 'required',
+            'tgl_lahir' => 'required',
+            'telepon' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['message' => $validate->errors()], 400);
+        }
+
+        $akun = Akun::create([
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'id_role' => $request->id_role
+        ]);
+
+        $pelanggan = Pelanggan::create([
+            'id_akun' => $akun->id_akun,
+            'nama' => $request->nama,
+            'tgl_lahir' => $request->tgl_lahir,
+            'telepon' => $request->telepon,
+        ]);
+
+        return response()->json([
+            'message' => 'Berhasil menambahkan pelanggan baru',
+            'data' => $pelanggan
+        ], 201);
     }
 
     /**
@@ -53,6 +81,30 @@ class PelangganController extends Controller
             "message" => "Berhasil menampilkan pengguna",
             "data" => $pelanggan
         ], 200);
+
+        // $pelanggan = Pelanggan::find($id_pelanggan);
+
+        // if (!$pelanggan) {
+        //     return response()->json(['message' => 'Pelanggan tidak ditemukan'], 404);
+        // }
+
+        // try {
+        //     $pesananBelumSelesai = $pelanggan->pesananBelumSelesai()->whereNull('total_dibayarkan')->get();
+        //     $historiPesanan = $pelanggan->historiPesanan()->get();
+
+        //     return response()->json([
+        //         'message' => 'Berhasil mendapatkan data pelanggan ' . $pelanggan->nama . '',
+        //         'data' => [
+        //             'pelanggan' => $pelanggan,
+        //             'pesanan' => $pesananBelumSelesai->load('detailPesanan.produk'), // Eager load the detailPesanan and produk relationships for pending orders
+        //             'histori_pesanan' => $historiPesanan,
+        //         ]
+        //     ], 200);
+        // } catch (\Exception $e) {
+        //     return response()->json([
+        //         'message' => 'Gagal mendapatkan data pelanggan: ' . $e->getMessage()
+        //     ], 500);
+        // }
     }
 
     /**

@@ -31,14 +31,6 @@ class PenitipController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -54,6 +46,14 @@ class PenitipController extends Controller
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
+        $jumlahPenitip = Penitip::withTrashed()->count();
+
+        // Tambahkan 1 pada jumlah penitip
+        $newId = 'penitip-' . str_pad($jumlahPenitip + 1, 2, '0', STR_PAD_LEFT);
+
+        // Masukkan id_penitip baru ke dalam data yang akan disimpan
+        $storeData['id_penitip'] = $newId;
+
 
         $penitip = Penitip::create($storeData);
         return response([
@@ -67,7 +67,7 @@ class PenitipController extends Controller
      */
     public function show($id)
     {
-        $penitip = Penitip::find($id);
+        $penitip = Penitip::with('produk')->find($id);
 
         if ($penitip) {
             return response([

@@ -15,6 +15,8 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PoinController;
 use App\Http\Controllers\PresensiAbsenController;
 use App\Http\Controllers\ResepProdukController;
+use App\Http\Controllers\PengeluaranLainnyaController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -87,6 +89,18 @@ Route::delete('/resep/{id}', [ResepProdukController::class, 'destroy']); // id: 
 Route::resource('presensi', PresensiAbsenController::class);
 
 Route::resource('pelanggan', PelangganController::class);
+
+Route::get('/pengeluaran-lainnya', [PengeluaranLainnyaController::class, 'index']);
+Route::post('/pengeluaran-lainnya', [PengeluaranLainnyaController::class, 'store']);
+Route::get('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'show']);
+Route::put('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'update']);
+Route::delete('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'destroy']);
+
+// Route::get('/pelanggan', [PelangganController::class, 'index']);
+// Route::post('/pelanggan', [PelangganController::class, 'store']);
+// Route::get('/pelanggan/{id}', [PelangganController::class, 'show']);
+// Route::put('/pelanggan/{id}', [PelangganController::class, 'update']);
+// Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
 
 
 Route::group(['middleware' => 'auth:api'], function () {

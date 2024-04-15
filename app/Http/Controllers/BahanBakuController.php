@@ -111,7 +111,7 @@ class BahanBakuController extends Controller
         $bahanBaku = BahanBaku::find($id);
         if (is_null($bahanBaku)) {
             return response([
-                'message' => 'data  bahan baku tidak ditemukan',
+                'message' => 'data bahan baku tidak ditemukan',
                 'data' => null
             ], 404);
         }

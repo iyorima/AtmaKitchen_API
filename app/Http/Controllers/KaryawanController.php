@@ -26,7 +26,7 @@ class KaryawanController extends Controller
         return response([
             "message" => "Karyawan tidak tersedia",
             "data" => $karyawan
-        ], 400);
+        ], 200);
     }
 
     /**
@@ -37,16 +37,25 @@ class KaryawanController extends Controller
         $storeData = $request->all();
 
         // 📃 Validator
-        // Docs: 'email' => 'unique:table,email_column_to_check,id_to_ignore,custom_column_to_ignore'
-        $validate = Validator::make($storeData, [
-            'email' => 'required|email:rfc,dns|unique:akuns,email,' . $storeData['email'] . ',id_akun',
-            'password' => 'required|min:6',
-            'nama' => 'required',
-            'telepon' => 'required',
-            'gaji_harian' => 'required',
-            'alamat' => 'required',
-            'id_role' => 'required',
-        ]);
+        // Docs: 'email' using unique exclude deleted rows. References: https://stackoverflow.com/questions/23374995/check-if-name-is-unique-among-non-deleted-items-with-laravel-validation
+        $validate = Validator::make(
+            $storeData,
+            [
+                'email' => 'required|email:rfc,dns|unique:akuns,email,NULL,id_akun,deleted_at,NULL',
+                'password' => 'required|min:6',
+                'nama' => 'required',
+                'telepon' => 'required',
+                'gaji_harian' => 'required',
+                'bonus' => 'nullable',
+                'alamat' => 'required',
+                'id_role' => 'required',
+            ],
+            // Custom messages. References: https://stackoverflow.com/questions/45007905/custom-laravel-validation-messages
+            [
+                'email.unique' => ':attribute sudah digunakan!',
+                'password.min' => ":attribute minimal 6 karakter"
+            ]
+        );
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
@@ -80,7 +89,6 @@ class KaryawanController extends Controller
     public function show(int $id)
     {
         $karyawan = Karyawan::with('akun.role')->find($id);
-
         if (!is_null($karyawan)) {
             // $data = $karyawan->only([
             //     'id_karyawan',
@@ -118,7 +126,7 @@ class KaryawanController extends Controller
         // Docs: 'email' => 'unique:table,email_column_to_check,id_to_ignore,custom_column_to_ignore'
         $validator = Validator::make($storeData, [
             'id_akun' => 'required|int',
-            'email' => 'required|email:rfc,dns|unique:akuns,email,' . $storeData['id_akun'] . ',id_akun',
+            'email' => 'required|email:rfc,dns|unique:akuns,email,' . $storeData['id_akun'] . ',id_akun,deleted_at,NULL',
         ]);
 
         if ($validator->fails()) {
@@ -143,7 +151,7 @@ class KaryawanController extends Controller
         $karyawan->update([
             'nama' => $request->nama ?? $karyawan->nama,
             'gaji_harian' => $request->gaji_harian ?? $karyawan->gaji_harian,
-            'bonus' => $request->bonus ?? $karyawan->bonus,
+            'bonus' => $request->bonus == "" ? null : $request->bonus,
             'alamat' => $request->alamat ?? $karyawan->alamat,
             'telepon' => $request->telepon ?? $karyawan->telepon
         ]);
@@ -169,7 +177,16 @@ class KaryawanController extends Controller
             ], 404);
         }
 
-        if ($karyawan->delete()) {
+        $akun = Akun::find($karyawan->id_akun);
+
+        if (is_null($akun)) {
+            return response([
+                'message' => 'Akun tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        if ($karyawan->delete() && $akun->delete()) {
             return response([
                 'message' => 'Karyawan berhasil dihapus',
                 'data' => $karyawan
