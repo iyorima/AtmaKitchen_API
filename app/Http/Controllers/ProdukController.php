@@ -80,16 +80,22 @@ class ProdukController extends Controller
         for ($i = 1; $i <= 5; $i++) {
             $imageKey = 'image' . $i;
             if ($request->hasFile($imageKey)) {
-                $imagePath = $request->file($imageKey)->store('public/product');
-
-                // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
-
-                ProdukImage::create([
-                    'id_produk' => $produk->id_produk,
-                    'image' => $imagePath
-                ]);
-                $imagePaths[] = $imagePath;
+                $fileName = time() . '_' . $request->file($imageKey)->getClientOriginalName();
+                // save file to azure blob virtual directory uplaods in your container
+                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . $request->file($imageKey)->storeAs('uploads', $fileName, 'azure');
+                $imagePaths[] = $filePath;
             }
+            // if ($request->hasFile($imageKey)) {
+            //     $imagePath = $request->file($imageKey)->store('public/product');
+
+            //     // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
+
+            //     ProdukImage::create([
+            //         'id_produk' => $produk->id_produk,
+            //         'image' => $imagePath
+            //     ]);
+            //     $imagePaths[] = $imagePath;
+            // }
         }
 
         // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
