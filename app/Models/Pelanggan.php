@@ -56,7 +56,7 @@ class Pelanggan extends Model
     }
     
     
-    public function detailPesanan() // Tambahkan relasi detailPesanan
+    public function detailPesanan() 
     {
         return $this->hasManyThrough(
             DetailPesanan::class,
