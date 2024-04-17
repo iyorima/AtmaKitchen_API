@@ -13,7 +13,12 @@ class PoinController extends Controller
      */
     public function index()
     {
-        //
+        $promo = Poin::all();
+
+        return response([
+            "message" => "Berhasil mendapatkan poin",
+            "data" => $promo
+        ]);
     }
 
     /**

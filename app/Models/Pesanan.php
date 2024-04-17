@@ -9,12 +9,15 @@ use App\Models\Pelanggan;
 use App\Models\DetailPesanan;
 use App\Models\Pengiriman;
 use App\Models\Produk;
+
 class Pesanan extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $primaryKey = "id_pesanan";
     public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
         'id_pesanan',
         'id_metode_pembayaran',
@@ -29,6 +32,10 @@ class Pesanan extends Model
         'accepted_at',
     ];
 
+    public function detail_pesanan()
+    {
+        return $this->hasMany(DetailPesanan::class, 'id_pesanan');
+    }
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class, 'id_pelanggan');
@@ -38,14 +45,4 @@ class Pesanan extends Model
     {
         return $this->hasManyThrough(Produk::class, DetailPesanan::class, 'id_pesanan', 'id_produk');
     }
-    
-    public function detailPesanan()
-    {
-        return $this->hasMany(DetailPesanan::class, 'id_pesanan');
-    }
-
-    
-
-    
-
 }

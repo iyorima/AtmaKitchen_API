@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Produk;
 use App\Models\Pesanan;
+
 class DetailPesanan extends Model
 {
     use HasFactory, SoftDeletes;
@@ -25,12 +26,12 @@ class DetailPesanan extends Model
     ];
 
     public function produk()
-{
-    return $this->belongsTo(Produk::class, 'id_produk');
-}
-public function pesanan()
-{
-    return $this->belongsTo(Pesanan::class, 'id_pesanan');
-}
+    {
+        return $this->belongsTo(Produk::class, 'id_produk');
+    }
 
+    public function pesanan()
+    {
+        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+    }
 }

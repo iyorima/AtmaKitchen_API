@@ -21,4 +21,14 @@ class Karyawan extends Model
         'telepon',
         'alamat',
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
+
+    public function akun()
+    {
+        return $this->belongsTo(Akun::class, 'id_akun');
+    }
 }

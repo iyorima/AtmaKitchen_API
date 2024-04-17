@@ -19,7 +19,7 @@ class KategoriPengiriman extends Model
     ];
 
     public function kategoriPengiriman()
-{
-    return $this->belongsTo(KategoriPengiriman::class, 'id_kategori_pengiriman');
-}
+    {
+        return $this->belongsTo(KategoriPengiriman::class, 'id_kategori_pengiriman');
+    }
 }

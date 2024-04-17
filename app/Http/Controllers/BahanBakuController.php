@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\BahanBaku;
-use App\Http\Requests\StoreBahanBakuRequest;
-use App\Http\Requests\UpdateBahanBakuRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+
 class BahanBakuController extends Controller
 {
     /**
@@ -15,18 +14,11 @@ class BahanBakuController extends Controller
     public function index()
     {
         $bahanBakus = BahanBaku::all();
+
         return response()->json([
             'message' => 'Berhasil mendapatkan seluruh data bahan baku',
             'data' => $bahanBakus
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -38,7 +30,7 @@ class BahanBakuController extends Controller
 
         $validate = Validator::make($storeData, [
             'nama' => 'required',
-            'satuan' => 'required',
+            'satuan' => 'required|in:gr,butir,ml,buah', // DOCS: in is used to check only gr,butir,ml,buah are valid values to validate
             'stok' => 'required',
         ]);
 
@@ -48,14 +40,12 @@ class BahanBakuController extends Controller
 
         $bahanBaku = BahanBaku::create($storeData);
 
-            return response([
-                'message' => 'Berhasil menambahkan bahan baku baru',
-                'data' => $bahanBaku
-            ], 200);
-        
+        return response([
+            'message' => 'Berhasil menambahkan bahan baku baru',
+            'data' => $bahanBaku
+        ], 200);
     }
-    
-        
+
 
     /**
      * Display the specified resource.
@@ -63,23 +53,21 @@ class BahanBakuController extends Controller
     public function show($id)
     {
         $bahanBaku = BahanBaku::find($id);
-         try {
+        try {
             if (!$bahanBaku) {
                 return response()->json([
-                    'message' => 'data bahan baku tidak ditemukan'
+                    'message' => 'Bahan baku tidak ditemukan'
                 ], 404);
             }
             return response([
                 'message' => 'bahan baku ' . $bahanBaku->nama . ' ditemukan',
                 'data' => $bahanBaku
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to fetch bahan baku: ' . $e->getMessage()
             ], 500);
         }
-
     }
 
     /**
@@ -99,7 +87,7 @@ class BahanBakuController extends Controller
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
             'nama' => 'required',
-            'satuan' => 'required',
+            'satuan' => 'required|in:gr,butir,ml,buah', // DOCS: in is used to check only gr,butir,ml,buah are valid values to validate
             'stok' => 'required',
         ]);
 
@@ -123,7 +111,7 @@ class BahanBakuController extends Controller
         $bahanBaku = BahanBaku::find($id);
         if (is_null($bahanBaku)) {
             return response([
-                'message' => 'data  bahan baku tidak ditemukan',
+                'message' => 'data bahan baku tidak ditemukan',
                 'data' => null
             ], 404);
         }

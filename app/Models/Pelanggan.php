@@ -24,9 +24,14 @@ class Pelanggan extends Model
         'telepon'
     ];
 
-    public function akun()
+    public function id_akun()
     {
         return $this->belongsTo(Akun::class, 'id_akun');
+    }
+
+    public function history_order()
+    {
+        return $this->hasMany(Pesanan::class, 'id_pelanggan');
     }
 
     public function pesanan()
@@ -37,10 +42,11 @@ class Pelanggan extends Model
     public function pesananBelumSelesai()
     {
         return $this->hasMany(Pesanan::class, 'id_pelanggan')
-        ->whereNull('total_dibayarkan')
-        ->with('detailPesanan.produk', 'detailPesanan.pesanan');
+            ->whereNull('total_dibayarkan')
+            ->with('detailPesanan.produk', 'detailPesanan.pesanan');
     }
 
+    // Kayanya mending pake history_order
     public function historiPesanan()
     {
         return $this->hasManyThrough(
@@ -54,9 +60,9 @@ class Pelanggan extends Model
             $query->whereColumn('detail_pesanans.id_pesanan', '=', 'pesanans.id_pesanan');
         }, 'detailPesanans.produk']);
     }
-    
-    
-    public function detailPesanan() 
+
+
+    public function detailPesanan()
     {
         return $this->hasManyThrough(
             DetailPesanan::class,
@@ -65,10 +71,10 @@ class Pelanggan extends Model
             'id_pesanan',
             'id_pelanggan',
             'id_pesanan'
-        )->whereColumn('detail_pesanans.id_pesanan', '=', 'pesanans.id_pesanan'); 
+        )->whereColumn('detail_pesanans.id_pesanan', '=', 'pesanans.id_pesanan');
     }
 
-    public function produk() // Tambahkan relasi produk
+    public function produk()
     {
         return $this->hasManyThrough(
             Produk::class,

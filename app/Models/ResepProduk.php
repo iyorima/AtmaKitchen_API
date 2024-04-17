@@ -19,4 +19,15 @@ class ResepProduk extends Model
         'satuan',
         'jumlah',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    public function id_bahan_baku()
+    {
+        return $this->belongsTo(BahanBaku::class, 'id_bahan_baku');
+    }
 }
