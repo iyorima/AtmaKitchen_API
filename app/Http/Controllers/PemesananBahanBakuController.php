@@ -108,9 +108,7 @@ class PemesananBahanBakuController extends Controller
             ], 400);
         }
 
-        $pemesananBahanBaku->update($updateData);
-
-        if ($pemesananBahanBaku->save()) {
+        if ($pemesananBahanBaku->update($updateData)) {
             return response([
                 'message' => 'ubah data pemesanan bahan baku berhasil',
                 'data' => $pemesananBahanBaku
