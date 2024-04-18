@@ -108,7 +108,7 @@ class AuthController extends Controller
 
         /** @var \App\Models\Akun $akun **/
         $akun = Auth::user();
-        $data = Akun::with('role')->where('id_role', '=', $akun->id_role)->get();
+        $data = Akun::with('role')->where('id_akun', '=', $akun->id_akun)->get();
         // TODO: fix verifikasi email
         if ($akun->email_verified_at == null) {
             $token = $akun->createToken('Authentication Token')->accessToken;
