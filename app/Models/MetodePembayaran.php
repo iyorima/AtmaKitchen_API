@@ -16,4 +16,10 @@ class MetodePembayaran extends Model
         'id_metode_pembayaran',
         'nama',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 }

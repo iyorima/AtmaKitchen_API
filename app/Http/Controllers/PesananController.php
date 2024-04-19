@@ -13,7 +13,19 @@ class PesananController extends Controller
      */
     public function index()
     {
-        //
+        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])->get();
+
+        if (count($pesanan) > 0) {
+            return response([
+                "message" => "Berhasil mendapatkan semua pesanan",
+                "data" => $pesanan
+            ], 200);
+        }
+
+        return response([
+            "message" => "pesanan tidak tersedia",
+            "data" => $pesanan
+        ], 200);
     }
 
     /**

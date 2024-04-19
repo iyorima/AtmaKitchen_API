@@ -42,4 +42,9 @@ class Produk extends Model
     {
         return $this->belongsTo(Penitip::class, 'id_penitip');
     }
+
+    public function thumbnail()
+    {
+        return $this->hasOne(ProdukImage::class, 'id_produk');
+    }
 }
