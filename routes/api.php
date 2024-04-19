@@ -36,11 +36,11 @@ Route::post('/register', [authController::class, 'register']);
 Route::get('/register/verify/{verify_key}', [authController::class, 'verify']);
 Route::post('/login', [authController::class, 'login']);
 
-// Route::get('/role', [roleController::class, 'index']);
-// Route::post('/role', [roleController::class, 'store']);
-// Route::get('/role/{id}', [roleController::class, 'show']);
-// Route::put('/role/{id}', [roleController::class, 'update']);
-// Route::delete('/role/{id}', [roleController::class, 'destroy']);
+Route::get('/role', [roleController::class, 'index']);
+Route::post('/role', [roleController::class, 'store']);
+Route::get('/role/{id}', [roleController::class, 'show']);
+Route::put('/role/{id}', [roleController::class, 'update']);
+Route::delete('/role/{id}', [roleController::class, 'destroy']);
 
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::post('/produk', [ProdukController::class, 'store']);
@@ -96,7 +96,7 @@ Route::get('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 's
 Route::put('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'update']);
 Route::delete('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'destroy']);
 
-Route::resource('pesanan', PesananController::class);
+// Route::resource('pesanan', PesananController::class);
 
 // Route::get('/pelanggan', [PelangganController::class, 'index']);
 // Route::post('/pelanggan', [PelangganController::class, 'store']);
@@ -109,7 +109,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
     // Route::get('/user', [usersController::class, 'index']);
-    Route::resource('role', roleController::class);
+    Route::resource('pesanan', PesananController::class);
 });
 
 // Route::middleware(['auth:api'])->group(function () {
