@@ -32,6 +32,7 @@ class BahanBakuController extends Controller
             'nama' => 'required',
             'satuan' => 'required|in:gr,butir,ml,buah', // DOCS: in is used to check only gr,butir,ml,buah are valid values to validate
             'stok' => 'required',
+            
         ]);
 
         if ($validate->fails()) {
@@ -73,9 +74,9 @@ class BahanBakuController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id_bahan_baku)
     {
-        $bahanBaku = BahanBaku::find($id);
+        $bahanBaku = BahanBaku::find($id_bahan_baku);
 
         if (!$bahanBaku) {
             return response([
@@ -96,6 +97,7 @@ class BahanBakuController extends Controller
         }
 
         $bahanBaku->update($updateData);
+        
 
         return response()->json([
             'message' => 'ubah data bahan baku berhasil',

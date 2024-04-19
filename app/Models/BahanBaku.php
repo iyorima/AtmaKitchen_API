@@ -16,11 +16,12 @@ class BahanBaku extends Model
         'nama',
         'satuan',
         'stok',
+        'updated_at',
     ];
 
     protected $hidden = [
         'created_at',
-        'updated_at',
+        // 'updated_at',
         'deleted_at',
     ];
 }

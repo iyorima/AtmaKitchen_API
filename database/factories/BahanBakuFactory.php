@@ -18,6 +18,7 @@ class BahanBakuFactory extends Factory
     {
         return [
             'stok' => $this->faker->numberBetween(1, 10000),
+            'updated_at' => $this->faker->dateTimeThisMonth()->format('Y-m-d H:i:s'),
         ];
     }
 }
