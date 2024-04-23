@@ -16,7 +16,7 @@ use App\Http\Controllers\PoinController;
 use App\Http\Controllers\PresensiAbsenController;
 use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\PengeluaranLainnyaController;
-
+use App\Http\Controllers\PesananController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,6 +96,8 @@ Route::get('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 's
 Route::put('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'update']);
 Route::delete('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'destroy']);
 
+// Route::resource('pesanan', PesananController::class);
+
 // Route::get('/pelanggan', [PelangganController::class, 'index']);
 // Route::post('/pelanggan', [PelangganController::class, 'store']);
 // Route::get('/pelanggan/{id}', [PelangganController::class, 'show']);
@@ -104,5 +106,12 @@ Route::delete('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class,
 
 
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::get('/user', [usersController::class, 'index']);
+    Route::post('/logout', [authController::class, 'logout']);
+
+    // Route::get('/user', [usersController::class, 'index']);
+    Route::resource('pesanan', PesananController::class);
 });
+
+// Route::middleware(['auth:api'])->group(function () {
+//     Route::post('/logout', [authController::class, 'logout']);
+// });

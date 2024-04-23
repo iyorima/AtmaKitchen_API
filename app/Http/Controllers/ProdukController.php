@@ -45,15 +45,12 @@ class ProdukController extends Controller
             'kapasitas' => 'required',
             'ukuran' => 'required',
             'harga_jual' => 'required',
-            'image1' => 'image|mimes:jpeg,png,jpg',
-            'image2' => 'image|mimes:jpeg,png,jpg',
-            'image3' => 'image|mimes:jpeg,png,jpg',
-            'image4' => 'image|mimes:jpeg,png,jpg',
-            'image5' => 'image|mimes:jpeg,png,jpg',
+            'image1' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image2' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image3' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image4' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image5' => 'image|mimes:jpeg,png,jpg|max:5120',
         ]);
-
-        // ✅ Use this to upload image to Cloudinary. References: https://cloudinary.com/. https://github.com/cloudinary-community/cloudinary-laravel
-        // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
@@ -82,32 +79,17 @@ class ProdukController extends Controller
             if ($request->hasFile($imageKey)) {
                 $fileName = time() . '_' . $request->file($imageKey)->getClientOriginalName();
                 // save file to azure blob virtual directory uplaods in your container
-                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . $request->file($imageKey)->storeAs('uploads', $fileName, 'azure');
+                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $request->file($imageKey)->storeAs('uploads', $fileName, 'azure'));
+
+                ProdukImage::create([
+                    'id_produk' => $produk->id_produk,
+                    'image' => $filePath
+                ]);
                 $imagePaths[] = $filePath;
             }
-            // if ($request->hasFile($imageKey)) {
-            //     $imagePath = $request->file($imageKey)->store('public/product');
-
-            //     // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
-
-            //     ProdukImage::create([
-            //         'id_produk' => $produk->id_produk,
-            //         'image' => $imagePath
-            //     ]);
-            //     $imagePaths[] = $imagePath;
-            // }
         }
 
-        // $uploadedFileUrl = Cloudinary::upload($request->file('image1')->getRealPath())->getSecurePath();
-
-        // ✅ Changes: Added image paths from cloudinary to database
-        // ProdukImage::create([
-        //     'id_produk' => $produk->id_produk,
-        //     'image' => $uploadedFileUrl
-        // ]);
-
         $produk['images'] = $imagePaths;
-        // $produk['cloudinary'] = $uploadedFileUrl;
 
         return response([
             'message' => 'Add Product Success',
@@ -121,10 +103,7 @@ class ProdukController extends Controller
     public function show($id)
     {
         $produk = Produk::with('images')->find($id);
-        // return response([
-        //     // 'message' => 'produk ' . $produk->nama . ' ditemukan',
-        //     'data' => $produk
-        // ], 200);
+
         if ($produk) {
             return response([
                 'message' => 'produk ' . $produk->nama . ' ditemukan',
@@ -201,11 +180,11 @@ class ProdukController extends Controller
             'kapasitas' => 'required',
             'ukuran' => 'required',
             'harga_jual' => 'required',
-            'image1' => 'image|mimes:jpeg,png,jpg',
-            'image2' => 'image|mimes:jpeg,png,jpg',
-            'image3' => 'image|mimes:jpeg,png,jpg',
-            'image4' => 'image|mimes:jpeg,png,jpg',
-            'image5' => 'image|mimes:jpeg,png,jpg',
+            'image1' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image2' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image3' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image4' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image5' => 'image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         if ($validate->fails()) {
@@ -215,7 +194,9 @@ class ProdukController extends Controller
         }
 
         foreach ($produk->images as $image) {
-            Storage::disk('public')->delete($image->image);
+            $fileName = basename($image->image);
+            $azurePath = 'uploads/' . $fileName;
+            Storage::disk('azure')->delete($azurePath);
             $image->delete();
         }
 
@@ -233,12 +214,15 @@ class ProdukController extends Controller
         for ($i = 1; $i <= 5; $i++) {
             $imageKey = 'image' . $i;
             if ($request->hasFile($imageKey)) {
-                $imagePath = $request->file($imageKey)->store('public/product');
+                $fileName = time() . '_' . $request->file($imageKey)->getClientOriginalName();
+                // save file to azure blob virtual directory uplaods in your container
+                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $request->file($imageKey)->storeAs('uploads', $fileName, 'azure'));
+
                 ProdukImage::create([
                     'id_produk' => $produk->id_produk,
-                    'image' => $imagePath
+                    'image' => $filePath
                 ]);
-                $imagePaths[] = $imagePath;
+                $imagePaths[] = $filePath;
             }
         }
 

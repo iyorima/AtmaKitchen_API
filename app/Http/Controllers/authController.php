@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Mail\MailSend;
+use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
@@ -89,6 +90,11 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Get a JWT via given credentials.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
         $loginData = $request->all();
@@ -108,23 +114,37 @@ class AuthController extends Controller
 
         /** @var \App\Models\Akun $akun **/
         $akun = Auth::user();
-        $data = Akun::with('role')->where('id_role', '=', $akun->id_role)->get();
+        // $data = Akun::with('role')->where('id_role', '=', $akun->id_role)->get();
         // TODO: fix verifikasi email
         if ($akun->email_verified_at == null) {
             $token = $akun->createToken('Authentication Token')->accessToken;
+            // $token = $akun->createToken('Authentication Token')->plainTextToken;
+
+            $cookie = cookie('credentials', $token, 60 * 24);
 
             return response([
                 'message' => 'Berhasil login',
                 'data' => [
-                    'akun' => $data,
+                    'akun' => $akun,
                     'token_type' => 'Bearer',
                     'access_token' => $token
                 ]
-            ], 200);
+            ], 200)->withCookie($cookie);
         } else {
             return response([
                 'message' => 'Akun belum diverifikasi, silahkan cek email anda',
             ], 401);
         }
+    }
+
+    public function logout(Request $request)
+    {
+        // Auth::logout();
+        $cookie = Cookie::forget('credentials');
+        // Delete token from database
+        $request->user()->tokens()->delete();
+        return response([
+            'message' => 'Berhasil keluar'
+        ], 200)->withCookie($cookie);
     }
 }

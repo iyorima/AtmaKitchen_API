@@ -15,7 +15,7 @@ class ResepProdukController extends Controller
      */
     public function index()
     {
-        $resep = Produk::whereHas('resep')->with('resep.id_bahan_baku')->get();
+        $resep = Produk::whereHas('resep')->with('resep.id_bahan_baku', 'thumbnail')->get();
 
         if (is_null($resep)) {
             return response([
@@ -82,7 +82,7 @@ class ResepProdukController extends Controller
      */
     public function show(int $id_produk)
     {
-        $resep = Produk::whereHas('resep')->with('resep.id_bahan_baku')->find($id_produk);
+        $resep = Produk::whereHas('resep')->with('resep.id_bahan_baku', 'images')->find($id_produk);
 
         if (is_null($resep)) {
             return response([

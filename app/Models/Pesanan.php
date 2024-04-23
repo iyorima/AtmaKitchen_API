@@ -45,4 +45,19 @@ class Pesanan extends Model
     {
         return $this->hasManyThrough(Produk::class, DetailPesanan::class, 'id_pesanan', 'id_produk');
     }
+
+    public function status_pesanan()
+    {
+        return $this->hasMany(StatusPesanan::class, 'id_pesanan');
+    }
+
+    public function pengiriman()
+    {
+        return $this->hasOne(Pengiriman::class, 'id_pesanan');
+    }
+
+    public function id_metode_pembayaran()
+    {
+        return $this->belongsTo(MetodePembayaran::class, 'id_metode_pembayaran');
+    }
 }
