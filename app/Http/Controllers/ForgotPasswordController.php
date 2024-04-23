@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\MailSend;
 use App\Models\Akun;
 use App\Models\OTP;
 use Illuminate\Http\Request;
@@ -16,12 +17,15 @@ class ForgotPasswordController extends Controller
         ]);
 
         $user = Akun::where('email', $validatedData['email'])->first();
-        return response()->json(['data' => $user]);
-        $otp = OTP::generate($user->id);
 
-        Mail::send('emails.otp', ['otp' => $otp->code], function ($message) use ($user) {
-            $message->to($user->email)->subject('Reset Password OTP');
-        });
+        $otp = OTP::generate($user->id_akun);
+
+        $details = [
+            'title' => 'Lupa Password AtmaKitchen',
+            'otp' => $otp->code
+        ];
+
+        Mail::to($request->email)->send(new MailSend($details));
 
         return response()->json(['message' => 'OTP telah dikirim ke email Anda.']);
     }
@@ -29,8 +33,8 @@ class ForgotPasswordController extends Controller
     public function verifyOTP(Request $request)
     {
         $validatedData = $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:6',
+            'email' => 'required|email|exists:akuns,email',
+            'otp' => 'required|digits:4',
         ]);
 
         $user = Akun::where('email', $validatedData['email'])->first();
@@ -39,10 +43,10 @@ class ForgotPasswordController extends Controller
             return response()->json(['message' => 'User tidak ditemukan.'], 404);
         }
 
-        $otp = OTP::where('user_id', $user->id)
-                  ->where('code', $validatedData['otp'])
-                  ->where('expires_at', '>=', now())
-                  ->first();
+        $otp = OTP::where('user_id', $user->id_akun)
+            ->where('code', $validatedData['otp'])
+            ->where('expires_at', '>=', now())
+            ->first();
 
         if (!$otp) {
             return response()->json(['message' => 'OTP tidak valid atau sudah kedaluwarsa.'], 400);
@@ -55,7 +59,7 @@ class ForgotPasswordController extends Controller
     {
         $validatedData = $request->validate([
             'email' => 'required|email|exists:users,email',
-            'otp' => 'required|digits:6',
+            'otp' => 'required|digits:4',
             'password' => 'required|min:8',
         ]);
 
