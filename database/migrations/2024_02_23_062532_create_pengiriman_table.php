@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('nama', 255);
             $table->string('telepon', 15);
             $table->string('alamat');
+            $table->timestamp('verified_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

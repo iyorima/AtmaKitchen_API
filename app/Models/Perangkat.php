@@ -6,17 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Alamat extends Model
+class Perangkat extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $primaryKey = "id_alamat";
+
+    protected $primaryKey = "id_perangkat";
 
     protected $fillable = [
-        'id_alamat',
-        'id_pelanggan',
-        'nama',
-        'alamat',
-        'label',
-        'telepon'
+        'token',
+        'is_active',
+        'id_akun',
+    ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 }
