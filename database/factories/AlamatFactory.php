@@ -19,7 +19,8 @@ class AlamatFactory extends Factory
         return [
             'nama' => $this->faker->name(),
             'alamat' => $this->faker->address(),
-            'telepon' => fake()->e164PhoneNumber()
+            'telepon' => fake()->e164PhoneNumber(),
+            'label' => fake()->word()
         ];
     }
 }

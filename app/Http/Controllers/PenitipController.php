@@ -67,7 +67,7 @@ class PenitipController extends Controller
      */
     public function show($id)
     {
-        $penitip = Penitip::with('produk')->find($id);
+        $penitip = Penitip::with('produk.thumbnail')->find($id);
 
         if ($penitip) {
             return response([

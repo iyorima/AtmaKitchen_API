@@ -17,7 +17,7 @@ class ProdukImageFactory extends Factory
     public function definition(): array
     {
         return [
-            'id_produk' => fake()->randomNumber(1, 5),
+            'id_produk' => fake()->numberBetween(1, 19),
             'image' => fake()->imageUrl()
         ];
     }

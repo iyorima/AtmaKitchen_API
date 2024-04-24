@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_alamat');
             $table->unsignedBigInteger('id_pelanggan');
             $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggans')->onDelete('cascade')->onUpdate('cascade');
+            $table->string('label', 255);
             $table->string('nama', 255);
             $table->string('alamat');
             $table->string('telepon', 15);

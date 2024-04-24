@@ -17,8 +17,9 @@ class PesananFactory extends Factory
     public function definition(): array
     {
         return [
-            'tgl_order' => $this->faker->dateTimeBetween('-1 month', 'now'), 
-            'verified_at' => $this->faker->dateTimeBetween('-1 month', 'now'), 
+            'tgl_order' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'verified_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'jenis_pengiriman' => fake()->randomKey(['Kurir Toko' => 1, 'Kurir Ojol' => 2, 'Ambil Sendiri' => 3])
         ];
     }
 }

@@ -43,7 +43,9 @@ class DatabaseSeeder extends Seeder
             DetailHampersSeeder::class,
             KeranjangSeeder::class,
             DetailKeranjangSeeder::class,
-            ProdukImageSeeder::class
+            ProdukImageSeeder::class,
+
+            NotifikasiSeeder::class
         ]);
     }
 }

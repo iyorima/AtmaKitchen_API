@@ -23,6 +23,7 @@ return new class extends Migration
             $table->double('total_setelah_diskon', 15, 2);
             $table->double('total_dibayarkan')->nullable();
             $table->double('total_tip');
+            $table->string('jenis_pengiriman');
             $table->timestamp('verified_at')->nullable();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();

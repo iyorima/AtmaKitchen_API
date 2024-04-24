@@ -11,6 +11,7 @@ use App\Http\Controllers\PemesananBahanBakuController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\DetailKeranjangController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PelangganController;
@@ -38,6 +39,10 @@ use App\Http\Controllers\PesananController;
 Route::post('/register', [authController::class, 'register']);
 Route::get('/register/verify/{verify_key}', [authController::class, 'verify']);
 Route::post('/login', [authController::class, 'login']);
+
+Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
+Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 Route::get('/role', [roleController::class, 'index']);
 Route::post('/role', [roleController::class, 'store']);
