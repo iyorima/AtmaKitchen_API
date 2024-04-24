@@ -16,3 +16,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/mymailtemplate', function () {
+    return view('mailTemplate', [
+        "details" => [
+            "otp" => 1252,
+            "title" => "Lupa Password AtmaKitchen"
+        ]
+    ]);
+});

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOtpsTable extends Migration
+return new class extends Migration
 {
     public function up()
     {
@@ -16,7 +16,6 @@ class CreateOtpsTable extends Migration
             $table->timestamps();
 
             $table->foreign('user_id')->references('id_akun')->on('akuns')->onDelete('cascade');
-           
         });
     }
 
@@ -24,4 +23,4 @@ class CreateOtpsTable extends Migration
     {
         Schema::dropIfExists('otps');
     }
-}
+};
