@@ -15,7 +15,7 @@ class PenitipController extends Controller
      */
     public function index()
     {
-        $penitip = Penitip::all();
+        $penitip = Penitip::withCount('produk as produk_titipan_count')->get();
 
         if ($penitip->isNotEmpty()) {
             return response([
@@ -74,7 +74,6 @@ class PenitipController extends Controller
                 'message' => ' penitip ' . $penitip->nama . ' ditemukan',
                 'data' => $penitip
             ], 200);
-
         }
 
         return response([

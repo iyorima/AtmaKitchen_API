@@ -51,6 +51,11 @@ class Pesanan extends Model
         return $this->hasMany(StatusPesanan::class, 'id_pesanan');
     }
 
+    public function status_pesanan_latest()
+    {
+        return $this->hasOne(StatusPesanan::class, 'id_pesanan')->latestOfMany('created_at');
+    }
+
     public function pengiriman()
     {
         return $this->hasOne(Pengiriman::class, 'id_pesanan');

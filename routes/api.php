@@ -10,12 +10,15 @@ use App\Http\Controllers\ProdukHampersController;
 use App\Http\Controllers\PemesananBahanBakuController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\DetailKeranjangController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PoinController;
 use App\Http\Controllers\PresensiAbsenController;
 use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\PengeluaranLainnyaController;
+use App\Http\Controllers\PengirimanController;
 use App\Http\Controllers\PesananController;
 
 /*
@@ -104,12 +107,15 @@ Route::delete('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class,
 // Route::put('/pelanggan/{id}', [PelangganController::class, 'update']);
 // Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
 
+Route::resource('keranjang', KeranjangController::class);
+Route::resource('detail-keranjang', DetailKeranjangController::class);
+Route::resource('pengiriman', PengirimanController::class);
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
-    // Route::get('/user', [usersController::class, 'index']);
     Route::resource('pesanan', PesananController::class);
+    // Route::get('/user', [usersController::class, 'index']);
 });
 
 // Route::middleware(['auth:api'])->group(function () {

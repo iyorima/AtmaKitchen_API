@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use App\Mail\MailSend;
+use App\Models\Karyawan;
 use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
@@ -117,6 +118,12 @@ class AuthController extends Controller
         // $data = Akun::with('role')->where('id_role', '=', $akun->id_role)->get();
         // TODO: fix verifikasi email
         if ($akun->email_verified_at == null) {
+            $user = Pelanggan::where('id_akun', $akun->id_akun)->first();
+
+            if (is_null($user)) {
+                $user = Karyawan::where('id_akun', $akun->id_akun)->first();
+            }
+
             $token = $akun->createToken('Authentication Token')->accessToken;
             // $token = $akun->createToken('Authentication Token')->plainTextToken;
 
@@ -125,6 +132,7 @@ class AuthController extends Controller
             return response([
                 'message' => 'Berhasil login',
                 'data' => [
+                    'user' => $user,
                     'akun' => $akun,
                     'token_type' => 'Bearer',
                     'access_token' => $token
