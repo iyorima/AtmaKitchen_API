@@ -7,6 +7,7 @@ use App\Models\Akun;
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class PelangganController extends Controller
 {
@@ -64,48 +65,79 @@ class PelangganController extends Controller
         ], 201);
     }
 
+    public function uploadBuktiPembayaran(Request $request, $id_pelanggan, $id_pesanan)
+    {
+        $validator = Validator::make($request->all(), [
+            'bukti_pembayaran' => 'required|file|mimes:jpg,png,pdf,jpeg|max:2048', // Sesuaikan dengan ukuran maksimum file yang diizinkan
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 400);
+        }
+        $pesanan = Pesanan::where('id_pesanan', $id_pesanan)->where('id_pelanggan', $id_pelanggan)->first();
+
+
+        if (!$pesanan) {
+            return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
+        }
+
+        if (!is_null($pesanan->total_dibayarkan)) {
+            return response()->json(['message' => 'Pesanan sudah selesai atau sudah dibayar'], 400);
+        }
+
+        $file = $request->file('bukti_pembayaran');
+        $path = $file->store('bukti_pembayaran');
+
+        $pesanan->bukti_pembayaran = $path;
+        $pesanan->save();
+
+        return response()->json([
+            'message' => 'Bukti pembayaran berhasil diunggah',
+            'path' => $path
+        ], 200);
+    }
+
     /**
      * Display the specified resource.
      */
     public function show(int $id_pelanggan)
     {
-        $pelanggan = Pelanggan::with('id_akun', 'history_order.detail_pesanan')->find($id_pelanggan);
-        // $pesanan = Pesanan::with('detail_pesanan')->get();
-
-        if (is_null($pelanggan)) return response()->json([
-            "message" => "Pengguna tidak ditemukan",
-            "data" => null
-        ], 404);
-
-        return response()->json([
-            "message" => "Berhasil menampilkan pengguna",
-            "data" => $pelanggan
-        ], 200);
-
-        // $pelanggan = Pelanggan::find($id_pelanggan);
-
-        // if (!$pelanggan) {
-        //     return response()->json(['message' => 'Pelanggan tidak ditemukan'], 404);
-        // }
-
-        // try {
-        //     $pesananBelumSelesai = $pelanggan->pesananBelumSelesai()->whereNull('total_dibayarkan')->get();
-        //     $historiPesanan = $pelanggan->historiPesanan()->get();
-
-        //     return response()->json([
-        //         'message' => 'Berhasil mendapatkan data pelanggan ' . $pelanggan->nama . '',
-        //         'data' => [
-        //             'pelanggan' => $pelanggan,
-        //             'pesanan' => $pesananBelumSelesai->load('detailPesanan.produk'), // Eager load the detailPesanan and produk relationships for pending orders
-        //             'histori_pesanan' => $historiPesanan,
-        //         ]
-        //     ], 200);
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'message' => 'Gagal mendapatkan data pelanggan: ' . $e->getMessage()
-        //     ], 500);
-        // }
+        $pelanggan = Pelanggan::with('id_akun')->find($id_pelanggan);
+    
+        if (!$pelanggan) {
+            return response()->json(['message' => 'Pelanggan tidak ditemukan'], 404);
+        }
+    
+        try {
+            $response = [
+                'message' => 'Berhasil mendapatkan data pelanggan ' . $pelanggan->nama . '',
+                'data' => [
+                    'pelanggan' => $pelanggan,
+                    'pesanan' => [],
+                    'histori_pesanan' => [],
+                ]
+            ];
+    
+            // Mengambil pesanan belum selesai
+            $pesananBelumSelesai = $pelanggan->pesananBelumSelesai()->whereNull('total_dibayarkan')->get();
+            foreach ($pesananBelumSelesai as $pesanan) {
+                $response['data']['pesanan'][] = $pesanan->load('detail_pesanan.produk');
+            }
+    
+            // Mengambil histori pesanan yang sudah selesai
+            $historiPesanan = $pelanggan->historiPesanan()->get();
+            foreach ($historiPesanan as $histori) {
+                $response['data']['histori_pesanan'][] = $histori->load('detail_pesanan.produk');
+            }
+    
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mendapatkan data pelanggan: ' . $e->getMessage()
+            ], 500);
+        }
     }
+    
 
     /**
      * Update the specified resource in storage.

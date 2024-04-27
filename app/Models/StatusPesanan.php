@@ -27,7 +27,7 @@ class StatusPesanan extends Model
 
 public function detailPesanans()
 {
-    return $this->hasManyThrough(DetailPesanan::class, Pesanan::class, 'id_pelanggan', 'id_pesanan');
+    return $this->hasMany(DetailPesanan::class, 'id_pesanan');
 }
 
 

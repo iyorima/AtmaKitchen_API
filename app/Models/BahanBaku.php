@@ -21,10 +21,7 @@ class BahanBaku extends Model
 
     protected $hidden = [
         'created_at',
-<<<<<<< HEAD
-=======
         // 'updated_at',
->>>>>>> c9bcd67d3210963338c2a33e8fa3dbf1aed1dcaa
         'deleted_at',
     ];
 }

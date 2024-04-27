@@ -9,58 +9,49 @@ use App\Http\Requests\UpdatePenarikanSaldoRequest;
 class PenarikanSaldoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar pengajuan penarikan saldo.
      */
     public function index()
     {
-        //
+        $penarikanSaldo = PenarikanSaldo::all();
+        return response()->json($penarikanSaldo);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Menyimpan pengajuan penarikan saldo baru.
      */
     public function store(StorePenarikanSaldoRequest $request)
     {
-        //
+        $penarikanSaldo = new PenarikanSaldo();
+        $penarikanSaldo->fill($request->validated());
+        $penarikanSaldo->save();
+
+        return response()->json(['message' => 'Pengajuan penarikan saldo berhasil disimpan'], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan detail pengajuan penarikan saldo berdasarkan ID.
      */
     public function show(PenarikanSaldo $penarikanSaldo)
     {
-        //
+        return response()->json($penarikanSaldo);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(PenarikanSaldo $penarikanSaldo)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Memperbarui pengajuan penarikan saldo yang ada.
      */
     public function update(UpdatePenarikanSaldoRequest $request, PenarikanSaldo $penarikanSaldo)
     {
-        //
+        $penarikanSaldo->update($request->validated());
+        return response()->json(['message' => 'Pengajuan penarikan saldo berhasil diperbarui']);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus pengajuan penarikan saldo.
      */
     public function destroy(PenarikanSaldo $penarikanSaldo)
     {
-        //
+        $penarikanSaldo->delete();
+        return response()->json(['message' => 'Pengajuan penarikan saldo berhasil dihapus']);
     }
 }

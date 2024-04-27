@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\PenarikanSaldoController;
+use App\Http\Controllers\SaldoPelangganController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\usersController;
@@ -106,11 +108,13 @@ Route::delete('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class,
 
 // Route::resource('pesanan', PesananController::class);
 
-// Route::get('/pelanggan', [PelangganController::class, 'index']);
-// Route::post('/pelanggan', [PelangganController::class, 'store']);
-// Route::get('/pelanggan/{id}', [PelangganController::class, 'show']);
-// Route::put('/pelanggan/{id}', [PelangganController::class, 'update']);
-// Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
+Route::get('/pelanggan', [PelangganController::class, 'index']);
+Route::post('/pelanggan', [PelangganController::class, 'store']);
+Route::get('/pelanggan/{id}', [PelangganController::class, 'show']);
+Route::put('/pelanggan/{id}', [PelangganController::class, 'update']);
+Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
+Route::post('/pelanggan/{id_pelanggan}/pesanan/{id_pesanan}/upload-bukti-pembayaran', [PelangganController::class, 'uploadBuktiPembayaran']);
+
 
 Route::resource('keranjang', KeranjangController::class);
 Route::resource('detail-keranjang', DetailKeranjangController::class);
@@ -122,6 +126,19 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::resource('pesanan', PesananController::class);
     // Route::get('/user', [usersController::class, 'index']);
 });
+
+Route::get('/saldo', [SaldoPelangganController::class, 'index']);
+Route::post('/saldo', [SaldoPelangganController::class, 'store']);
+Route::get('/saldo/{id}', [SaldoPelangganController::class, 'show']);
+Route::put('/saldo/{id}', [SaldoPelangganController::class, 'update']);
+Route::delete('/saldo/{id}', [SaldoPelangganController::class, 'destroy']);
+
+Route::get('/penarikan-saldo', [PenarikanSaldoController::class, 'index']);
+Route::post('/penarikan-saldo', [PenarikanSaldoController::class, 'store']);
+Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
+Route::put('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'update']);
+Route::delete('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'destroy']);
+
 
 // Route::middleware(['auth:api'])->group(function () {
 //     Route::post('/logout', [authController::class, 'logout']);

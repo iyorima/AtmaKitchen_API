@@ -24,6 +24,7 @@ return new class extends Migration
             $table->double('total_dibayarkan')->nullable();
             $table->double('total_tip');
             $table->string('jenis_pengiriman');
+            $table->string('bukti_pembayaran')->nullable();
             $table->timestamp('verified_at')->nullable();
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
