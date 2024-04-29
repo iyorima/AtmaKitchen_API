@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Akun;
 use App\Models\Pesanan;
-use App\Models\DetailPesanan; // Tambahkan ini
-use App\Models\Produk; // Tambahkan ini
+use App\Models\DetailPesanan; 
+use App\Models\Produk; 
 
 class Pelanggan extends Model
 {

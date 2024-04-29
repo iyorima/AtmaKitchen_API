@@ -17,5 +17,6 @@ class PenarikanSaldo extends Model
         'id_akun',
         'jumlah_penarikan',
         'transfer_at',
+        'status',
     ];
 }

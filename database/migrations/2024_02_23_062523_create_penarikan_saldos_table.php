@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_akun');
             $table->foreign('id_akun')->references('id_akun')->on('akuns')->onDelete('cascade');
             $table->double('jumlah_penarikan', 10, 2);
+            $table->enum('status', ['menunggu', 'selesai', 'ditolak'])->default('menunggu');
             $table->timestamp('transfer_at')->nullable();
             $table->timestamps();
             $table->softDeletes();

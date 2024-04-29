@@ -128,16 +128,14 @@ Route::group(['middleware' => 'auth:api'], function () {
 });
 
 Route::get('/saldo', [SaldoPelangganController::class, 'index']);
-Route::post('/saldo', [SaldoPelangganController::class, 'store']);
-Route::get('/saldo/{id}', [SaldoPelangganController::class, 'show']);
-Route::put('/saldo/{id}', [SaldoPelangganController::class, 'update']);
-Route::delete('/saldo/{id}', [SaldoPelangganController::class, 'destroy']);
+Route::get('/saldo/{id_akun}', [SaldoPelangganController::class, 'show']);
+Route::put('/saldo/{id_akun}', [SaldoPelangganController::class, 'update']);
 
 Route::get('/penarikan-saldo', [PenarikanSaldoController::class, 'index']);
 Route::post('/penarikan-saldo', [PenarikanSaldoController::class, 'store']);
-Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
+Route::get('/penarikan-saldo/user/{id_akun}', [PenarikanSaldoController::class, 'showByCustomer']);
 Route::put('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'update']);
-Route::delete('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'destroy']);
+Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
 
 
 // Route::middleware(['auth:api'])->group(function () {

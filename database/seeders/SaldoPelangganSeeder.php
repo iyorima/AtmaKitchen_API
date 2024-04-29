@@ -18,5 +18,19 @@ class SaldoPelangganSeeder extends Seeder
             'saldo' => 75000,
             'total_saldo' => 75000
         ]);
+
+        SaldoPelanggan::factory()->create([
+            'id_akun' => 1,
+            'id_pesanan' => '17.03.24.004',
+            'saldo' => 200000,
+            'total_saldo' => 200000
+        ]);
+
+        SaldoPelanggan::factory()->create([
+            'id_akun' => 2,
+            'id_pesanan' => '17.03.24.004',
+            'saldo' => 1,
+            'total_saldo' => 1
+        ]);
     }
 }
