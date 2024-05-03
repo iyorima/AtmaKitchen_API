@@ -142,11 +142,14 @@ class KaryawanController extends Controller
 
         $akun = $karyawan->akun;
 
-        // 📃 Update the akun and karyawan. Also, check if there is no change in response body, use its value instead.
-        $akun->update([
-            'password' => bcrypt($request->password) ?? $akun->password,
-            'id_role' => $request->id_role ?? $akun->id_role
-        ]);
+        $updateData = [
+            'id_role' => $request->id_role ?? $akun->id_role,
+        ];
+
+        if ($request->password) {
+            $updateData['password'] = bcrypt($request->password);
+        }
+        $akun->update($updateData);
 
         $karyawan->update([
             'nama' => $request->nama ?? $karyawan->nama,

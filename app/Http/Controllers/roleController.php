@@ -41,7 +41,7 @@ class roleController extends Controller
 
         $role = Role::create($storeData);
         return response([
-            'message' => 'Role berhasil dibuat',
+            'message' => 'Jabatan ' . $role->role . ' berhasil ditambahkan',
             'data' => $role
         ], 200);
     }
@@ -109,20 +109,20 @@ class roleController extends Controller
 
         if (is_null($role)) {
             return response([
-                'message' => 'role tidak ditemukan',
+                'message' => 'Jabatan tidak ditemukan',
                 'data' => null
             ], 404);
         }
 
         if ($role->delete()) {
             return response([
-                'message' => 'role berhasil dihapus',
+                'message' => $role->role . ' berhasil dihapus',
                 'data' => $role
             ], 200);
         }
 
         return response([
-            'message' => 'role gagal dihapus',
+            'message' => 'Jabatan gagal dihapus',
             'data' => null
         ], 400);
     }

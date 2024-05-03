@@ -12,6 +12,10 @@ class AkunSeeder extends Seeder
      */
     public function run(): void
     {
+        Akun::factory()->create([
+            'email' => 'nepreufrebeije-3962@yopmail.com',
+            'password' => bcrypt('admin123')
+        ]);
         Akun::factory()->count(10)->create();
     }
 }

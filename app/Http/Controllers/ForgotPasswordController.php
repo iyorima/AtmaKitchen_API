@@ -14,6 +14,8 @@ class ForgotPasswordController extends Controller
     {
         $validatedData = $request->validate([
             'email' => 'required|email|exists:akuns,email',
+        ], [
+            'email.exists' => 'Email tidak ditemukan!'
         ]);
 
         $user = Akun::where('email', $validatedData['email'])->first();

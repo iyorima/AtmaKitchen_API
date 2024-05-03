@@ -26,7 +26,18 @@ class ResepProduk extends Model
         'deleted_at',
     ];
 
+    protected $casts = [
+        'id_bahan_baku' => 'string',
+        'jumlah' => 'string'
+    ];
+
+    // TODO: This must be deleted soon
     public function id_bahan_baku()
+    {
+        return $this->belongsTo(BahanBaku::class, 'id_bahan_baku');
+    }
+
+    public function bahan_baku()
     {
         return $this->belongsTo(BahanBaku::class, 'id_bahan_baku');
     }

@@ -16,11 +16,16 @@ class BahanBaku extends Model
         'nama',
         'satuan',
         'stok',
+        'stok_minimum',
         'updated_at',
     ];
 
     protected $hidden = [
         'created_at',
         'deleted_at',
+    ];
+
+    protected $casts = [
+        'id_bahan_baku' => 'string'
     ];
 }

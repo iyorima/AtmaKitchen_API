@@ -37,6 +37,10 @@ class Produk extends Model
     {
         return $this->hasMany(ResepProduk::class, 'id_produk');
     }
+    public function bahan_baku()
+    {
+        return $this->hasMany(ResepProduk::class, 'id_produk');
+    }
 
     public function penitip()
     {

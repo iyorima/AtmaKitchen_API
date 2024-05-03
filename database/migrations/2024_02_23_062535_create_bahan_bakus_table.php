@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('bahan_bakus', function (Blueprint $table) {
             $table->bigIncrements('id_bahan_baku');
-            $table->string('nama' , 255);
+            $table->string('nama', 255);
             $table->string('satuan', 15);
             $table->double('stok');
+            $table->double('stok_minumum');
             $table->timestamps();
             $table->softDeletes();
         });

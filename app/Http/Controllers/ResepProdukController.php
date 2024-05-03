@@ -82,7 +82,7 @@ class ResepProdukController extends Controller
      */
     public function show(int $id_produk)
     {
-        $resep = Produk::whereHas('resep')->with('resep.id_bahan_baku', 'images')->find($id_produk);
+        $resep = Produk::whereHas('bahan_baku')->with('bahan_baku.bahan_baku', 'images')->find($id_produk);
 
         if (is_null($resep)) {
             return response([

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AkunController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\usersController;
@@ -82,11 +83,11 @@ Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
 Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
 Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
 
-Route::get('/karyawan', [KaryawanController::class, 'index']);
-Route::post('/karyawan', [KaryawanController::class, 'store']);
-Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
-Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
-Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
+// Route::get('/karyawan', [KaryawanController::class, 'index']);
+// Route::post('/karyawan', [KaryawanController::class, 'store']);
+// Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
+// Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
+// Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
 
 Route::get('/resep', [ResepProdukController::class, 'index']);
 Route::post('/resep', [ResepProdukController::class, 'store']);
@@ -116,13 +117,22 @@ Route::resource('keranjang', KeranjangController::class);
 Route::resource('detail-keranjang', DetailKeranjangController::class);
 Route::resource('pengiriman', PengirimanController::class);
 
+Route::group([
+
+    'middleware' => 'api',
+    'prefix' => 'auth'
+
+], function ($router) {
+    Route::post('login', [AkunController::class, 'login']);
+    Route::post('logout', [AkunController::class, 'logout']);
+    Route::post('refresh', [AkunController::class, 'refresh']);
+    Route::get('me', [AkunController::class, 'me']);
+});
+
+
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
     Route::resource('pesanan', PesananController::class);
-    // Route::get('/user', [usersController::class, 'index']);
+    Route::resource('karyawan', KaryawanController::class);
 });
-
-// Route::middleware(['auth:api'])->group(function () {
-//     Route::post('/logout', [authController::class, 'logout']);
-// });
