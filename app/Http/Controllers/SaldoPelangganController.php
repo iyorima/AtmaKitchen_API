@@ -3,64 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Models\SaldoPelanggan;
-use App\Http\Requests\StoreSaldoPelangganRequest;
-use App\Http\Requests\UpdateSaldoPelangganRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SaldoPelangganController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan saldo pelanggan.
      */
     public function index()
     {
-        //
+        $saldoPelanggan = SaldoPelanggan::all();
+        if ($saldoPelanggan->isEmpty()) {
+            return response()->json([
+                'message' => 'Tidak ada data saldo pelanggan',
+                'data' => []
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh data saldo pelanggan',
+            'data' => $saldoPelanggan
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    public function show(int $id_akun) //ini aku tampilin berdasarkan id_akun jadi get by customer gtu
+{
+    $saldoPelanggan = SaldoPelanggan::where('id_akun', $id_akun)->first();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreSaldoPelangganRequest $request)
-    {
-        //
+    if (!$saldoPelanggan) {
+        return response()->json(['message' => 'Saldo tidak ditemukan untuk akun ini'], 404);
     }
+    return response()->json([
+        'message' => 'Berhasil mendapatkan data saldo pelanggan',
+        'data' => $saldoPelanggan
+    ]);
+}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(SaldoPelanggan $saldoPelanggan)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SaldoPelanggan $saldoPelanggan)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateSaldoPelangganRequest $request, SaldoPelanggan $saldoPelanggan)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SaldoPelanggan $saldoPelanggan)
-    {
-        //
-    }
 }

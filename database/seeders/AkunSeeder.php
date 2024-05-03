@@ -16,6 +16,10 @@ class AkunSeeder extends Seeder
             'email' => 'nepreufrebeije-3962@yopmail.com',
             'password' => bcrypt('admin123')
         ]);
+        Akun::factory()->create([
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('admin123')
+        ]);
         Akun::factory()->count(10)->create();
     }
 }

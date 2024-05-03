@@ -19,4 +19,9 @@ class SaldoPelanggan extends Model
         'saldo',
         'total_saldo',
     ];
+
+    public function akun()
+    {
+        return $this->belongsTo(Akun::class, 'id_akun', 'id_akun');
+    }
 }

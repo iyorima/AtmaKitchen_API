@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Akun;
 use App\Models\Pesanan;
-use App\Models\DetailPesanan; // Tambahkan ini
-use App\Models\Produk; // Tambahkan ini
+use App\Models\DetailPesanan; 
+use App\Models\Produk; 
 
 class Pelanggan extends Model
 {
@@ -39,50 +39,24 @@ class Pelanggan extends Model
         return $this->hasMany(Pesanan::class, 'id_pelanggan');
     }
 
-    public function pesananBelumSelesai()
+    public function pesananBelumSelesai() //pesanan yang perlu di bayar
     {
         return $this->hasMany(Pesanan::class, 'id_pelanggan')
             ->whereNull('total_dibayarkan')
-            ->with('detailPesanan.produk', 'detailPesanan.pesanan');
+            ->with(['detail_pesanan' => function ($query) {
+                $query->with('produk');
+            }]);
     }
-
-    // Kayanya mending pake history_order
+    
+    //yang status selesai
     public function historiPesanan()
     {
-        return $this->hasManyThrough(
-            StatusPesanan::class,
-            Pesanan::class,
-            'id_pelanggan',
-            'id_pesanan',
-            'id_pelanggan',
-            'id_pesanan'
-        )->where('status', 'selesai')->with(['detailPesanans' => function ($query) {
-            $query->whereColumn('detail_pesanans.id_pesanan', '=', 'pesanans.id_pesanan');
-        }, 'detailPesanans.produk']);
+        return $this->hasMany(Pesanan::class, 'id_pelanggan')
+        ->whereHas('status_pesanan_latest', function ($query) {
+            $query->where('status', 'selesai');
+        })
+        
+        ->with(['detail_pesanan.produk.images']);
     }
-
-
-    public function detailPesanan()
-    {
-        return $this->hasManyThrough(
-            DetailPesanan::class,
-            Pesanan::class,
-            'id_pelanggan',
-            'id_pesanan',
-            'id_pelanggan',
-            'id_pesanan'
-        )->whereColumn('detail_pesanans.id_pesanan', '=', 'pesanans.id_pesanan');
-    }
-
-    public function produk()
-    {
-        return $this->hasManyThrough(
-            Produk::class,
-            DetailPesanan::class,
-            'id_pelanggan',
-            'id_produk',
-            'id_pelanggan',
-            'id_produk'
-        );
-    }
+    
 }

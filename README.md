@@ -53,3 +53,7 @@ Start the server
 ```bash
   php artisan serve
 ```
+
+## Need to Discuss or Check
+
+-   Conrollers: Penitip success message

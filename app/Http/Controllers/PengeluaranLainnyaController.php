@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\PengeluaranLainnya;
-use App\Http\Requests\StorepengeluaranLainnyaRequest;
-use App\Http\Requests\UpdatepengeluaranLainnyaRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -15,17 +13,17 @@ class PengeluaranLainnyaController extends Controller
      */
     public function index()
     {
-        $pengeluaranLainnya = PengeluaranLainnya::with('karyawan')->get();
+        $pengeluaranLainnya = PengeluaranLainnya::with('karyawan:id_karyawan,nama')->get();
 
         if ($pengeluaranLainnya->isNotEmpty()) {
             return response([
-                'message' => 'Berhasil mendapatkan seluruh data pengeluaran lainnya',
+                'message' => 'Arus kas berhasil ditemukan',
                 'data' => $pengeluaranLainnya
             ], 200);
         }
 
         return response([
-            'message' => 'pengeluaran lainnya tidak ditemukan',
+            'message' => 'Arus kas tidak ditemukan',
             'data' => null
         ], 400);
     }
@@ -35,24 +33,32 @@ class PengeluaranLainnyaController extends Controller
      */
     public function store(Request $request)
     {
+        // if (auth()->check()) {
+        //     $id_karyawan = auth()->user()->id_karyawan;
+        // } else {
+        //     $id_karyawan = 1;
+        // }
+
         $storeData = $request->all();
+        // unset($storeData['id_karyawan']);
 
         $validate = Validator::make($storeData, [
             'id_karyawan' => 'required',
             'nama' => 'required',
             'biaya' => 'required',
             'tanggal' => 'required',
-            'kategori' => 'required|in:pengeluaran,pemasukan',
+            'kategori' => 'required|in:Pengeluaran,Pemasukkan',
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
+        // $storeData['id_karyawan'] = $id_karyawan;
 
         $pengeluaranLainnya = PengeluaranLainnya::create($storeData);
 
         return response([
-            'message' => 'berhasil membuat pengeluaran lainnya',
+            'message' => 'Arus kas berhasil ditambahkan',
             'data' => $pengeluaranLainnya
         ], 200);
     }
@@ -62,17 +68,17 @@ class PengeluaranLainnyaController extends Controller
      */
     public function show($id)
     {
-        $pengeluaranLainnya = PengeluaranLainnya::find($id);
+        $pengeluaranLainnya = PengeluaranLainnya::with('karyawan')->find($id);
 
         if (!is_null($pengeluaranLainnya)) {
             return response([
-                'message' => 'pengeluaran lainnya ' . $pengeluaranLainnya->nama . ' ditemukan',
+                'message' => 'Arus kas ' . $pengeluaranLainnya->nama . ' ditemukan',
                 'data' => $pengeluaranLainnya
             ], 200);
         }
 
         return response([
-            'message' => 'data pengeluaran lainnya tidak ditemukan',
+            'message' => 'Arus kas tidak ditemukan',
             'data' => null
         ], 404);
     }
@@ -86,18 +92,17 @@ class PengeluaranLainnyaController extends Controller
 
         if (is_null($pengeluaranLainnya)) {
             return response([
-                'message' => 'data pengeluaran lainnya tidak ditemukan',
+                'message' => 'Arus kas tidak ditemukan',
                 'data' => null
             ], 404);
         }
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
-            'id_karyawan' => 'required',
             'nama' => 'required',
             'biaya' => 'required',
             'tanggal' => 'required',
-            'kategori' => 'required|in:pengeluaran,pemasukan',
+            'kategori' => 'required|in:Pengeluaran,Pemasukkan',
         ]);
 
         if ($validate->fails()) {
@@ -106,17 +111,15 @@ class PengeluaranLainnyaController extends Controller
             ], 400);
         }
 
-        $pengeluaranLainnya->update($updateData);
-
-        if ($pengeluaranLainnya->save()) {
+        if ($pengeluaranLainnya->update($updateData)) {
             return response([
-                'message' => 'ubah data pengeluaran lainnya berhasil',
+                'message' => 'Arus kas berhasil diubah',
                 'data' => $pengeluaranLainnya
             ], 200);
         }
 
         return response([
-            'message' => 'ubah data pengeluaran lainnya ',
+            'message' => 'Arus kas gagal diubah ',
             'data' => null
         ], 400);
     }
@@ -130,20 +133,20 @@ class PengeluaranLainnyaController extends Controller
 
         if (is_null($pengeluaranLainnya)) {
             return response([
-                'message' => 'data pengeluaran lainnya tidak ditemukan',
+                'message' => 'Arus kas tidak ditemukan',
                 'data' => null
             ], 404);
         }
 
         if ($pengeluaranLainnya->delete()) {
             return response([
-                'message' => 'hapus pengeluaran lainnya berhasil',
+                'message' => 'Arus kas berhasil dihapus',
                 'data' => $pengeluaranLainnya
             ], 200);
         }
 
         return response([
-            'message' => 'hapus pengeluaran lainnya gagal',
+            'message' => 'Arus kas gagal dihapus',
             'data' => null
         ], 400);
     }

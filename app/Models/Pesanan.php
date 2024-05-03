@@ -9,6 +9,8 @@ use App\Models\Pelanggan;
 use App\Models\DetailPesanan;
 use App\Models\Pengiriman;
 use App\Models\Produk;
+use App\Models\StatusPesanan;
+
 
 class Pesanan extends Model
 {
@@ -28,6 +30,7 @@ class Pesanan extends Model
         'total_setelah_diskon',
         'total_dibayarkan',
         'total_tip',
+        'bukti_pembayaran',
         'verified_at',
         'accepted_at',
     ];
@@ -43,7 +46,7 @@ class Pesanan extends Model
 
     public function produk()
     {
-        return $this->hasManyThrough(Produk::class, DetailPesanan::class, 'id_pesanan', 'id_produk');
+        return $this->hasMany(Produk::class, DetailPesanan::class, 'id_pesanan', 'id_produk');
     }
 
     public function status_pesanan()
