@@ -48,39 +48,15 @@ class Pelanggan extends Model
             }]);
     }
     
+    //yang status selesai
     public function historiPesanan()
     {
         return $this->hasMany(Pesanan::class, 'id_pelanggan')
         ->whereHas('status_pesanan_latest', function ($query) {
             $query->where('status', 'selesai');
         })
-        ->with(['detail_pesanan' => function ($query) {
-            $query->with('produk');
-        }]);
+        
+        ->with(['detail_pesanan.produk.images']);
     }
     
-
-    // public function detailPesanan()
-    // {
-    //     return $this->hasManyThrough(
-    //         DetailPesanan::class,
-    //         Pesanan::class,
-    //         'id_pelanggan',
-    //         'id_pesanan',
-    //         'id_pelanggan',
-    //         'id_pesanan'
-    //     )->whereColumn('detail_pesanans.id_pesanan', '=', 'pesanans.id_pesanan');
-    // }
-
-    // public function produk()
-    // {
-    //     return $this->hasManyThrough(
-    //         Produk::class,
-    //         DetailPesanan::class,
-    //         'id_pelanggan',
-    //         'id_produk',
-    //         'id_pelanggan',
-    //         'id_produk'
-    //     );
-    // }
 }

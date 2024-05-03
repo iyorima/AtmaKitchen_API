@@ -123,8 +123,8 @@ Route::resource('pengiriman', PengirimanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
-    Route::resource('pesanan', PesananController::class);
-    // Route::get('/user', [usersController::class, 'index']);
+    // Route::resource('pesanan', PesananController::class);
+    
 });
 
 Route::get('/saldo', [SaldoPelangganController::class, 'index']);
@@ -137,6 +137,10 @@ Route::get('/penarikan-saldo/user/{id_akun}', [PenarikanSaldoController::class, 
 Route::put('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'update']);
 Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
 
+Route::get('/pesanan/perlu-dikonfirmasi', [PesananController::class, 'indexPesananPerluDikonfirmasi']);
+    Route::post('/pesanan/{id}/terima', [PesananController::class, 'terimaPesanan']);
+    Route::post('/pesanan/{id}/tolak', [PesananController::class, 'tolakPesanan']);
+    Route::get('/pesanan/{id}/bahan-baku', [PesananController::class, 'listBahanBakuPerluDibeli']);
 
 // Route::middleware(['auth:api'])->group(function () {
 //     Route::post('/logout', [authController::class, 'logout']);

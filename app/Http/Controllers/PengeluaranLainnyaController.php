@@ -35,10 +35,16 @@ class PengeluaranLainnyaController extends Controller
      */
     public function store(Request $request)
     {
+        if (auth()->check()) {
+            $id_karyawan = auth()->user()->id_karyawan;
+        } else {
+              $id_karyawan = 1; 
+        }
+    
         $storeData = $request->all();
+        unset($storeData['id_karyawan']);
 
         $validate = Validator::make($storeData, [
-            'id_karyawan' => 'required',
             'nama' => 'required',
             'biaya' => 'required',
             'tanggal' => 'required',
@@ -48,9 +54,10 @@ class PengeluaranLainnyaController extends Controller
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
+        $storeData['id_karyawan'] = $id_karyawan;
 
         $pengeluaranLainnya = PengeluaranLainnya::create($storeData);
-
+    
         return response([
             'message' => 'berhasil membuat pengeluaran lainnya',
             'data' => $pengeluaranLainnya
@@ -93,7 +100,6 @@ class PengeluaranLainnyaController extends Controller
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
-            'id_karyawan' => 'required',
             'nama' => 'required',
             'biaya' => 'required',
             'tanggal' => 'required',

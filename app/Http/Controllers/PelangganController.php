@@ -121,13 +121,13 @@ class PelangganController extends Controller
             // Mengambil pesanan belum selesai
             $pesananBelumSelesai = $pelanggan->pesananBelumSelesai()->whereNull('total_dibayarkan')->get();
             foreach ($pesananBelumSelesai as $pesanan) {
-                $response['data']['pesanan'][] = $pesanan->load('detail_pesanan.produk');
+                $response['data']['pesanan'][] = $pesanan->load('detail_pesanan.produk.thumbnail');
             }
     
             // Mengambil histori pesanan yang sudah selesai
             $historiPesanan = $pelanggan->historiPesanan()->get();
             foreach ($historiPesanan as $histori) {
-                $response['data']['histori_pesanan'][] = $histori->load('detail_pesanan.produk');
+                $response['data']['histori_pesanan'][] = $histori->load('detail_pesanan.produk.thumbnail');
             }
     
             return response()->json($response, 200);
