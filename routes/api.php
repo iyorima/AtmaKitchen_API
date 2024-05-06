@@ -138,6 +138,7 @@ Route::group([
 
 ], function ($router) {
     Route::post('login', [AkunController::class, 'login']);
+    Route::post('register', [AkunController::class, 'register']);
     Route::post('logout', [AkunController::class, 'logout']);
     Route::post('refresh', [AkunController::class, 'refresh']);
     Route::get('me', [AkunController::class, 'me']);
