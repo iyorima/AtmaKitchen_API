@@ -16,7 +16,7 @@ class BahanBaku extends Model
         'nama',
         'satuan',
         'stok',
-        'stok_minimum',
+        'stok_minumum',
         'updated_at',
     ];
 

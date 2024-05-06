@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PemesananBahanBaku;
+use App\Models\BahanBaku;
 use App\Http\Requests\StorePemesananBahanBakuRequest;
 use App\Http\Requests\UpdatePemesananBahanBakuRequest;
 use Illuminate\Support\Facades\Validator;
@@ -37,23 +38,37 @@ class PemesananBahanBakuController extends Controller
     {
         $storeData = $request->all();
 
-        $validate = Validator::make($storeData, [
-            'id_bahan_baku' => 'required',
-            'nama' => 'required',
-            'satuan' => 'required',
-            'jumlah' => 'required',
-            'harga_beli' => 'required',
-            'total' => 'required',
-        ]);
+        if ($request->has('id_bahan_baku') && $request->id_bahan_baku == null) {
+            $storeDataBahanBaku['nama'] = $request->nama;
+            $storeDataBahanBaku['satuan'] = $request->satuan;
+            $storeDataBahanBaku['stok'] = $request->jumlah;
+            $storeDataBahanBaku['stok_minumum'] = 1;
+            $bahanBaku = BahanBaku::create($storeDataBahanBaku);
 
-        if ($validate->fails()) {
-            return response(['message' => $validate->errors()], 400);
+            $storeData['id_bahan_baku'] = $bahanBaku['id_bahan_baku'];
+        } else {
+            $bahanBaku = BahanBaku::find($request->id_bahan_baku);
+            if ($bahanBaku) {
+                $storeData['nama'] = $bahanBaku->nama;
+            }
         }
 
+        $validatePemesanan = Validator::make($storeData, [
+            'id_bahan_baku' => 'required',
+            'satuan' => 'required|in:gr,butir,ml,buah',
+            'jumlah' => 'required',
+            'harga_beli' => 'required',
+        ]);
+
+        if ($validatePemesanan->fails()) {
+            return response(['message' => $validatePemesanan->errors()], 400);
+        }
+
+        $storeData['total'] = $storeData['jumlah'] * $storeData['harga_beli'];
         $pemesananBahanBaku = PemesananBahanBaku::create($storeData);
 
         return response([
-            'message' => 'berhasil membuat pemesanan bahan baku baru',
+            'message' => 'Berhasil membuat pemesanan bahan baku baru',
             'data' => $pemesananBahanBaku
         ], 200);
     }
@@ -95,8 +110,7 @@ class PemesananBahanBakuController extends Controller
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
             'id_bahan_baku' => 'required',
-            'nama' => 'required',
-            'satuan' => 'required',
+            'satuan' => 'required|in:gr,butir,ml,buah',
             'jumlah' => 'required',
             'harga_beli' => 'required',
             'total' => 'required',
@@ -108,6 +122,13 @@ class PemesananBahanBakuController extends Controller
             ], 400);
         }
 
+        if ($request->has('id_bahan_baku') && $request->id_bahan_baku != null) {
+            $bahanBaku = BahanBaku::find($request->id_bahan_baku);
+            if ($bahanBaku) {
+                $updateData['nama'] = $bahanBaku->nama;
+            }
+        }
+
         if ($pemesananBahanBaku->update($updateData)) {
             return response([
                 'message' => 'ubah data pemesanan bahan baku berhasil',
@@ -116,7 +137,7 @@ class PemesananBahanBakuController extends Controller
         }
 
         return response([
-            'message' => 'ubah data pemesanan bahan baku ',
+            'message' => 'ubah data pemesanan bahan baku gagal',
             'data' => null
         ], 400);
     }
