@@ -42,7 +42,7 @@ class ProdukHampersController extends Controller
         $validate = Validator::make($storeData, [
             'nama' => 'required',
             'harga_jual' => 'required',
-            'produk' => 'required|array',
+            'detail_produk' => 'required|array',
             'image' => 'required|image|mimes:jpeg,png,jpg',
         ]);
 
@@ -55,15 +55,17 @@ class ProdukHampersController extends Controller
             'harga_jual' => $storeData['harga_jual'],
         ];
 
-        $imagePath = $request->file('image')->store('product', 'public');
-        $hampersData['image'] = $imagePath;
+        $fileName = time() . '_' . $storeData['image']->getClientOriginalName();
+        $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $storeData['image']->storeAs('uploads', $fileName, 'azure'));
+
+        $hampersData['image'] = $filePath;
 
         $hampers = ProdukHampers::create($hampersData);
 
-        foreach ($storeData['produk'] as $id_produk) {
+        foreach ($storeData['detail_produk'] as $id_produk) {
             DetailHampers::create([
                 'id_produk_hampers' => $hampers->id_produk_hampers,
-                'id_produk' => $id_produk,
+                'id_produk' => $id_produk['id_produk'],
             ]);
         }
 
@@ -113,8 +115,8 @@ class ProdukHampersController extends Controller
         $validate = Validator::make($updateData, [
             'nama' => 'required',
             'harga_jual' => 'required',
-            'produk' => 'required|array',
-            'image' => 'required|image|mimes:jpeg,png,jpg',
+            'detail_produk' => 'required|array',
+            // 'image' => 'required|image|mimes:jpeg,png,jpg',
         ]);
 
         if ($validate->fails()) {
@@ -124,22 +126,27 @@ class ProdukHampersController extends Controller
         }
 
         $produkHampers->detailHampers()->delete();
-        Storage::disk('public')->delete($produkHampers->image);
+
+        // $fileName = basename($produkHampers->image);
+        // $azurePath = 'uploads/' . $fileName;
+        // Storage::disk('azure')->delete($azurePath);
+        // $produkHampers->image->delete();
 
         $hampersData = [
             'nama' => $updateData['nama'],
-            'harga_jual' => $updateData['harga_jual'],
+            'harga_jual' => $updateData['harga_jual']
         ];
 
-        $imagePath = $request->file('image')->store('product', 'public');
-        $hampersData['image'] = $imagePath;
+        // $fileName = time() . '_' . $updateData['image']->getClientOriginalName();
+        // $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $updateData['image']->storeAs('uploads', $fileName, 'azure'));
+        // $hampersData['image'] = $filePath;
 
         $produkHampers->update($hampersData);
 
-        foreach ($updateData['produk'] as $id_produk) {
+        foreach ($updateData['detail_produk'] as $id_produk) {
             DetailHampers::create([
                 'id_produk_hampers' => $produkHampers->id_produk_hampers,
-                'id_produk' => $id_produk,
+                'id_produk' => $id_produk['id_produk'],
             ]);
         }
 
@@ -175,7 +182,7 @@ class ProdukHampersController extends Controller
         }
 
         $produkHampers->detailHampers()->delete();
-        Storage::disk('public')->delete($produkHampers->image);
+        Storage::disk('azure')->delete($produkHampers->image);
 
         if ($produkHampers->delete()) {
             return response([
