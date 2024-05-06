@@ -16,7 +16,7 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $produk = Produk::with('images')->get();
+        $produk = Produk::with('images', 'thumbnail')->get();
 
         if ($produk->isNotEmpty()) {
             return response([

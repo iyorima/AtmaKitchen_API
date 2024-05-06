@@ -22,6 +22,7 @@ use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\PengeluaranLainnyaController;
 use App\Http\Controllers\PengirimanController;
 use App\Http\Controllers\PesananController;
+use App\Models\PemesananBahanBaku;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,11 +65,12 @@ Route::get('/hampers/{id}', [ProdukHampersController::class, 'show']);
 Route::post('/hampers/{id}', [ProdukHampersController::class, 'update']);
 Route::delete('/hampers/{id}', [ProdukHampersController::class, 'destroy']);
 
-Route::get('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'index']);
-Route::post('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'store']);
-Route::get('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'show']);
-Route::post('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'update']);
-Route::delete('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'destroy']);
+Route::resource('bahan-baku/pemesanan', PemesananBahanBakuController::class);
+// Route::get('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'index']);
+// Route::post('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'store']);
+// Route::get('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'show']);
+// Route::post('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'update']);
+// Route::delete('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'destroy']);
 
 Route::resource('penitip', PenitipController::class);
 // Route::get('/penitip', [PenitipController::class, 'index']);

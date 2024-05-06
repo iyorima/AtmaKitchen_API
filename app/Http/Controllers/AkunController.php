@@ -46,10 +46,10 @@ class AkunController extends Controller
     {
         $akun = auth()->user();
 
-        $user = Pelanggan::with('id_akun')->where('id_akun', $akun->id_akun)->first();
+        $user = Pelanggan::with('akun.role', 'poins:id_poin,total_poin,poins.id_pelanggan')->where('id_akun', $akun->id_akun)->first();
 
         if (is_null($user)) {
-            $user = Karyawan::where('id_akun', $akun->id_akun)->first();
+            $user = Karyawan::with('akun.role')->where('id_akun', $akun->id_akun)->first();
         }
         return response()->json(['data' => $user]);
     }

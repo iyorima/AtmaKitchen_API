@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Akun;
 use App\Models\Pesanan;
-use App\Models\DetailPesanan; 
-use App\Models\Produk; 
+use App\Models\DetailPesanan;
+use App\Models\Produk;
 
 class Pelanggan extends Model
 {
@@ -25,6 +25,11 @@ class Pelanggan extends Model
     ];
 
     public function id_akun()
+    {
+        return $this->belongsTo(Akun::class, 'id_akun');
+    }
+
+    public function akun()
     {
         return $this->belongsTo(Akun::class, 'id_akun');
     }
@@ -47,16 +52,20 @@ class Pelanggan extends Model
                 $query->with('produk');
             }]);
     }
-    
+
     //yang status selesai
     public function historiPesanan()
     {
         return $this->hasMany(Pesanan::class, 'id_pelanggan')
-        ->whereHas('status_pesanan_latest', function ($query) {
-            $query->where('status', 'selesai');
-        })
-        
-        ->with(['detail_pesanan.produk.images']);
+            // ->whereHas('status_pesanan_latest', function ($query) {
+            //     $query->where('status', 'selesai');
+            // })
+
+            ->with(['detail_pesanan.produk.images', 'status_pesanan_latest', 'pengiriman', 'poins']);
     }
-    
+
+    public function poins()
+    {
+        return $this->hasOne(Poin::class, 'id_pelanggan')->latestOfMany('id_poin');
+    }
 }

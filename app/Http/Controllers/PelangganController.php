@@ -103,11 +103,11 @@ class PelangganController extends Controller
     public function show(int $id_pelanggan)
     {
         $pelanggan = Pelanggan::with('id_akun')->find($id_pelanggan);
-    
+
         if (!$pelanggan) {
             return response()->json(['message' => 'Pelanggan tidak ditemukan'], 404);
         }
-    
+
         try {
             $response = [
                 'message' => 'Berhasil mendapatkan data pelanggan ' . $pelanggan->nama . '',
@@ -117,19 +117,19 @@ class PelangganController extends Controller
                     'histori_pesanan' => [],
                 ]
             ];
-    
+
             // Mengambil pesanan belum selesai
             $pesananBelumSelesai = $pelanggan->pesananBelumSelesai()->whereNull('total_dibayarkan')->get();
             foreach ($pesananBelumSelesai as $pesanan) {
                 $response['data']['pesanan'][] = $pesanan->load('detail_pesanan.produk.thumbnail');
             }
-    
+
             // Mengambil histori pesanan yang sudah selesai
             $historiPesanan = $pelanggan->historiPesanan()->get();
             foreach ($historiPesanan as $histori) {
                 $response['data']['histori_pesanan'][] = $histori->load('detail_pesanan.produk.thumbnail');
             }
-    
+
             return response()->json($response, 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -137,7 +137,7 @@ class PelangganController extends Controller
             ], 500);
         }
     }
-    
+
 
     /**
      * Update the specified resource in storage.
