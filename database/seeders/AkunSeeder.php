@@ -14,11 +14,13 @@ class AkunSeeder extends Seeder
     {
         Akun::factory()->create([
             'email' => 'nepreufrebeije-3962@yopmail.com',
-            'password' => bcrypt('admin123')
+            'password' => bcrypt('admin123'),
+            'id_role' => 1
         ]);
         Akun::factory()->create([
             'email' => 'admin@gmail.com',
-            'password' => bcrypt('admin123')
+            'password' => bcrypt('admin123'),
+            'id_role' => 3
         ]);
         Akun::factory()->count(10)->create();
     }

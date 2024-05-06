@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Akun;
 use App\Http\Requests\StoreAkunRequest;
 use App\Http\Requests\UpdateAkunRequest;
+use App\Models\Alamat;
 use App\Models\Karyawan;
 use App\Models\Pelanggan;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Validator;
 
 class AkunController extends Controller
 {
@@ -18,7 +21,7 @@ class AkunController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
     /**
@@ -80,6 +83,67 @@ class AkunController extends Controller
         return $this->respondWithToken($auth->refresh());
     }
 
+    public function register(Request $request)
+    {
+        $registrationData = $request->all();
+
+        $validate = Validator::make($registrationData, [
+            'nama' => 'required',
+            'email' => 'required|email:rfc,dns|unique:akuns',
+            'password' => 'required',
+            'nama_alamat' => 'required',
+            'alamat' => 'required',
+            'telepon' => 'required',
+            'tgl_lahir' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        // $str = Str::random(100);
+        $registrationData['id_role'] = 1; // customer
+        // $registrationData['verify_key'] = $str;
+        $registrationData['password'] = bcrypt($request->password);
+
+        // $details = [
+        //     'nama' => $request->name,
+        //     'website' => 'atmakitchen',
+        //     'datetime' => date('Y-m-d H:i:s'),
+        //     'url' => request()->getHttpHost() . '/api/register/verify/' . $str
+        // ];
+
+        // Mail::to($request->email)->send(new Mailsend($details));
+        $akun = Akun::create([
+            'email' => $registrationData['email'],
+            'password' => $registrationData['password'],
+            'id_role' => $registrationData['id_role'],
+            'profile_image' => fake()->imageUrl()
+        ]);
+
+        $pelanggan = Pelanggan::create([
+            'id_akun' => $akun->id_akun,
+            'nama' => $registrationData['nama'],
+            'tgl_lahir' => $registrationData['tgl_lahir'],
+        ]);
+
+        $alamat = Alamat::create([
+            'id_pelanggan' => $pelanggan->id_pelanggan,
+            'label' => $registrationData['nama'],
+            'nama' => $registrationData['nama_alamat'],
+            'alamat' => $registrationData['alamat'],
+            'telepon' => $registrationData['telepon']
+        ]);
+
+        return response([
+            'message' => 'Registrasi Berhasil, silahkan verifikasi akun',
+            'data' => [
+                'akun' => $akun,
+                'pelanggan' => $pelanggan,
+                'alamat' => $alamat,
+            ]
+        ], 200);
+    }
 
     /**
      * Get the token array structure.
