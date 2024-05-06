@@ -3,6 +3,7 @@
 use App\Http\Controllers\PenarikanSaldoController;
 use App\Http\Controllers\SaldoPelangganController;
 use App\Http\Controllers\AkunController;
+use App\Http\Controllers\AlamatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\roleController;
@@ -36,13 +37,18 @@ use App\Models\PemesananBahanBaku;
 */
 
 // Simple AUTHENTICATION
-Route::post('/register', [authController::class, 'register']);
-Route::get('/register/verify/{verify_key}', [authController::class, 'verify']);
-Route::post('/login', [authController::class, 'login']);
+// Route::post('/register', [authController::class, 'register']);
+// Route::get('/register/verify/{verify_key}', [authController::class, 'verify']);
+// Route::post('/login', [authController::class, 'login']);
 
-Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
-Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
-Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+// Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
+// Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
+// Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::post('/auth/register', [AkunController::class, 'register']);
+Route::post('/auth/send-otp', [AkunController::class, 'sendOTP']);
+Route::post('/auth/verify', [AkunController::class, 'verifyOTP']);
+Route::post('/auth/reset', [AkunController::class, 'resetPassword']);
+
 
 Route::resource('role', roleController::class);
 // Route::get('/role', [roleController::class, 'index']);
@@ -123,6 +129,7 @@ Route::post('/pelanggan/{id_pelanggan}/pesanan/{id_pesanan}/upload-bukti-pembaya
 Route::resource('keranjang', KeranjangController::class);
 Route::resource('detail-keranjang', DetailKeranjangController::class);
 Route::resource('pengiriman', PengirimanController::class);
+Route::resource('alamat', AlamatController::class);
 
 Route::group([
 
