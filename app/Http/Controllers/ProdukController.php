@@ -38,8 +38,6 @@ class ProdukController extends Controller
     {
         $storeData = $request->all();
 
-        return response()->json(['data' => $storeData]);
-
         $validate = Validator::make($storeData, [
             'id_kategori' => 'required',
             'id_penitip',
