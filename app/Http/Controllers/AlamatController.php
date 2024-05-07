@@ -39,7 +39,7 @@ class AlamatController extends Controller
         $alamat = Alamat::create($storeData);
 
         return response([
-            'message' => 'Berhasil menambahkan alamat baku baru',
+            'message' => 'Berhasil menambahkan alamat baru',
             'data' => $alamat
         ], 200);
     }
@@ -65,7 +65,7 @@ class AlamatController extends Controller
 
         if (!$alamat) {
             return response([
-                'message' => 'data bahan baku tidak ditemukan',
+                'message' => 'Alamat tidak ditemukan',
                 'data' => null
             ], 404);
         }

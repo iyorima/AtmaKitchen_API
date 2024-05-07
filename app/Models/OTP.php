@@ -22,7 +22,7 @@ class OTP extends Model
             $otp->user_id = $userId;
         }
 
-        $otp->code = mt_rand(0000, 9999); // Generate random 4-digit OTP
+        $otp->code = mt_rand(1000, 9999); // Generate random 4-digit OTP
         $otp->expires_at = now()->addMinutes(10); // OTP akan kedaluwarsa dalam 10 menit
         $otp->save();
 

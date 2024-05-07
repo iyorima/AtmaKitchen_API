@@ -149,5 +149,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
     Route::resource('pesanan', PesananController::class);
+    Route::put("/karyawan/profile", [KaryawanController::class, 'updateKaryawanProfile']);
     Route::resource('karyawan', KaryawanController::class);
 });
