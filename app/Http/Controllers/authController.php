@@ -91,6 +91,7 @@ class AuthController extends Controller
         }
     }
 
+    // ❗ This function is deprecated. Check AkunController instead!
     /**
      * Get a JWT via given credentials.
      *

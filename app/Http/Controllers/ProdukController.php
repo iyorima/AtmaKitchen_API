@@ -16,7 +16,7 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $produk = Produk::with('images')->get();
+        $produk = Produk::with('images', 'thumbnail')->get();
 
         if ($produk->isNotEmpty()) {
             return response([
@@ -38,6 +38,8 @@ class ProdukController extends Controller
     {
         $storeData = $request->all();
 
+        return response()->json(['data' => $storeData]);
+
         $validate = Validator::make($storeData, [
             'id_kategori' => 'required',
             'id_penitip',
@@ -45,11 +47,7 @@ class ProdukController extends Controller
             'kapasitas' => 'required',
             'ukuran' => 'required',
             'harga_jual' => 'required',
-            'image1' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image2' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image3' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image4' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image5' => 'image|mimes:jpeg,png,jpg|max:5120',
+            'image.*' => 'image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         if ($validate->fails()) {
@@ -74,12 +72,10 @@ class ProdukController extends Controller
 
         $imagePaths = [];
 
-        for ($i = 1; $i <= 5; $i++) {
-            $imageKey = 'image' . $i;
-            if ($request->hasFile($imageKey)) {
-                $fileName = time() . '_' . $request->file($imageKey)->getClientOriginalName();
-                // save file to azure blob virtual directory uplaods in your container
-                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $request->file($imageKey)->storeAs('uploads', $fileName, 'azure'));
+        if ($request->hasFile('image')) {
+            foreach ($request->file('image') as $image) {
+                $fileName = time() . '_' . $image->getClientOriginalName();
+                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $image->storeAs('uploads', $fileName, 'azure'));
 
                 ProdukImage::create([
                     'id_produk' => $produk->id_produk,
@@ -102,7 +98,7 @@ class ProdukController extends Controller
      */
     public function show($id)
     {
-        $produk = Produk::with('images')->find($id);
+        $produk = Produk::with('images', 'thumbnail')->find($id);
 
         if ($produk) {
             return response([
@@ -180,11 +176,7 @@ class ProdukController extends Controller
             'kapasitas' => 'required',
             'ukuran' => 'required',
             'harga_jual' => 'required',
-            'image1' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image2' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image3' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image4' => 'image|mimes:jpeg,png,jpg|max:5120',
-            'image5' => 'image|mimes:jpeg,png,jpg|max:5120',
+            // 'image.*' => 'image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         if ($validate->fails()) {
@@ -193,12 +185,12 @@ class ProdukController extends Controller
             ], 400);
         }
 
-        foreach ($produk->images as $image) {
-            $fileName = basename($image->image);
-            $azurePath = 'uploads/' . $fileName;
-            Storage::disk('azure')->delete($azurePath);
-            $image->delete();
-        }
+        // foreach ($produk->images as $image) {
+        //     $fileName = basename($image->image);
+        //     $azurePath = 'uploads/' . $fileName;
+        //     Storage::disk('azure')->delete($azurePath);
+        //     $image->delete();
+        // }
 
         $produkData = [
             'id_kategori' => $updateData['id_kategori'],
@@ -206,25 +198,25 @@ class ProdukController extends Controller
             'kapasitas' => $updateData['kapasitas'],
             'ukuran' => $updateData['ukuran'],
             'harga_jual' => $updateData['harga_jual'],
+            'id_penitip' => $updateData['id_penitip'] ? $updateData['id_penitip'] : null,
         ];
 
         $produk->update($produkData);
 
-        $imagePaths = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $imageKey = 'image' . $i;
-            if ($request->hasFile($imageKey)) {
-                $fileName = time() . '_' . $request->file($imageKey)->getClientOriginalName();
-                // save file to azure blob virtual directory uplaods in your container
-                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $request->file($imageKey)->storeAs('uploads', $fileName, 'azure'));
+        // $imagePaths = [];
+        // if ($request->hasFile('image')) {
+        //     foreach ($request->file('image') as $image) {
+        //         $fileName = time() . '_' . $image->getClientOriginalName();
+        //         // save file to azure blob virtual directory uplaods in your container
+        //         $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $image->storeAs('uploads', $fileName, 'azure'));
 
-                ProdukImage::create([
-                    'id_produk' => $produk->id_produk,
-                    'image' => $filePath
-                ]);
-                $imagePaths[] = $filePath;
-            }
-        }
+        //         ProdukImage::create([
+        //             'id_produk' => $produk->id_produk,
+        //             'image' => $filePath
+        //         ]);
+        //         $imagePaths[] = $filePath;
+        //     }
+        // }
 
         $updatedProduk = Produk::with('images')->find($id);
 
@@ -233,7 +225,7 @@ class ProdukController extends Controller
                 'message' => 'produk berhasil diubah',
                 'data' => [
                     'produk' => $updatedProduk,
-                    'image' => $imagePaths
+                    // 'image' => $imagePaths
                 ]
             ], 200);
         }
@@ -259,7 +251,7 @@ class ProdukController extends Controller
         }
 
         foreach ($produk->images as $image) {
-            Storage::disk('public')->delete($image->image);
+            Storage::disk('azure')->delete($image->image);
             $image->delete();
         }
 

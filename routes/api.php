@@ -3,6 +3,7 @@
 use App\Http\Controllers\PenarikanSaldoController;
 use App\Http\Controllers\SaldoPelangganController;
 use App\Http\Controllers\AkunController;
+use App\Http\Controllers\AlamatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\authController;
 use App\Http\Controllers\roleController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\PengeluaranLainnyaController;
 use App\Http\Controllers\PengirimanController;
 use App\Http\Controllers\PesananController;
+use App\Models\PemesananBahanBaku;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,13 +42,18 @@ Route::get('laporan-pengeluaran-pemasukkan', [LaporanPengeluaranPemasukkanContro
 
 
 // Simple AUTHENTICATION
-Route::post('/register', [authController::class, 'register']);
-Route::get('/register/verify/{verify_key}', [authController::class, 'verify']);
-Route::post('/login', [authController::class, 'login']);
+// Route::post('/register', [authController::class, 'register']);
+// Route::get('/register/verify/{verify_key}', [authController::class, 'verify']);
+// Route::post('/login', [authController::class, 'login']);
 
-Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
-Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
-Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+// Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
+// Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
+// Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::post('/auth/register', [AkunController::class, 'register']);
+Route::post('/auth/send-otp', [AkunController::class, 'sendOTP']);
+Route::post('/auth/verify', [AkunController::class, 'verifyOTP']);
+Route::post('/auth/reset', [AkunController::class, 'resetPassword']);
+
 
 Route::resource('role', roleController::class);
 // Route::get('/role', [roleController::class, 'index']);
@@ -69,11 +76,12 @@ Route::get('/hampers/{id}', [ProdukHampersController::class, 'show']);
 Route::post('/hampers/{id}', [ProdukHampersController::class, 'update']);
 Route::delete('/hampers/{id}', [ProdukHampersController::class, 'destroy']);
 
-Route::get('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'index']);
-Route::post('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'store']);
-Route::get('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'show']);
-Route::post('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'update']);
-Route::delete('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'destroy']);
+Route::resource('bahan-baku/pemesanan', PemesananBahanBakuController::class);
+// Route::get('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'index']);
+// Route::post('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'store']);
+// Route::get('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'show']);
+// Route::post('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'update']);
+// Route::delete('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'destroy']);
 
 Route::resource('penitip', PenitipController::class);
 // Route::get('/penitip', [PenitipController::class, 'index']);
@@ -126,6 +134,7 @@ Route::post('/pelanggan/{id_pelanggan}/pesanan/{id_pesanan}/upload-bukti-pembaya
 Route::resource('keranjang', KeranjangController::class);
 Route::resource('detail-keranjang', DetailKeranjangController::class);
 Route::resource('pengiriman', PengirimanController::class);
+Route::resource('alamat', AlamatController::class);
 
 Route::group([
 
@@ -134,6 +143,7 @@ Route::group([
 
 ], function ($router) {
     Route::post('login', [AkunController::class, 'login']);
+    Route::post('register', [AkunController::class, 'register']);
     Route::post('logout', [AkunController::class, 'logout']);
     Route::post('refresh', [AkunController::class, 'refresh']);
     Route::get('me', [AkunController::class, 'me']);
@@ -144,5 +154,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
     Route::resource('pesanan', PesananController::class);
+    Route::put("/karyawan/profile", [KaryawanController::class, 'updateKaryawanProfile']);
     Route::resource('karyawan', KaryawanController::class);
 });

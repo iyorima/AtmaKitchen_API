@@ -6,6 +6,7 @@ use App\Models\Akun;
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class KaryawanController extends Controller
 {
@@ -200,5 +201,44 @@ class KaryawanController extends Controller
             'message' => 'Karyawan gagal dihapus',
             'data' => null
         ], 400);
+    }
+
+    public function updateKaryawanProfile(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'id_karyawan' => 'required',
+                'nama' => 'required',
+                'alamat' => 'required',
+                'email' => 'required|email|exists:akuns,email',
+                'telepon' => 'required',
+                'id_akun' => 'required',
+                // 'password' => 'required',
+            ], [
+                'email.exists' => 'Email tidak ditemukan!',
+                'email.required' => 'Email wajib diisi!',
+                'email.email' => 'Email tidak valid!',
+            ]);
+
+            $akun = Akun::where('email', $validatedData['email'])->first();
+            $updatedAkun = [
+                'email' => $request->email
+            ];
+            if ($request->password) {
+                $updatedAkun['password'] = bcrypt($request->password);
+            }
+            // $akun->password = bcrypt($validatedData['password']);
+            $akun->update($updatedAkun);
+
+            $karyawan = Karyawan::find($validatedData['id_karyawan']);
+            $karyawan->update($validatedData);
+
+            return response()->json([
+                'message' => 'Profile berhasil diperbarui',
+                'data' => $karyawan
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 }

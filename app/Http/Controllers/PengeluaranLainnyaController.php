@@ -47,7 +47,7 @@ class PengeluaranLainnyaController extends Controller
             'nama' => 'required',
             'biaya' => 'required',
             'tanggal' => 'required',
-            'kategori' => 'required|in:Pengeluaran,Pemasukkan',
+            'kategori' => 'required|in:Pengeluaran,Pemasukan',
         ]);
 
         if ($validate->fails()) {
@@ -102,7 +102,7 @@ class PengeluaranLainnyaController extends Controller
             'nama' => 'required',
             'biaya' => 'required',
             'tanggal' => 'required',
-            'kategori' => 'required|in:Pengeluaran,Pemasukkan',
+            'kategori' => 'required|in:Pengeluaran,Pemasukan',
         ]);
 
         if ($validate->fails()) {

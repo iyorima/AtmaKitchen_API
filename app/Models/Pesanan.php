@@ -68,4 +68,9 @@ class Pesanan extends Model
     {
         return $this->belongsTo(MetodePembayaran::class, 'id_metode_pembayaran');
     }
+
+    public function poins()
+    {
+        return $this->hasOne(Poin::class, 'id_pesanan');
+    }
 }
