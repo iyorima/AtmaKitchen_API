@@ -15,6 +15,7 @@ use App\Http\Controllers\DetailKeranjangController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\LaporanPengeluaranPemasukkanController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PoinController;
 use App\Http\Controllers\PresensiAbsenController;
@@ -33,6 +34,10 @@ use App\Http\Controllers\PesananController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+//laporan
+Route::get('laporan-pengeluaran-pemasukkan', [LaporanPengeluaranPemasukkanController::class, 'laporanPengeluaranPemasukkan']);
+
+
 
 // Simple AUTHENTICATION
 Route::post('/register', [authController::class, 'register']);
