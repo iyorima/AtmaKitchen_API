@@ -249,7 +249,6 @@ class AkunController extends Controller
     public function resetPassword(Request $request)
     {
         try {
-            // Perform validation (similar to verifyOTP)
             $validatedData = $request->validate([
                 'email' => 'required|email|exists:akuns,email',
                 'otp' => 'required|digits:4',
