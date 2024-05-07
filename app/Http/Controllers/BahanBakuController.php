@@ -32,7 +32,8 @@ class BahanBakuController extends Controller
             'nama' => 'required',
             'satuan' => 'required|in:gr,butir,ml,buah', // DOCS: in is used to check only gr,butir,ml,buah are valid values to validate
             'stok' => 'required',
-            
+            'stok_minumum' => 'required',
+
         ]);
 
         if ($validate->fails()) {
@@ -90,6 +91,7 @@ class BahanBakuController extends Controller
             'nama' => 'required',
             'satuan' => 'required|in:gr,butir,ml,buah', // DOCS: in is used to check only gr,butir,ml,buah are valid values to validate
             'stok' => 'required',
+            'stok_minumum' => 'required',
         ]);
 
         if ($validate->fails()) {
@@ -97,7 +99,7 @@ class BahanBakuController extends Controller
         }
 
         $bahanBaku->update($updateData);
-        
+
 
         return response()->json([
             'message' => 'ubah data bahan baku berhasil',
