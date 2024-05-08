@@ -10,11 +10,12 @@ class PresensiAbsen extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $primaryKey = "id_karyawan";
+    protected $primaryKey = "id_presensi";
 
     protected $fillable = [
         'id_presensi',
         'id_karyawan',
+        'tanggal',
     ];
 
     public function id_karyawan()

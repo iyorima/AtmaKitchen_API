@@ -15,6 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_presensi');
             $table->unsignedBigInteger('id_karyawan');
             $table->foreign('id_karyawan')->references('id_karyawan')->on('karyawans')->onDelete('cascade');
+            $table->date('tanggal');
             $table->timestamps();
             $table->softDeletes();
         });

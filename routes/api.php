@@ -105,6 +105,7 @@ Route::resource('resep', ResepProdukController::class);
 // Route::put('/resep/{id}', [ResepProdukController::class, 'update']); // id: id produk @Produk
 // Route::delete('/resep/{id}', [ResepProdukController::class, 'destroy']); // id: id resep @ResepProduk ⛔ It doesnt needed anymore!
 
+Route::get('presensi/karyawan', [PresensiAbsenController::class, 'showByDate']);
 Route::resource('presensi', PresensiAbsenController::class);
 
 Route::resource('pelanggan', PelangganController::class);
@@ -145,10 +146,10 @@ Route::group([
 });
 
 
+Route::resource('karyawan', KaryawanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
     Route::resource('pesanan', PesananController::class);
     Route::put("/karyawan/profile", [KaryawanController::class, 'updateKaryawanProfile']);
-    Route::resource('karyawan', KaryawanController::class);
 });

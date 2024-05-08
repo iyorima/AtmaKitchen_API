@@ -71,6 +71,7 @@ class PresensiAbsenController extends Controller
 
         $validate = Validator::make($storeData, [
             'id_karyawan' => 'required',
+            'tanggal' => 'required|date_format:Y-m-d',
         ]);
 
         if ($validate->fails()) {
@@ -84,7 +85,7 @@ class PresensiAbsenController extends Controller
             "data" => null,
         ], 400);
 
-        $presensi = PresensiAbsen::create(['id_karyawan' => $storeData['id_karyawan']]);
+        $presensi = PresensiAbsen::create(['id_karyawan' => $storeData['id_karyawan'], 'tanggal' => $storeData['tanggal'],]);
 
         return response()->json([
             "message" => "Berhasil menambahkan presensi",
@@ -133,6 +134,45 @@ class PresensiAbsenController extends Controller
         ], 200);
     }
 
+    public function showByDate(Request $request)
+    {
+        $dateQuery = $request->query('date');
+
+        if ($dateQuery) {
+            $date = Carbon::createFromFormat('Y-m-d', $dateQuery);
+
+            if (!$date || !$date->isValid()) {
+                return response()->json([
+                    "message" => "Format tanggal invalid.",
+                    "data" => null,
+                ], 400);
+            }
+        } else {
+            $date = Carbon::now();
+        }
+
+        $presensi = [];
+
+        $karyawan = Karyawan::all();
+
+        foreach ($karyawan as $karyawanData) {
+            $statusPresensi = PresensiAbsen::where('id_karyawan', $karyawanData->id_karyawan)
+                ->whereDate('tanggal', $date)
+                ->exists();
+
+            $presensi[] = [
+                'id_karyawan' => $karyawanData->id_karyawan,
+                'nama' => $karyawanData->nama,
+                'presensi' => $statusPresensi,
+            ];
+        }
+
+        return response()->json([
+            "message" => "Presensi karyawan pada tanggal $date",
+            "data" => $presensi,
+        ], 200);
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -152,14 +192,16 @@ class PresensiAbsenController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id_presensi)
+    public function destroy($id_presensi)
     {
-        $presensi = PresensiAbsen::with('id_karyawan')->find($id_presensi);
+        $presensi = PresensiAbsen::find($id_presensi);
 
-        if (is_null($presensi)) return response()->json([
-            "message" => "Karyawan tidak ditemukan",
-            "data" => null,
-        ], 400);
+        if (is_null($presensi)) {
+            return response()->json([
+                "message" => "Data presensi absen tidak ditemukan",
+                "data" => null,
+            ], 400);
+        }
 
         $presensi->delete();
 

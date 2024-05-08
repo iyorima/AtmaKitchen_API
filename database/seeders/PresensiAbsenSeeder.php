@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\PresensiAbsen;
 use Illuminate\Database\Seeder;
+use Carbon\Carbon;
 
 class PresensiAbsenSeeder extends Seeder
 {
@@ -13,8 +14,10 @@ class PresensiAbsenSeeder extends Seeder
     public function run(): void
     {
         for ($i = 1; $i <= 5; $i++) {
+            $randomDate = Carbon::createFromTimestamp(mt_rand(strtotime('first day of last month'), strtotime('today')));
             PresensiAbsen::factory()->create([
-                'id_karyawan' => $i
+                'id_karyawan' => $i,
+                'tanggal' => $randomDate
             ]);
         }
     }
