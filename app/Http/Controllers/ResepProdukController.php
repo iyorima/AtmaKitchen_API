@@ -15,6 +15,7 @@ class ResepProdukController extends Controller
      */
     public function index()
     {
+        // $resep = Produk::with('resep.id_bahan_baku', 'thumbnail')->get();
         $resep = Produk::whereHas('resep')->with('resep.id_bahan_baku', 'thumbnail')->get();
 
         if (is_null($resep)) {
@@ -166,16 +167,18 @@ class ResepProdukController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id_resep)
+    public function destroy(int $id_produk)
     {
-        $resep = ResepProduk::find($id_resep);
+        $resep = ResepProduk::where('id_produk', $id_produk)->get();
 
-        if (is_null($resep)) return response([
-            'message' => 'Resep produk tidak ditemukan',
-            'data' => null
-        ], 404);
+        if ($resep->isEmpty()) {
+            return response([
+                'message' => 'Resep produk tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
 
-        if ($resep->delete()) {
+        if ($resep->each->delete()) {
             return response([
                 'message' => 'Resep produk berhasil dihapus',
                 'data' => $resep
