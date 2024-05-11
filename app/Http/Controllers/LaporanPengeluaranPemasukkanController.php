@@ -7,6 +7,7 @@ use App\Models\PengeluaranLainnya;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class LaporanPengeluaranPemasukkanController extends Controller
 {
@@ -17,14 +18,29 @@ class LaporanPengeluaranPemasukkanController extends Controller
         [$tahun, $bulan] = explode('-', $bulanTahun);
         $namaBulan = Carbon::createFromDate(null, $bulan, null)->monthName;
 
-        $tanggalAwalBulan = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
-        $tanggalAkhirBulan = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+        $pemasukkanPesanan = Pesanan::whereYear('tgl_order', $tahun)
+        ->whereMonth('tgl_order', $bulan)
+        ->whereNotNull('total_dibayarkan') 
+        ->sum('total_setelah_diskon');
 
-        $pemasukkan = $this->getPemasukkanBulanan($tanggalAwalBulan, $tanggalAkhirBulan);
-        $pengeluaran = $this->getPengeluaranBulanan($tanggalAwalBulan, $tanggalAkhirBulan);
 
-        $totalPemasukkan = $pemasukkan->sum('total');
-        $totalPengeluaran = $pengeluaran->sum('biaya');
+        $tipPesanan = Pesanan::whereYear('tgl_order', $tahun)
+            ->whereMonth('tgl_order', $bulan)
+            ->sum('total_tip');
+
+        $pengeluaranLainnya = PengeluaranLainnya::select('nama', DB::raw('SUM(biaya) as biaya'))
+            ->whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $bulan)
+            ->groupBy('nama')
+            ->get();
+
+        $pengeluaranFormatted = [];
+        foreach ($pengeluaranLainnya as $item) {
+            $pengeluaranFormatted[$item->nama] = $item->biaya;
+        }
+
+        $totalPemasukkan = $pemasukkanPesanan + $tipPesanan;
+        $totalPengeluaran = array_sum($pengeluaranFormatted);
 
         $output = [
             'tanggal_cetak' => now()->format('Y-m-d'),
@@ -32,8 +48,11 @@ class LaporanPengeluaranPemasukkanController extends Controller
                 'bulan' => $namaBulan,
                 'tahun' => $tahun
             ],
-            'pemasukkan' => $pemasukkan->toArray(),
-            'pengeluaran' => $pengeluaran->toArray(),
+            'pemasukkan' => [
+                'penjualan' => $pemasukkanPesanan,
+                'tip' => $tipPesanan,
+            ],
+            'pengeluaran' => $pengeluaranFormatted,
             'total_pemasukkan' => $totalPemasukkan,
             'total_pengeluaran' => $totalPengeluaran
         ];
@@ -41,19 +60,17 @@ class LaporanPengeluaranPemasukkanController extends Controller
         return response()->json($output);
     }
 
-    private function getPemasukkanBulanan($tanggalAwalBulan, $tanggalAkhirBulan) //masih error
+    public function getPengeluaranPemasukkan($tahun, $bulan)
     {
-        return Pesanan::selectRaw('SUM(total_setelah_diskon) as total')
-            ->whereBetween('tgl_order', [$tanggalAwalBulan, $tanggalAkhirBulan])
-            ->groupBy(DB::raw('DATE_FORMAT(tgl_order, "%Y-%m")'))
-            ->get();
+        $request = new Request();
+        $request->merge([
+            'bulan_tahun' => "$tahun-$bulan"
+        ]);
+
+        $laporan = $this->laporanPengeluaranPemasukkan($request);
+
+        return response()->json($laporan, 200);
     }
 
-    private function getPengeluaranBulanan($tanggalAwalBulan, $tanggalAkhirBulan) //masih error
-    {
-        return PengeluaranLainnya::select('nama', DB::raw('SUM(biaya) as biaya'))
-            ->whereBetween('tanggal', [$tanggalAwalBulan, $tanggalAkhirBulan])
-            ->groupBy('kategori')
-            ->get();
-    }
+
 }
