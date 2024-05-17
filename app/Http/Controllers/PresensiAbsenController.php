@@ -153,17 +153,25 @@ class PresensiAbsenController extends Controller
 
         $presensi = [];
 
-        $karyawan = Karyawan::all();
-
+        $karyawan = Karyawan::with('presensiOnlyOne', 'akun.role')->get();
+        // return response()->json([
+        //     "message" => "Presensi karyawan pada tanggal $date",
+        //     "data" => $karyawan,
+        // ], 200);
         foreach ($karyawan as $karyawanData) {
             $statusPresensi = PresensiAbsen::where('id_karyawan', $karyawanData->id_karyawan)
                 ->whereDate('tanggal', $date)
                 ->exists();
-
+            // return response()->json([
+            //     "message" => "Presensi karyawan pada tanggal $date",
+            //     "data" => $karyawanData,
+            // ], 200);
             $presensi[] = [
+                'id_presensi' => $karyawanData->presensiOnlyOne->id_presensi ?? 0,
                 'id_karyawan' => $karyawanData->id_karyawan,
                 'nama' => $karyawanData->nama,
                 'presensi' => $statusPresensi,
+                'akun' => $karyawanData->akun
             ];
         }
 

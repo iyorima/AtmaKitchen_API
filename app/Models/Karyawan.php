@@ -20,6 +20,7 @@ class Karyawan extends Model
         'bonus',
         'telepon',
         'alamat',
+        'presensi_only_one'
     ];
 
     protected $hidden = [
@@ -30,5 +31,15 @@ class Karyawan extends Model
     public function akun()
     {
         return $this->belongsTo(Akun::class, 'id_akun');
+    }
+
+    public function presensi()
+    {
+        return $this->hasMany(PresensiAbsen::class, 'id_karyawan');
+    }
+
+    public function presensiOnlyOne()
+    {
+        return $this->hasOne(PresensiAbsen::class, 'id_karyawan');
     }
 }

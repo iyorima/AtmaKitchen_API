@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\StatusPesanan;
 use App\Http\Requests\StoreStatusPesananRequest;
 use App\Http\Requests\UpdateStatusPesananRequest;
+use App\Models\Pesanan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class StatusPesananController extends Controller
 {
@@ -27,9 +30,34 @@ class StatusPesananController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreStatusPesananRequest $request)
+    public function store(Request $request)
     {
-        //
+        $updateData = $request->all();
+        $validate = Validator::make($updateData, [
+            'id_pesanan' => 'required',
+            'id_karyawan' => 'required',
+            'status' => 'required'
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        $pesanan = Pesanan::find($updateData['id_pesanan']);
+
+        if (is_null($pesanan)) {
+            return response()->json([
+                'message' => 'Pesanan tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        $status = StatusPesanan::create($updateData);
+
+        return response()->json([
+            'message' => 'Status pesanan berhasil ditambahkan',
+            'data' => $status
+        ], 200);
     }
 
     /**
@@ -51,9 +79,8 @@ class StatusPesananController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateStatusPesananRequest $request, StatusPesanan $statusPesanan)
+    public function update(Request $request, int $id_status_pesanan)
     {
-        //
     }
 
     /**

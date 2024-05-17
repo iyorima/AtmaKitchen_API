@@ -23,6 +23,7 @@ use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\PengeluaranLainnyaController;
 use App\Http\Controllers\PengirimanController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\StatusPesananController;
 use App\Models\PemesananBahanBaku;
 
 /*
@@ -44,10 +45,10 @@ use App\Models\PemesananBahanBaku;
 // Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
 // Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
 // Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-Route::post('/auth/register', [AkunController::class, 'register']);
-Route::post('/auth/send-otp', [AkunController::class, 'sendOTP']);
-Route::post('/auth/verify', [AkunController::class, 'verifyOTP']);
-Route::post('/auth/reset', [AkunController::class, 'resetPassword']);
+// Route::post('/auth/register', [AkunController::class, 'register']);
+// Route::post('/auth/send-otp', [AkunController::class, 'sendOTP']);
+// Route::post('/auth/verify', [AkunController::class, 'verifyOTP']);
+// Route::post('/auth/reset', [AkunController::class, 'resetPassword']);
 
 
 Route::resource('role', roleController::class);
@@ -146,10 +147,16 @@ Route::group([
 });
 
 
+Route::get('/pesanan/confirmpayments', [PesananController::class, 'getAllPesananNeedConfirmPayment']);
+Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInProcess']);
+Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createAcceptedPayment']);
+Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
+Route::resource('pesanan', PesananController::class);
+Route::post('/status', [StatusPesananController::class, 'store']);
+
 Route::resource('karyawan', KaryawanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
-    Route::resource('pesanan', PesananController::class);
     Route::put("/karyawan/profile", [KaryawanController::class, 'updateKaryawanProfile']);
 });
