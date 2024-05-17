@@ -13,9 +13,11 @@ use App\Http\Controllers\PemesananBahanBakuController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\DetailKeranjangController;
-use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\LaporanPengeluaranPemasukkanController;
+use App\Http\Controllers\LaporanPenitipController;
+use App\Http\Controllers\LaporanPresensiGajiController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PoinController;
 use App\Http\Controllers\PresensiAbsenController;
@@ -36,6 +38,13 @@ use App\Models\PemesananBahanBaku;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+//laporan
+Route::get('laporan-pengeluaran-pemasukkan', [LaporanPengeluaranPemasukkanController::class, 'laporanPengeluaranPemasukkan']);
+Route::get('laporan-pengeluaran-pemasukkan/{tahun}/{bulan}', [LaporanPengeluaranPemasukkanController::class, 'getPengeluaranPemasukkan']);
+Route::get('laporan-penitip', [LaporanPenitipController::class, 'rekapTransaksiPenitip']);
+Route::get('laporan-penitip/{tahun}/{bulan}', [LaporanPenitipController::class, 'rekapTransaksiPenitipByDate']);
+Route::get('laporan-presensi', [LaporanPresensiGajiController::class, 'generateLaporan']);
+Route::get('laporan-presensi/{tahun}/{bulan}', [LaporanPresensiGajiController::class, 'generateLaporan']);
 
 // Simple AUTHENTICATION
 // Route::post('/register', [authController::class, 'register']);
