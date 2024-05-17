@@ -73,4 +73,14 @@ class Pelanggan extends Model
     {
         return $this->hasMany(Alamat::class, 'id_pelanggan');
     }
+
+    public function count_keranjang()
+    {
+        return $this->belongsTo(Keranjang::class, 'id_pelanggan');
+    }
+
+    // public function count_keranjang()
+    // {
+    //     return $this->keranjang()->count();
+    // }
 }

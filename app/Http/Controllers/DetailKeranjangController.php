@@ -58,10 +58,7 @@ class DetailKeranjangController extends Controller
         $detail_keranjang = DetailKeranjang::find($id);
 
         if (!is_null($detail_keranjang)) {
-            $detail_keranjang->update([
-                'id_produk' => $request->id_produk,
-                'jumlah' => $request->jumlah,
-            ]);
+            $detail_keranjang->update($storeData);
 
             return response([
                 'message' => 'Keranjang berhasil diperbarui',
