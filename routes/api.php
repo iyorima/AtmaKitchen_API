@@ -37,7 +37,7 @@ use App\Models\PemesananBahanBaku;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-//laporan
+//laporan jeha
 Route::get('laporan-pengeluaran-pemasukkan', [LaporanPengeluaranPemasukkanController::class, 'laporanPengeluaranPemasukkan']);
 Route::get('laporan-pengeluaran-pemasukkan/{tahun}/{bulan}', [LaporanPengeluaranPemasukkanController::class, 'getPengeluaranPemasukkan']);
 Route::get('laporan-penitip', [LaporanPenitipController::class, 'rekapTransaksiPenitip']);
