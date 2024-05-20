@@ -76,12 +76,22 @@ class PengirimanController extends Controller
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
             'jarak' => 'required',
-            'harga' => 'required',
-            'id_kurir' => 'required',
+            // 'harga' => 'required',
+            // 'id_kurir' => 'required',
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
+        }
+
+        if ($updateData['jarak'] <= 5) {
+            $updateData['harga'] = 10000;
+        } else if ($updateData['jarak'] <= 10) {
+            $updateData['harga'] = 15000;
+        } else if ($updateData['jarak'] <= 15) {
+            $updateData['harga'] = 20000;
+        } else {
+            $updateData['harga'] = 25000;
         }
 
         if ($pengiriman->update($updateData)) {

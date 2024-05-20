@@ -225,6 +225,29 @@ class PesananController extends Controller
     }
 
     // @Nathan
+    public function getAllPesananNeedConfirmDelivery()
+    {
+        $pesanan = Pesanan::with([
+            'pelanggan',
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran'
+        ])->where('jenis_pengiriman', "!=", "Ambil Sendiri")->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    // @Nathan
     public function getAllPesananNeedConfirmPayment()
     {
         $pesanan = Pesanan::with([

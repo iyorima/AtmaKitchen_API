@@ -102,7 +102,7 @@ class PelangganController extends Controller
      */
     public function show(int $id_pelanggan)
     {
-        $pelanggan = Pelanggan::with('id_akun')->find($id_pelanggan);
+        $pelanggan = Pelanggan::with('akun')->find($id_pelanggan);
 
         if (!$pelanggan) {
             return response()->json(['message' => 'Pelanggan tidak ditemukan'], 404);
