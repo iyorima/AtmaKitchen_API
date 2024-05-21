@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use App\Models\ProdukImage;
+use App\Models\DetailPesanan;
 // use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ProdukController extends Controller
 {
@@ -149,6 +152,62 @@ class ProdukController extends Controller
             'message' => 'produk tidak ditemukan',
             'data' => null
         ], 404);
+    }
+
+    /**
+     * Menampilkan produk berdasarkan tanggal
+     */
+    public function showByDate($date)
+    {
+        $date = Carbon::parse($date);
+
+        $products = Produk::with('images', 'thumbnail')->get();
+
+        $result = [];
+
+        foreach ($products as $product) {
+            $readyStock = 0;
+
+            if (!is_null($product->id_penitip)) {
+                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
+                    $query->whereDate('tgl_order', $date);
+                })
+                    ->where('id_produk', $product->id_produk)
+                    ->sum('jumlah');
+
+
+                $remainingCapacity = $product->kapasitas - $orderCount;
+                $readyStock = $remainingCapacity;
+            } else {
+                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
+                    $query->whereDate('tgl_order', $date);
+                })
+                    ->where('id_produk', $product->id_produk)
+                    ->sum('jumlah');
+
+                if (Str::contains($product->ukuran, '10x20')) {
+                    $remainingCapacity = $product->kapasitas - $orderCount;
+                    if ($product->kapasitas % 2 == 0) $readyStock = $remainingCapacity % 2;
+                    else $readyStock = $remainingCapacity % 2 == 0 ? 1 : 0;
+                }
+            }
+
+            $result[] = [
+                'id_produk' => $product->id_produk,
+                'nama' => $product->nama,
+                'id_kategori' => $product->id_kategori,
+                'id_penitip' => $product->id_penitip,
+                'kapasitas' => $product->kapasitas,
+                'ukuran' => $product->ukuran,
+                'harga_jual' => $product->harga_jual,
+                'ready_stock' => $readyStock
+            ];
+        }
+
+        return response([
+            'message' => 'Products with ready stock for ' . $date->toDateString(),
+            'data' => $result
+        ], 200);
     }
 
     /**

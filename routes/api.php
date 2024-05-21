@@ -62,6 +62,7 @@ Route::post('/produk', [ProdukController::class, 'store']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::get('/produk/kategori/{id}', [ProdukController::class, 'showByKategori']);
 Route::get('/produk/penitip/{id}', [ProdukController::class, 'showByPenitip']);
+Route::get('/produk/tanggal/{date}', [ProdukController::class, 'showByDate']);
 Route::post('/produk/{id}', [ProdukController::class, 'update']);
 Route::delete('/produk/{id}', [ProdukController::class, 'destroy']);
 

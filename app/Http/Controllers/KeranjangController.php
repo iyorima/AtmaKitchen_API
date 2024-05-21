@@ -14,7 +14,19 @@ class KeranjangController extends Controller
      */
     public function index()
     {
-        //
+        $keranjangs = Keranjang::with('detail_keranjang')->get();
+
+        if ($keranjangs->isEmpty()) {
+            return response([
+                'message' => 'Keranjang tidak ditemukan',
+                'data' => null,
+            ], 404);
+        }
+
+        return response([
+            'message' => 'Berhasil mendapatkan data keranjang',
+            'data' => $keranjangs,
+        ], 200);
     }
 
     /**
@@ -97,7 +109,7 @@ class KeranjangController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, $id)
     {
         //
     }
