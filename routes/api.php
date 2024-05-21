@@ -160,12 +160,37 @@ Route::get('/pesanan/confirmpayments', [PesananController::class, 'getAllPesanan
 Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInProcess']);
 Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createAcceptedPayment']);
 Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
-Route::resource('pesanan', PesananController::class);
+
 Route::post('/status', [StatusPesananController::class, 'store']);
 
+//jeha open
+
+Route::get('/pesanan/perlu-dikonfirmasi', [PesananController::class, 'indexPesananPerluDikonfirmasi']);
+Route::post('/pesanan/{id}/terima', [PesananController::class, 'terimaPesanan']);
+Route::post('/pesanan/{id}/tolak', [PesananController::class, 'tolakPesanan']);
+Route::get('/pesanan/{id}/bahan-baku', [PesananController::class, 'listBahanBakuPerluDibeli']);
+
+Route::get('/saldo', [SaldoPelangganController::class, 'index']);
+Route::post('/saldo', [SaldoPelangganController::class, 'store']);
+Route::get('/saldo/{id}', [SaldoPelangganController::class, 'show']);
+Route::put('/saldo/{id}', [SaldoPelangganController::class, 'update']);
+Route::delete('/saldo/{id}', [SaldoPelangganController::class, 'destroy']);
+Route::get('/saldo/{id_akun}', [SaldoPelangganController::class, 'show']);
+Route::put('/saldo/{id_akun}', [SaldoPelangganController::class, 'update']);
+
+Route::get('/penarikan-saldo', [PenarikanSaldoController::class, 'index']);
+Route::post('/penarikan-saldo', [PenarikanSaldoController::class, 'store']);
+Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
+Route::get('/penarikan-saldo/user/{id_akun}', [PenarikanSaldoController::class, 'showByCustomer']);
+Route::put('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'update']);
+Route::delete('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'destroy']);
+Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
+
+
+// jeha close
 Route::resource('karyawan', KaryawanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
-
+    Route::resource('pesanan', PesananController::class);
     Route::put("/karyawan/profile", [KaryawanController::class, 'updateKaryawanProfile']);
 });
