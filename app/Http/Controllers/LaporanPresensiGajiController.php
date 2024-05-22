@@ -37,9 +37,9 @@ class LaporanPresensiGajiController extends Controller
                 ->whereMonth('created_at', $bulan)
                 ->count();
 
-            $jumlahHadir = $presensi;
+            $jumlahBolos = $presensi;
 
-            $jumlahBolos = $jumlahHari - $jumlahHadir;
+            $jumlahHadir = $jumlahHari - $jumlahBolos;
 
             $totalGajiHarian = $pegawai->gaji_harian * $jumlahHadir;
 
