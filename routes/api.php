@@ -159,6 +159,8 @@ Route::group([
 Route::get('/pesanan/delivery', [PesananController::class, 'getAllPesananNeedConfirmDelivery']);
 Route::get('/pesanan/confirmpayments', [PesananController::class, 'getAllPesananNeedConfirmPayment']);
 Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInProcess']);
+Route::get('/pesanan/rejected', [PesananController::class, 'getAllPesananRejected']);
+Route::get('/pesanan/paymentverified', [PesananController::class, 'getAllPesananPaymentVerified']);
 Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createAcceptedPayment']);
 Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
 Route::resource('pesanan', PesananController::class);

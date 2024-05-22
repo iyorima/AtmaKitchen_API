@@ -6,6 +6,7 @@ use App\Models\Pengiriman;
 use App\Http\Requests\StorePengirimanRequest;
 use App\Http\Requests\UpdatePengirimanRequest;
 use App\Models\Pesanan;
+use App\Models\StatusPesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -92,6 +93,19 @@ class PengirimanController extends Controller
             $updateData['harga'] = 20000;
         } else {
             $updateData['harga'] = 25000;
+        }
+
+        $statusPesanan = StatusPesanan::where('id_pesanan', $pengiriman->id_pesanan)->where('status', 'Menunggu pembayaran')->first();
+
+        // return response()->json([
+        //     'data' => $statusPesanan
+        // ], 200);
+
+        if (!$statusPesanan) {
+            StatusPesanan::create([
+                'id_pesanan' => $pengiriman->id_pesanan,
+                'status' => 'Menunggu pembayaran'
+            ]);
         }
 
         if ($pengiriman->update($updateData)) {
