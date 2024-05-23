@@ -13,10 +13,11 @@ class PelangganSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 1; $i < 6; $i++) {
-            Pelanggan::factory()->create([
-                'id_akun' => $i
-            ]);
+        for ($i = 1; $i < 7; $i++) {
+            if ($i != 3)
+                Pelanggan::factory()->create([
+                    'id_akun' => $i
+                ]);
         }
     }
 }

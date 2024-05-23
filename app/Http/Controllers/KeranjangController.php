@@ -79,7 +79,7 @@ class KeranjangController extends Controller
      */
     public function show(int $id)
     {
-        $keranjang = Keranjang::with('detail_keranjang.produk')->where('id_pelanggan', $id)->get();
+        $keranjang = Keranjang::with('detail_keranjang.produk.thumbnail')->where('id_pelanggan', $id)->first();
 
         if (!is_null($keranjang)) {
             return response([
