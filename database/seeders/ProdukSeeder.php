@@ -15,61 +15,61 @@ class ProdukSeeder extends Seeder
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Lapis Legit',
-            'ukuran' => '20x20',
+            'ukuran' => '20x20 cm',
             'harga_jual' => 850000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Lapis Legit',
-            'ukuran' => '10x20',
+            'ukuran' => '10x20 cm',
             'harga_jual' => 450000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Lapis Surabaya',
-            'ukuran' => '20x20',
+            'ukuran' => '20x20 cm',
             'harga_jual' => 550000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Lapis Surabaya',
-            'ukuran' => '10x20',
+            'ukuran' => '10x20 cm',
             'harga_jual' => 300000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Brownies',
-            'ukuran' => '20x20',
+            'ukuran' => '20x20 cm',
             'harga_jual' => 250000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Brownies',
-            'ukuran' => '10x20',
+            'ukuran' => '10x20 cm',
             'harga_jual' => 150000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Mandarin',
-            'ukuran' => '20x20',
+            'ukuran' => '20x20 cm',
             'harga_jual' => 450000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Mandarin',
-            'ukuran' => '10x20',
+            'ukuran' => '10x20 cm',
             'harga_jual' => 250000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Spikoe',
-            'ukuran' => '20x20',
+            'ukuran' => '20x20 cm',
             'harga_jual' => 350000
         ]);
         Produk::factory()->create([
             'id_kategori' => 1,
             'nama' => 'Spikoe',
-            'ukuran' => '10x20',
+            'ukuran' => '10x20 cm',
             'harga_jual' => 200000
         ]);
         Produk::factory()->create([

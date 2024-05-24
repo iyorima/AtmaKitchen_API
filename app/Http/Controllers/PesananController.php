@@ -10,8 +10,12 @@ use App\Models\SaldoPelanggan;
 use App\Models\Akun;
 use App\Models\BahanBaku;
 use App\Models\DetailPesanan;
+use App\Models\Notifikasi;
 use App\Models\Produk;
 use App\Models\ResepProduk;
+use App\Models\StatusPesanan;
+use App\Models\Pelanggan;
+use App\Models\Pengiriman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,7 +26,7 @@ class PesananController extends Controller
      */
     public function index()
     {
-        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])->get();
+        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan', 'status_pesanan_latest', 'pengiriman', 'id_metode_pembayaran'])->get();
 
         if (count($pesanan) > 0) {
             return response([
@@ -222,6 +226,167 @@ class PesananController extends Controller
         }
     }
 
+    // @Nathan
+    public function getAllPesananNeedConfirmDelivery()
+    {
+        $pesanan = Pesanan::with([
+            'pelanggan',
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran'
+        ])->where('jenis_pengiriman', "!=", "Ambil Sendiri")->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    // @Nathan
+    public function getAllPesananNeedConfirmPayment()
+    {
+        $pesanan = Pesanan::with([
+            'pelanggan',
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran'
+        ])->where('total_dibayarkan', null)->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    // @Nathan
+    public function createAcceptedPayment(Request $request, string $id_pesanan)
+    {
+        $pesanan = Pesanan::with('pengiriman:id_pesanan,harga,jarak')->find($id_pesanan);
+
+        if (is_null($pesanan)) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => null
+            ], 404);
+        }
+
+        $updateData = $request->all();
+        $validate = Validator::make($updateData, [
+            'total_dibayarkan' => 'required|int|min:' . $pesanan->total_setelah_diskon,
+            'id_karyawan' => 'required'
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        $status = StatusPesanan::create([
+            'id_pesanan' => $id_pesanan,
+            'id_karyawan' => $updateData['id_karyawan'],
+            'status' => "Pembayaran diterima"
+        ]);
+
+        $totalTip = $updateData['total_dibayarkan'] - ($pesanan->total_setelah_diskon + $pesanan->pengiriman->harga);
+
+        if ($totalTip > 0) {
+            $updateData['total_tip'] = $totalTip;
+        } else {
+            $updateData['total_tip'] = 0;
+        }
+
+        if ($pesanan->update($updateData) && $status) {
+            return response()->json([
+                'message' => 'Pembayaran berhasil dikonfirmasi',
+                'data' => $pesanan
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Pembayaran gagal dikonfirmasi',
+            'data' => null
+        ], 404);
+    }
+
+    // @Nathan
+    public function pesananAcceptedByCustomer(string $id_pesanan)
+    {
+        $pesanan = Pesanan::with('pelanggan.akun')->find($id_pesanan);
+
+        if (is_null($pesanan)) {
+            return response()->json([
+                'message' => 'Pesanan tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        if (!is_null($pesanan->accepted_at)) {
+            return response()->json([
+                'message' => 'Pesanan telah diterima',
+                'data' => null
+            ], 404);
+        }
+
+        $status = StatusPesanan::create([
+            'id_pesanan' => $pesanan->id_pesanan,
+            'status' => 'Selesai'
+        ]);
+
+        $notification = Notifikasi::create([
+            'judul' => 'Pesanan Selesai',
+            'deskripsi' => 'Hai, Pesanan Anda [' . $id_pesanan . '] telah diterima.',
+            'id_akun' => $pesanan->pelanggan->akun->id_akun
+        ]);
+
+        $updateData = [
+            'accepted_at' => now()
+        ];
+
+        if ($pesanan->update($updateData) && $status && $notification) {
+            return response()->json([
+                'message' => 'Pesanan berhasil diterima',
+                'data' => $pesanan
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Pesanan gagal diterima',
+            'data' => null
+        ], 404);
+    }
+
+    // @Nathan
+    public function getAllPesananInProcess()
+    {
+        $pesanan = Pesanan::with([
+            'status_pesanan_latest',
+        ])->where('verified_at', "!=", null)->where('accepted_at', null)->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -234,20 +399,33 @@ class PesananController extends Controller
             'id_pelanggan' => 'required',
             'tgl_order' => 'required|date',
             'total_diskon_poin' => 'required|numeric',
-            'total_dibayarkan' => 'required|numeric',
+            // 'total_dibayarkan' => 'required|numeric',
+            'jenis_pengiriman' => 'required|string',
+            'nama' => 'required|string',
+            'telepon' => 'required|string',
+            'alamat' => 'required|string',
             'produk' => 'required|array',
             'produk.*.id_produk' => 'required|integer',
             'produk.*.jumlah' => 'required|integer',
             'produk.*.harga' => 'required|numeric',
+            'produk.*.nama' => 'required|string',
             'produk_hampers' => 'required|array',
             'produk_hampers.*.id_produk_hampers' => 'required|integer',
             'produk_hampers.*.jumlah' => 'required|integer',
             'produk_hampers.*.harga' => 'required|numeric',
+            'produk_hampers.*.nama' => 'required|string',
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
+
+        $tahun = date('Y');
+        $bulan = date('m');
+
+        $latestOrder = Pesanan::latest()->first();
+        $nomorUrut = $latestOrder ? intval(substr($latestOrder->id_pesanan, -3)) + 1 : 1;
+        $id_pesanan = sprintf('%02d.%02d.%03d', $tahun, $bulan, $nomorUrut);
 
         $total_pesanan = 0;
         foreach ($data['produk'] as $produk)
@@ -255,25 +433,118 @@ class PesananController extends Controller
         foreach ($data['produk_hampers'] as $hampers)
             $total_pesanan += $hampers['harga'] * $hampers['jumlah'];
 
+        $previous_total_poin = Poin::where('id_pelanggan', $data['id_pelanggan'])->latest()->value('total_poin') ?? 0;
+
+        if ($data['total_diskon_poin'] > 0) {
+            if ($previous_total_poin < $data['total_diskon_poin']) {
+                return response(['message' => 'Poin Tidak Cukup'], 400);
+            }
+        }
         $total_setelah_diskon = $total_pesanan - ($data['total_diskon_poin'] * 100);
-        $total_tip = $data['total_dibayarkan'] - $total_pesanan;
+        // $total_stip = $data['total_dibayarkan'] - $total_pesanan;
 
         $pesanan = Pesanan::create([
+            'id_pesanan' => $id_pesanan,
             'id_metode_pembayaran' => $data['id_metode_pembayaran'],
             'id_pelanggan' => $data['id_pelanggan'],
             'tgl_order' => $data['tgl_order'],
             'total_diskon_poin' => $data['total_diskon_poin'],
             'total_pesanan' => $total_pesanan,
-            'total_dibayarkan' => $data['total_dibayarkan'],
+            // 'total_dibayarkan' => $data['total_dibayarkan'],
             'total_setelah_diskon' => $total_setelah_diskon,
-            'total_tip' => $total_tip,
-            'bukti_pembayaran' => $data['bukti_pembayaran'],
+            // 'total_tip' => $total_tip,
+            'jenis_pengiriman' => $data['jenis_pengiriman'],
             'verified_at' => $data['verified_at'] ?? null,
             'accepted_at' => $data['accepted_at'] ?? null,
         ]);
 
+        Poin::create([
+            'id_pesanan' => $pesanan->id,
+            'id_pelanggan' => $data['id_pelanggan'],
+            'penambahan_poin' => -$data['total_diskon_poin'],
+            'total_poin' => $previous_total_poin - $data['total_diskon_poin'],
+        ]);
+
+        $previous_total_poin -= $data['total_diskon_poin'];
+
+        foreach ($data['produk'] as $produk) {
+            DetailPesanan::create([
+                'id_pesanan' => $pesanan->id,
+                'id_produk' => $produk['id_produk'],
+                'id_produk_hampers' => null,
+                'kategori' => 'produk',
+                'nama_produk' => $produk['nama'],
+                'harga' => $produk['harga'],
+                'jumlah' => $produk['jumlah'],
+            ]);
+        }
+
+        foreach ($data['produk_hampers'] as $hampers) {
+            DetailPesanan::create([
+                'id_pesanan' => $pesanan->id,
+                'id_produk' => null,
+                'id_produk_hampers' => $hampers['id_produk_hampers'],
+                'kategori' => 'produk_hampers',
+                'nama_produk' => $hampers['nama'],
+                'harga' => $hampers['harga'],
+                'jumlah' => $hampers['jumlah'],
+            ]);
+        }
+
+        $poin = 0;
+        if ($total_pesanan >= 1000000) {
+            $poin += (int)($total_pesanan / 1000000) * 200;
+            $total_pesanan %= 1000000;
+        }
+        if ($total_pesanan >= 500000) {
+            $poin += (int)($total_pesanan / 500000) * 75;
+            $total_pesanan %= 500000;
+        }
+        if ($total_pesanan >= 100000) {
+            $poin += (int)($total_pesanan / 100000) * 15;
+            $total_pesanan %= 100000;
+        }
+        if ($total_pesanan >= 10000) $poin += (int)($total_pesanan / 10000) * 1;
+
+        $pelanggan = Pelanggan::find($data['id_pelanggan']);
+        if ($pelanggan) {
+            $tgl_order = new \DateTime($data['tgl_order']);
+            $tgl_lahir = new \DateTime($pelanggan->tgl_lahir);
+            $tgl_ultah_tahun_ini = new \DateTime($tgl_lahir->format('Y') . '-' . $tgl_lahir->format('m') . '-' . $tgl_lahir->format('d'));
+
+            $batas_bawah_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('-3 days');
+            $batas_atas_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('+3 days');
+
+            if ($tgl_order >= $batas_bawah_tgl_lahir && $tgl_order <= $batas_atas_tgl_lahir) {
+                $poin *= 2;
+            }
+        }
+
+        $new_total_poin = $previous_total_poin + $poin;
+
+        Poin::create([
+            'id_pesanan' => $pesanan->id,
+            'id_pelanggan' => $data['id_pelanggan'],
+            'penambahan_poin' => $poin,
+            'total_poin' => $new_total_poin,
+        ]);
+
+        if ($data['jenis_pengiriman'] == "Kurir Toko" || $data['jenis_pengiriman'] == "Kurir Ojol") {
+            Pengiriman::create([
+                'id_pesanan' => $pesanan->id,
+                'nama' => $data['nama'],
+                'telepon' => $data['telepon'],
+                'alamat' => $data['alamat'],
+            ]);
+        }
+
+        StatusPesanan::create([
+            'id_pesanan' => $pesanan->id,
+            'status' => "Menunggu",
+        ]);
+
         return response([
-            'message' => 'Berhasil membuat pemesanan bahan baku baru',
+            'message' => 'Berhasil membuat pesanan',
             'data' => $pesanan
         ], 200);
     }
@@ -282,14 +553,6 @@ class PesananController extends Controller
      * Display the specified resource.
      */
     public function show(Pesanan $pesanan)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Pesanan $pesanan)
     {
         //
     }

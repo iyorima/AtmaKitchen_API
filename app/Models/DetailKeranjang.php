@@ -18,4 +18,9 @@ class DetailKeranjang extends Model
         'id_produk_hampers',
         'jumlah'
     ];
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'id_produk');
+    }
 }

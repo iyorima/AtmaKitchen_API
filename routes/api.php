@@ -13,9 +13,11 @@ use App\Http\Controllers\PemesananBahanBakuController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\DetailKeranjangController;
-use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\LaporanPengeluaranPemasukkanController;
+use App\Http\Controllers\LaporanPenitipController;
+use App\Http\Controllers\LaporanPresensiGajiController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PoinController;
 use App\Http\Controllers\PresensiAbsenController;
@@ -23,6 +25,7 @@ use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\PengeluaranLainnyaController;
 use App\Http\Controllers\PengirimanController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\StatusPesananController;
 use App\Models\PemesananBahanBaku;
 
 /*
@@ -35,6 +38,13 @@ use App\Models\PemesananBahanBaku;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+//laporan
+Route::get('laporan-pengeluaran-pemasukkan', [LaporanPengeluaranPemasukkanController::class, 'laporanPengeluaranPemasukkan']);
+Route::get('laporan-pengeluaran-pemasukkan/{tahun}/{bulan}', [LaporanPengeluaranPemasukkanController::class, 'getPengeluaranPemasukkan']);
+Route::get('laporan-penitip', [LaporanPenitipController::class, 'rekapTransaksiPenitip']);
+Route::get('laporan-penitip/{tahun}/{bulan}', [LaporanPenitipController::class, 'rekapTransaksiPenitipByDate']);
+Route::get('laporan-presensi', [LaporanPresensiGajiController::class, 'generateLaporan']);
+Route::get('laporan-presensi/{tahun}/{bulan}', [LaporanPresensiGajiController::class, 'generateLaporan']);
 
 // Simple AUTHENTICATION
 // Route::post('/register', [authController::class, 'register']);
@@ -44,10 +54,10 @@ use App\Models\PemesananBahanBaku;
 // Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
 // Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
 // Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-Route::post('/auth/register', [AkunController::class, 'register']);
-Route::post('/auth/send-otp', [AkunController::class, 'sendOTP']);
-Route::post('/auth/verify', [AkunController::class, 'verifyOTP']);
-Route::post('/auth/reset', [AkunController::class, 'resetPassword']);
+// Route::post('/auth/register', [AkunController::class, 'register']);
+// Route::post('/auth/send-otp', [AkunController::class, 'sendOTP']);
+// Route::post('/auth/verify', [AkunController::class, 'verifyOTP']);
+// Route::post('/auth/reset', [AkunController::class, 'resetPassword']);
 
 
 Route::resource('role', roleController::class);
@@ -147,10 +157,17 @@ Route::group([
 });
 
 
+Route::get('/pesanan/delivery', [PesananController::class, 'getAllPesananNeedConfirmDelivery']);
+Route::get('/pesanan/confirmpayments', [PesananController::class, 'getAllPesananNeedConfirmPayment']);
+Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInProcess']);
+Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createAcceptedPayment']);
+Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
+Route::resource('pesanan', PesananController::class);
+Route::post('/status', [StatusPesananController::class, 'store']);
+
 Route::resource('karyawan', KaryawanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
 
-    Route::resource('pesanan', PesananController::class);
     Route::put("/karyawan/profile", [KaryawanController::class, 'updateKaryawanProfile']);
 });
