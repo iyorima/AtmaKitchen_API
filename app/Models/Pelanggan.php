@@ -76,7 +76,7 @@ class Pelanggan extends Model
 
     public function count_keranjang()
     {
-        return $this->belongsTo(Keranjang::class, 'id_pelanggan');
+        return $this->hasOne(Keranjang::class, 'id_pelanggan');
     }
 
     // public function count_keranjang()

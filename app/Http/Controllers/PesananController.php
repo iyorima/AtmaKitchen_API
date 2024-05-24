@@ -234,7 +234,7 @@ class PesananController extends Controller
             'status_pesanan_latest',
             'pengiriman',
             'id_metode_pembayaran'
-        ])->where('jenis_pengiriman', "!=", "Ambil Sendiri")->get();
+        ])->where('jenis_pengiriman', "!=", "Ambil Sendiri")->orderBy('id_pesanan', 'desc')->get();
 
         if ($pesanan->isEmpty()) {
             return response()->json([
@@ -286,8 +286,8 @@ class PesananController extends Controller
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
-            'total_dibayarkan' => 'required|int|min:' . $pesanan->total_setelah_diskon,
-            'id_karyawan' => 'required'
+            'total_dibayarkan' => 'required|int|min:' . $pesanan->total_setelah_diskon + $pesanan->pengiriman->harga,
+            // 'id_karyawan' => 'required'
         ]);
 
         if ($validate->fails()) {
@@ -296,7 +296,7 @@ class PesananController extends Controller
 
         $status = StatusPesanan::create([
             'id_pesanan' => $id_pesanan,
-            'id_karyawan' => $updateData['id_karyawan'],
+            // 'id_karyawan' => $updateData['id_karyawan'],
             'status' => "Pembayaran diterima"
         ]);
 
@@ -373,7 +373,57 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::with([
             'status_pesanan_latest',
-        ])->where('verified_at', "!=", null)->where('accepted_at', null)->get();
+            'pelanggan',
+            'id_metode_pembayaran'
+        ])->where('verified_at', "!=", null)->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
+            return $query->where('status', 'Pesanan diproses');
+        })->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => []
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    public function getAllPesananRejected()
+    {
+        $pesanan = Pesanan::with([
+            'status_pesanan_latest',
+            'pelanggan',
+            'id_metode_pembayaran'
+        ])->where('verified_at', "!=", null)->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
+            return $query->where('status', 'Pesanan ditolak');
+        })->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    public function getAllPesananPaymentVerified()
+    {
+        $pesanan = Pesanan::with([
+            'status_pesanan_latest',
+            'pelanggan',
+            'id_metode_pembayaran'
+        ])->where('verified_at', "!=", null)->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
+            return $query->where('status', 'Pembayaran diterima');
+        })->get();
 
         if ($pesanan->isEmpty()) {
             return response()->json([
@@ -552,9 +602,21 @@ class PesananController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Pesanan $pesanan)
+    public function show(string $id)
     {
-        //
+        $pesanan = Pesanan::with('pelanggan', 'pengiriman')->find($id);
+
+        if (is_null($pesanan)) {
+            return response()->json([
+                'message' => 'Pesanan tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan pesanan',
+            'data' => $pesanan
+        ], 200);
     }
 
     /**
