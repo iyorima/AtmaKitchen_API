@@ -54,7 +54,7 @@ class PesananController extends Controller
         $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
             ->findOrFail($id);
         $pesanan->status_pesanan()->update([
-            'status' => 'diterima'
+            'status' => 'Pesanan diterima'
         ]);
 
         $totalPesanan = $pesanan->total_pesanan;
@@ -96,7 +96,7 @@ class PesananController extends Controller
         $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
             ->findOrFail($id);
         $pesanan->status_pesanan()->update([
-            'status' => 'ditolak'
+            'status' => 'Pesanan ditolak'
         ]);
 
         // Mengembalikan stok produk
@@ -196,8 +196,10 @@ class PesananController extends Controller
         //gabung semua biar tau total kekurangan berapa
         $totalKekuranganPerBahanBakuMerged = [];
         foreach ($totalKekuranganPerBahanBaku as $idBahanBaku => $totalKekurangan) {
+            $bahanBaku = BahanBaku::findOrFail($idBahanBaku);
             $totalKekuranganPerBahanBakuMerged[] = [
                 'id_bahan_baku' => $idBahanBaku,
+                'nama_bahan_baku' => $bahanBaku->nama,
                 'total_kekurangan' => $totalKekurangan
             ];
         }
