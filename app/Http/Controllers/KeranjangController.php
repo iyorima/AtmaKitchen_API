@@ -41,8 +41,7 @@ class KeranjangController extends Controller
             $storeData,
             [
                 'id_pelanggan' => 'required',
-                'id_produk' => 'required',
-                'jumlah' => 'required|min:1'
+                'jumlah' => 'required|min:1',
             ]
         );
 
@@ -53,11 +52,18 @@ class KeranjangController extends Controller
         $keranjang = Keranjang::where('id_pelanggan', $request->id_pelanggan)->first();
 
         if (!is_null($keranjang)) {
-            $detail_keranjang = DetailKeranjang::create([
+            $data = [
                 'id_keranjang' => $keranjang->id_keranjang,
-                'id_produk' => $request->id_produk,
-                'jumlah' => $request->jumlah
-            ]);
+                'jumlah' => $request->jumlah,
+            ];
+
+            if (isset($storeData['id_produk'])) {
+                $data['id_produk'] = $storeData['id_produk'];
+            } else {
+                $data['id_produk_hampers'] = $storeData['id_produk_hampers'];
+            }
+
+            $detail_keranjang = DetailKeranjang::create($data);
 
             return response([
                 'message' => 'Produk berhasil ditambahkan ke keranjang',
@@ -71,7 +77,6 @@ class KeranjangController extends Controller
 
         $detail_keranjang = DetailKeranjang::create([
             'id_keranjang' => $keranjang->id_keranjang,
-            'id_produk' => $request->id_produk,
             'jumlah' => $request->jumlah
         ]);
 
@@ -91,7 +96,7 @@ class KeranjangController extends Controller
      */
     public function show(int $id)
     {
-        $keranjang = Keranjang::with('detail_keranjang.produk.thumbnail')->where('id_pelanggan', $id)->first();
+        $keranjang = Keranjang::with('detail_keranjang.produk.thumbnail', 'detail_keranjang.hampers')->where('id_pelanggan', $id)->first();
 
         if (!is_null($keranjang)) {
             return response([
@@ -129,7 +134,6 @@ class KeranjangController extends Controller
         }
 
         $keranjang->detail_keranjang->each->delete();
-
 
         $keranjang->delete();
 

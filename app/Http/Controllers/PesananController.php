@@ -437,6 +437,7 @@ class PesananController extends Controller
             'data' => $pesanan
         ], 200);
     }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -449,41 +450,37 @@ class PesananController extends Controller
             'id_pelanggan' => 'required',
             'tgl_order' => 'required|date',
             'total_diskon_poin' => 'required|numeric',
-            // 'total_dibayarkan' => 'required|numeric',
             'jenis_pengiriman' => 'required|string',
             'nama' => 'required|string',
             'telepon' => 'required|string',
             'alamat' => 'required|string',
-            'produk' => 'required|array',
-            'produk.*.id_produk' => 'required|integer',
-            'produk.*.jumlah' => 'required|integer',
-            'produk.*.harga' => 'required|numeric',
-            'produk.*.nama' => 'required|string',
-            'produk_hampers' => 'required|array',
-            'produk_hampers.*.id_produk_hampers' => 'required|integer',
-            'produk_hampers.*.jumlah' => 'required|integer',
-            'produk_hampers.*.harga' => 'required|numeric',
-            'produk_hampers.*.nama' => 'required|string',
         ]);
+
+        $data['produk'] = $data['produk_hampers'] ?? [];
+        $data['produk_hampers'] = $data['produk_hampers'] ?? [];
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
 
-        $tahun = date('Y');
+        $tahun = date('y');
         $bulan = date('m');
 
-        $latestOrder = Pesanan::latest()->first();
-        $nomorUrut = $latestOrder ? intval(substr($latestOrder->id_pesanan, -3)) + 1 : 1;
+        $nomorUrut = Pesanan::count() + 1;
         $id_pesanan = sprintf('%02d.%02d.%03d', $tahun, $bulan, $nomorUrut);
 
         $total_pesanan = 0;
-        foreach ($data['produk'] as $produk)
-            $total_pesanan += $produk['harga'] * $produk['jumlah'];
-        foreach ($data['produk_hampers'] as $hampers)
-            $total_pesanan += $hampers['harga'] * $hampers['jumlah'];
+        if ($data['produk'] > 0) {
+            foreach ($data['produk'] as $produk)
+                $total_pesanan += $produk['harga_jual'] * $produk['jumlah'];
+        }
 
-        $previous_total_poin = Poin::where('id_pelanggan', $data['id_pelanggan'])->latest()->value('total_poin') ?? 0;
+        if ($data['produk_hampers'] > 0) {
+            foreach ($data['produk_hampers'] as $hampers)
+                $total_pesanan += $hampers['harga_jual'] * $hampers['jumlah'];
+        }
+
+        $previous_total_poin = Poin::where('id_pelanggan', $data['id_pelanggan'])->orderBy('id_poin', 'desc')->latest()->value('total_poin') ?? 0;
 
         if ($data['total_diskon_poin'] > 0) {
             if ($previous_total_poin < $data['total_diskon_poin']) {
@@ -491,25 +488,23 @@ class PesananController extends Controller
             }
         }
         $total_setelah_diskon = $total_pesanan - ($data['total_diskon_poin'] * 100);
-        // $total_stip = $data['total_dibayarkan'] - $total_pesanan;
 
         $pesanan = Pesanan::create([
             'id_pesanan' => $id_pesanan,
             'id_metode_pembayaran' => $data['id_metode_pembayaran'],
             'id_pelanggan' => $data['id_pelanggan'],
             'tgl_order' => $data['tgl_order'],
-            'total_diskon_poin' => $data['total_diskon_poin'],
+            'total_diskon_poin' => $data['total_diskon_poin'] * 100,
             'total_pesanan' => $total_pesanan,
-            // 'total_dibayarkan' => $data['total_dibayarkan'],
             'total_setelah_diskon' => $total_setelah_diskon,
-            // 'total_tip' => $total_tip,
+            'total_tip' => 0,
             'jenis_pengiriman' => $data['jenis_pengiriman'],
             'verified_at' => $data['verified_at'] ?? null,
             'accepted_at' => $data['accepted_at'] ?? null,
         ]);
 
         Poin::create([
-            'id_pesanan' => $pesanan->id,
+            'id_pesanan' => $pesanan->id_pesanan,
             'id_pelanggan' => $data['id_pelanggan'],
             'penambahan_poin' => -$data['total_diskon_poin'],
             'total_poin' => $previous_total_poin - $data['total_diskon_poin'],
@@ -517,28 +512,32 @@ class PesananController extends Controller
 
         $previous_total_poin -= $data['total_diskon_poin'];
 
-        foreach ($data['produk'] as $produk) {
-            DetailPesanan::create([
-                'id_pesanan' => $pesanan->id,
-                'id_produk' => $produk['id_produk'],
-                'id_produk_hampers' => null,
-                'kategori' => 'produk',
-                'nama_produk' => $produk['nama'],
-                'harga' => $produk['harga'],
-                'jumlah' => $produk['jumlah'],
-            ]);
+        if ($data['produk'] > 0) {
+            foreach ($data['produk'] as $produk) {
+                DetailPesanan::create([
+                    'id_pesanan' => $pesanan->id_pesanan,
+                    'id_produk' => $produk['id_produk'],
+                    'id_produk_hampers' => null,
+                    'kategori' => 'produk',
+                    'nama_produk' => $produk['nama'],
+                    'harga' => $produk['harga_jual'],
+                    'jumlah' => $produk['jumlah'],
+                ]);
+            }
         }
 
-        foreach ($data['produk_hampers'] as $hampers) {
-            DetailPesanan::create([
-                'id_pesanan' => $pesanan->id,
-                'id_produk' => null,
-                'id_produk_hampers' => $hampers['id_produk_hampers'],
-                'kategori' => 'produk_hampers',
-                'nama_produk' => $hampers['nama'],
-                'harga' => $hampers['harga'],
-                'jumlah' => $hampers['jumlah'],
-            ]);
+        if ($data['produk_hampers'] > 0) {
+            foreach ($data['produk_hampers'] as $hampers) {
+                DetailPesanan::create([
+                    'id_pesanan' => $pesanan->id_pesanan,
+                    'id_produk' => null,
+                    'id_produk_hampers' => $hampers['id_produk_hampers'],
+                    'kategori' => 'produk_hampers',
+                    'nama_produk' => $hampers['nama'],
+                    'harga' => $hampers['harga_jual'],
+                    'jumlah' => $hampers['jumlah'],
+                ]);
+            }
         }
 
         $poin = 0;
@@ -573,7 +572,7 @@ class PesananController extends Controller
         $new_total_poin = $previous_total_poin + $poin;
 
         Poin::create([
-            'id_pesanan' => $pesanan->id,
+            'id_pesanan' => $pesanan->id_pesanan,
             'id_pelanggan' => $data['id_pelanggan'],
             'penambahan_poin' => $poin,
             'total_poin' => $new_total_poin,
@@ -581,7 +580,7 @@ class PesananController extends Controller
 
         if ($data['jenis_pengiriman'] == "Kurir Toko" || $data['jenis_pengiriman'] == "Kurir Ojol") {
             Pengiriman::create([
-                'id_pesanan' => $pesanan->id,
+                'id_pesanan' => $pesanan->id_pesanan,
                 'nama' => $data['nama'],
                 'telepon' => $data['telepon'],
                 'alamat' => $data['alamat'],
@@ -589,7 +588,7 @@ class PesananController extends Controller
         }
 
         StatusPesanan::create([
-            'id_pesanan' => $pesanan->id,
+            'id_pesanan' => $pesanan->id_pesanan,
             'status' => "Menunggu",
         ]);
 

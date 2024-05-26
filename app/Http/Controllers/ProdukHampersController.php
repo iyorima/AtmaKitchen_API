@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\ProdukHampers;
 use App\Models\DetailHampers;
-use App\Http\Requests\StoreProdukHampersRequest;
-use App\Http\Requests\UpdateProdukHampersRequest;
+use App\Models\DetailPesanan;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ProdukHampersController extends Controller
 {
@@ -95,6 +95,53 @@ class ProdukHampersController extends Controller
             'message' => 'produk hampers tidak ditemukan',
             'data' => null
         ], 404);
+    }
+
+    public function showStockByDateAndId($id, $date)
+    {
+        $date = Carbon::parse($date);
+
+        $hamper = ProdukHampers::with(['detailHampers.produk'])->find($id);
+
+        if (is_null($hamper)) {
+            return response([
+                'message' => 'Produk tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        $stok = [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $currentDate = $date->copy()->addDays($i);
+            $minStock = null;
+
+            foreach ($hamper->detailHampers as $detail) {
+                $product = $detail->produk;
+
+                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($currentDate) {
+                    $query->whereDate('tgl_order', $currentDate);
+                })
+                    ->where('id_produk', $product->id)
+                    ->sum('jumlah');
+
+                $productStock = $product->kapasitas - $orderCount;
+
+                if (is_null($minStock) || $productStock < $minStock) {
+                    $minStock = $productStock;
+                }
+            }
+
+            $stok[] = [
+                'date' => $currentDate->toDateString(),
+                'stock' => $minStock,
+            ];
+        }
+
+        return response([
+            'message' => 'Ready stock for the next 7 days',
+            'data' => $stok
+        ], 200);
     }
 
     /**

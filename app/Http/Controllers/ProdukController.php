@@ -210,6 +210,90 @@ class ProdukController extends Controller
         ], 200);
     }
 
+    public function showReadyStockByDateAndId($date, $id)
+    {
+        $date = Carbon::parse($date);
+
+        $product = Produk::with('images', 'thumbnail')->find($id);
+
+        if (is_null($product)) {
+            return response([
+                'message' => 'Produk tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        $readyStock = 0;
+
+        if (!is_null($product->id_penitip)) {
+            $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                $query->whereDate('tgl_order', $date);
+            })
+                ->where('id_produk', $id)
+                ->sum('jumlah');
+
+            $remainingCapacity = $product->kapasitas - $orderCount;
+            $readyStock = $remainingCapacity;
+        } else {
+            $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                $query->whereDate('tgl_order', $date);
+            })
+                ->where('id_produk', $id)
+                ->sum('jumlah');
+
+            if (Str::contains($product->ukuran, '10x20')) {
+                $remainingCapacity = $product->kapasitas - $orderCount;
+                if ($product->kapasitas % 2 == 0) $readyStock = $remainingCapacity % 2;
+                else $readyStock = $remainingCapacity % 2 == 0 ? 1 : 0;
+            }
+        }
+
+        $result = [
+            'ready_stock' => $readyStock
+        ];
+
+        return response([
+            'message' => 'Ready stock for ' . $product->nama . ' on ' . $date->toDateString(),
+            'data' => $result
+        ], 200);
+    }
+
+    public function showStockByDateAndId($id, $date)
+    {
+        $date = Carbon::parse($date);
+        $date->addDays();
+
+        $produk = Produk::with('images', 'thumbnail')->find($id);
+
+        if (is_null($produk)) {
+            return response([
+                'message' => 'Produk tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        $stok = [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
+                $query->whereDate('tgl_order', $date->addDays());
+            })
+                ->where('id_produk', $id)
+                ->sum('jumlah');
+
+            $stock = $produk->kapasitas - $orderCount;
+            $stok[] = [
+                'date' => $date->toDateString(),
+                'stock' => $stock,
+            ];
+        }
+
+        return response([
+            'message' => 'Ready stock for the next 7 days',
+            'data' => $stok
+        ], 200);
+    }
+
     /**
      * Mengubah data produk
      * TODO: cari cara supaya foto bisa dinamis
