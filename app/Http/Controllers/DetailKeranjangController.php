@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailKeranjang;
+use App\Models\Keranjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -85,5 +86,33 @@ class DetailKeranjangController extends Controller
             'message' => 'Produk gagal dihapus dari keranjang',
             'data' => $detail_keranjang,
         ], 400);
+    }
+
+    public function destroyAll($id)
+    {
+        $keranjang = Keranjang::where('id_pelanggan', $id)->first();
+
+        if (is_null($keranjang)) {
+            return response([
+                'message' => 'Tidak ada keranjang untuk dihapus',
+                'data' => null,
+            ], 404);
+        }
+
+        $detail_keranjang = DetailKeranjang::where('id_keranjang', $keranjang->id_keranjang)->get();
+
+        if ($detail_keranjang->isEmpty()) {
+            return response([
+                'message' => 'Tidak ada detail keranjang untuk dihapus',
+                'data' => null,
+            ], 404);
+        }
+
+        $detail_keranjang->each->delete();
+
+        return response([
+            'message' => 'Semua detail keranjang berhasil dihapus',
+            'data' => null,
+        ], 200);
     }
 }

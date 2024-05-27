@@ -31,6 +31,7 @@ class Pesanan extends Model
         'total_dibayarkan',
         'total_tip',
         'bukti_pembayaran',
+        'jenis_pengiriman',
         'verified_at',
         'accepted_at',
     ];

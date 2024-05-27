@@ -26,6 +26,8 @@ use App\Http\Controllers\PengeluaranLainnyaController;
 use App\Http\Controllers\PengirimanController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\StatusPesananController;
+use App\Http\Controllers\MetodePembayaranController;
+use App\Models\MetodePembayaran;
 use App\Models\PemesananBahanBaku;
 
 /*
@@ -72,12 +74,16 @@ Route::post('/produk', [ProdukController::class, 'store']);
 Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::get('/produk/kategori/{id}', [ProdukController::class, 'showByKategori']);
 Route::get('/produk/penitip/{id}', [ProdukController::class, 'showByPenitip']);
+Route::get('/produk/tanggal/{date}', [ProdukController::class, 'showByDate']);
+Route::get('/produk/tanggal/{date}/{id}', [ProdukController::class, 'showReadyStockByDateAndId']);
+Route::get('/produk/stok/{id}/{date}', [ProdukController::class, 'showStockByDateAndId']);
 Route::post('/produk/{id}', [ProdukController::class, 'update']);
 Route::delete('/produk/{id}', [ProdukController::class, 'destroy']);
 
 Route::get('/hampers', [ProdukHampersController::class, 'index']);
 Route::post('/hampers', [ProdukHampersController::class, 'store']);
 Route::get('/hampers/{id}', [ProdukHampersController::class, 'show']);
+Route::get('/hampers/stok/{id}/{date}', [ProdukHampersController::class, 'showStockByDateAndId']);
 Route::post('/hampers/{id}', [ProdukHampersController::class, 'update']);
 Route::delete('/hampers/{id}', [ProdukHampersController::class, 'destroy']);
 
@@ -138,6 +144,7 @@ Route::post('/pelanggan/{id_pelanggan}/pesanan/{id_pesanan}/upload-bukti-pembaya
 
 
 Route::resource('keranjang', KeranjangController::class);
+Route::delete('/detail-keranjang/delete/{id}', [DetailKeranjangController::class, 'destroyAll']);
 Route::resource('detail-keranjang', DetailKeranjangController::class);
 Route::resource('pengiriman', PengirimanController::class);
 Route::resource('alamat', AlamatController::class);
@@ -190,11 +197,17 @@ Route::put('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'update'])
 Route::delete('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'destroy']);
 Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
 
+Route::get('/poin/{id}', [PoinController::class, 'showByPelanggan']);
+Route::get('/poin/harga/{total_harga}', [PoinController::class, 'showGetPoin']);
+Route::resource('poin', PoinController::class);
+
+Route::resource('metode-pembayaran', MetodePembayaranController::class);
+Route::resource('pesanan', PesananController::class);
+
 
 // jeha close
 Route::resource('karyawan', KaryawanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
-    Route::resource('pesanan', PesananController::class);
     Route::put("/karyawan/profile", [KaryawanController::class, 'updateKaryawanProfile']);
 });
