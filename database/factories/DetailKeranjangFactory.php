@@ -17,9 +17,9 @@ class DetailKeranjangFactory extends Factory
     public function definition(): array
     {
         return [
-            'id_keranjang' => fake()->randomNumber(1, 10),
-            'id_produk' => fake()->randomNumber(1, 19),
-            'jumlah' => fake()->randomNumber(1, 3)
+            'id_keranjang' => fake()->numberBetween(1, 2),
+            // 'id_produk' => fake()->randomNumber(1, 19),
+            'jumlah' => fake()->numberBetween(1, 3)
         ];
     }
 }

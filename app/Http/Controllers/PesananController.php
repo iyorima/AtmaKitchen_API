@@ -15,6 +15,7 @@ use App\Models\Produk;
 use App\Models\ResepProduk;
 use App\Models\StatusPesanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class PesananController extends Controller
@@ -435,6 +436,48 @@ class PesananController extends Controller
             'data' => $pesanan
         ], 200);
     }
+
+    // @Nathan
+    public function getAllPendapatanBulanan()
+    {
+        $currentYear = date('Y');
+
+        // All months in a year
+        $months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        // Fetching data from the database
+        $data = Pesanan::select([
+            DB::raw('MONTHNAME(tgl_order) as month'),
+            DB::raw('count(*) as total_orders'),
+            DB::raw('sum(total_setelah_diskon + COALESCE(pengirimen.harga, 0)) as total_sales'),
+        ])
+            ->join('pengirimen', 'pesanans.id_pesanan', '=', 'pengirimen.id_pesanan')
+            ->whereYear('tgl_order', $currentYear)
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->get()
+            ->keyBy('month');
+
+        // Initialize an array with all months set to 0 orders and 0 sales
+        $result = [];
+        foreach ($months as $month) {
+            $result[] = [
+                'month' => $month,
+                'total_orders' => $data->has($month) ? $data[$month]->total_orders : 0,
+                'total_sales' => $data->has($month) ? $data[$month]->total_sales : 0,
+            ];
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pendapatan tahun ' . $currentYear,
+            'data' => $result
+        ], 200);
+    }
+
+
     /**
      * Store a newly created resource in storage.
      */

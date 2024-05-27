@@ -163,6 +163,7 @@ Route::get('/pesanan/rejected', [PesananController::class, 'getAllPesananRejecte
 Route::get('/pesanan/paymentverified', [PesananController::class, 'getAllPesananPaymentVerified']);
 Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createAcceptedPayment']);
 Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
+Route::get('/pesanan/laporan', [PesananController::class, 'getAllPendapatanBulanan']);
 
 Route::post('/status', [StatusPesananController::class, 'store']);
 

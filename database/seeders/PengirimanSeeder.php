@@ -13,23 +13,21 @@ class PengirimanSeeder extends Seeder
     public function run(): void
     {
         Pengiriman::factory()->create([
-            'id_pesanan' => '17.03.24.001',
+            'id_pesanan' => '24.03.1',
             // 'id_kategori_pengiriman' => 4,
-            'id_kurir' => 10,
             'jarak' => 27,
             'harga' => 25000
         ]);
 
         Pengiriman::factory()->create([
-            'id_pesanan' => '17.03.24.002',
+            'id_pesanan' => '24.03.2',
             // 'id_kategori_pengiriman' => 3,
-            'id_kurir' => 10,
             'jarak' => 11,
             'harga' => 20000
         ]);
 
         Pengiriman::factory()->create([
-            'id_pesanan' => '17.03.24.004',
+            'id_pesanan' => '24.03.4',
             // 'id_kategori_pengiriman' => 4,
             // 'id_kurir' => 10,
             // 'jarak' => 27,
@@ -37,7 +35,7 @@ class PengirimanSeeder extends Seeder
         ]);
 
         Pengiriman::factory()->create([
-            'id_pesanan' => '17.03.24.005',
+            'id_pesanan' => '24.03.5',
             // 'id_kategori_pengiriman' => 1,
             // 'id_kurir' => 1,
             // 'jarak' => 1,
@@ -45,9 +43,8 @@ class PengirimanSeeder extends Seeder
         ]);
 
         Pengiriman::factory()->create([
-            'id_pesanan' => '17.03.24.006',
+            'id_pesanan' => '24.03.6',
             // 'id_kategori_pengiriman' => 1,
-            'id_kurir' => 1,
             'jarak' => 1,
             'harga' => 10000
         ]);

@@ -12,9 +12,9 @@ class AlamatSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 1; $i < 6; $i++) {
+        for ($i = 1; $i < 3; $i++) {
             Alamat::factory()->create([
-                'id_pelanggan' => $i
+                'id_pelanggan' => fake()->numberBetween(1, 2)
             ]);
         }
         Alamat::factory()->create([
@@ -25,7 +25,7 @@ class AlamatSeeder extends Seeder
         ]);
         for ($i = 1; $i < 10; $i++) {
             Alamat::factory()->create([
-                'id_pelanggan' => fake()->numberBetween(1, 5)
+                'id_pelanggan' => fake()->numberBetween(1, 2)
             ]);
         }
     }

@@ -20,7 +20,7 @@ class AlamatFactory extends Factory
             'nama' => $this->faker->name(),
             'alamat' => $this->faker->address(),
             'telepon' => fake()->e164PhoneNumber(),
-            'label' => fake()->word()
+            'label' => fake()->randomKey(['Rumah' => 1, 'Kos' => 2, 'Apartemen' => 3])
         ];
     }
 }

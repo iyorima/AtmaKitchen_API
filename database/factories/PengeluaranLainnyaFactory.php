@@ -19,7 +19,7 @@ class PengeluaranLainnyaFactory extends Factory
     {
         $karyawanIds = Karyawan::pluck('id_karyawan')->toArray();
         return [
-            'id_karyawan' => $this->faker->numberBetween(1, 10),
+            'id_karyawan' => $this->faker->numberBetween(1, 3),
             // 'nama' => Karyawan::find($this->faker->randomElement($karyawanIds))->nama,
             'nama' => $this->faker->randomKey(['Listrik' => 1, 'Iuran RT' => 2, 'Bensin' => 3, 'Gas' => 4, 'Gaji Karyawan' => 5]),
             'biaya' => $this->faker->randomFloat(2, 500, 2000000),
