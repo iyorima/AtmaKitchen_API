@@ -456,7 +456,7 @@ class PesananController extends Controller
             'alamat' => 'required|string',
         ]);
 
-        $data['produk'] = $data['produk_hampers'] ?? [];
+        $data['produk'] = $data['produk'] ?? [];
         $data['produk_hampers'] = $data['produk_hampers'] ?? [];
 
         if ($validate->fails()) {
@@ -470,14 +470,16 @@ class PesananController extends Controller
         $id_pesanan = sprintf('%02d.%02d.%03d', $tahun, $bulan, $nomorUrut);
 
         $total_pesanan = 0;
-        if ($data['produk'] > 0) {
-            foreach ($data['produk'] as $produk)
+        if (isset($data['produk']) && count($data['produk']) > 0) {
+            foreach ($data['produk'] as $produk) {
                 $total_pesanan += $produk['harga_jual'] * $produk['jumlah'];
+            }
         }
 
-        if ($data['produk_hampers'] > 0) {
-            foreach ($data['produk_hampers'] as $hampers)
+        if (isset($data['produk_hampers']) && count($data['produk_hampers']) > 0) {
+            foreach ($data['produk_hampers'] as $hampers) {
                 $total_pesanan += $hampers['harga_jual'] * $hampers['jumlah'];
+            }
         }
 
         $previous_total_poin = Poin::where('id_pelanggan', $data['id_pelanggan'])->orderBy('id_poin', 'desc')->latest()->value('total_poin') ?? 0;
@@ -512,7 +514,7 @@ class PesananController extends Controller
 
         $previous_total_poin -= $data['total_diskon_poin'];
 
-        if ($data['produk'] > 0) {
+        if (isset($data['produk']) && count($data['produk']) > 0) {
             foreach ($data['produk'] as $produk) {
                 DetailPesanan::create([
                     'id_pesanan' => $pesanan->id_pesanan,
@@ -526,7 +528,7 @@ class PesananController extends Controller
             }
         }
 
-        if ($data['produk_hampers'] > 0) {
+        if (isset($data['produk_hampers']) && count($data['produk_hampers']) > 0) {
             foreach ($data['produk_hampers'] as $hampers) {
                 DetailPesanan::create([
                     'id_pesanan' => $pesanan->id_pesanan,
