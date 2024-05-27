@@ -200,7 +200,8 @@ class ProdukController extends Controller
                 'kapasitas' => $product->kapasitas,
                 'ukuran' => $product->ukuran,
                 'harga_jual' => $product->harga_jual,
-                'ready_stock' => $readyStock
+                'ready_stock' => $readyStock,
+                'thumbnail' => $product->thumbnail
             ];
         }
 
