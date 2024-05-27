@@ -85,15 +85,21 @@ class PelangganController extends Controller
             return response()->json(['message' => 'Pesanan sudah selesai atau sudah dibayar'], 400);
         }
 
-        $file = $request->file('bukti_pembayaran');
-        $path = $file->store('bukti_pembayaran');
+        if ($request->hasFile('bukti_pembayaran')) {
+            $image = $request->file('bukti_pembayaran');
+                $fileName = time() . '_' . $image->getClientOriginalName();
+                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $image->storeAs('uploads', $fileName, 'azure'));
 
-        $pesanan->bukti_pembayaran = $path;
+                $pesanan->bukti_pembayaran = $filePath;
+               
+            
+        }
+
         $pesanan->save();
 
         return response()->json([
             'message' => 'Bukti pembayaran berhasil diunggah',
-            'path' => $path
+            'data' => $pesanan
         ], 200);
     }
 
