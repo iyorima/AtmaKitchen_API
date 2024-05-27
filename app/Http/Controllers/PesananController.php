@@ -41,7 +41,11 @@ class PesananController extends Controller
 
     public function indexPesananPerluDikonfirmasi()
     {
-        $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])->get();
+        $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])
+        ->whereDoesntHave('status_pesanan', function ($query) {
+            $query->where('status', 'Pesanan diterima');
+        })
+        ->get();
 
         return response()->json([
             'message' => 'Daftar pesanan',
