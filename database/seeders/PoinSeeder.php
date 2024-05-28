@@ -15,23 +15,18 @@ class PoinSeeder extends Seeder
         Poin::factory()->create([
             'id_pesanan' => '17.03.24.001',
             'id_pelanggan' => 1,
-            'penambahan_poin' => 65,
-            'total_poin' => 65
+            'penambahan_poin' => 939,
+            'total_poin' => 1000
         ]);
 
         Poin::factory()->create([
             'id_pesanan' => '17.03.24.006',
             'id_pelanggan' => 1,
-            'penambahan_poin' => -60,
-            'total_poin' => 5
+            'penambahan_poin' => 37,
+            'total_poin' => 40
         ]);
 
-        Poin::factory()->create([
-            'id_pesanan' => '17.03.24.006',
-            'id_pelanggan' => 1,
-            'penambahan_poin' => 45,
-            'total_poin' => 50
-        ]);
+
 
         Poin::factory()->create([
             'id_pesanan' => '17.03.24.002',
@@ -57,7 +52,7 @@ class PoinSeeder extends Seeder
         Poin::factory()->create([
             'id_pesanan' => '17.03.24.005',
             'id_pelanggan' => 5,
-            'penambahan_poin' => 45,
+            'penambahan_poin' => 17,
             'total_poin' => 45
         ]);
     }

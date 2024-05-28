@@ -41,7 +41,7 @@ class PesananController extends Controller
 
     public function indexPesananPerluDikonfirmasi()
     {
-        $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])
+        $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan_latest', 'pengiriman', 'id_metode_pembayaran'])
         ->whereDoesntHave('status_pesanan', function ($query) {
             $query->where('status', 'Pesanan diterima');
         })
@@ -63,15 +63,20 @@ class PesananController extends Controller
 
         $totalPesanan = $pesanan->total_pesanan;
         $additionalPoints = 0;
+        $remainingPesanan = $totalPesanan;
 
-        if ($totalPesanan >= 1000000) {
-            $additionalPoints = 200;
-        } elseif ($totalPesanan >= 500000) {
-            $additionalPoints = 75;
-        } elseif ($totalPesanan >= 100000) {
-            $additionalPoints = 15;
-        } elseif ($totalPesanan >= 10000) {
-            $additionalPoints = 1;
+        $pointsTiers = [
+            1000000 => 200,
+            500000 => 75,
+            100000 => 15,
+            10000 => 1,
+        ];
+        
+        foreach ($pointsTiers as $threshold => $points) {
+            while ($remainingPesanan >= $threshold) {
+                $remainingPesanan -= $threshold;
+                $additionalPoints += $points;
+            }
         }
 
         $latestPoin = Poin::where('id_pelanggan', $pesanan->pelanggan->id_pelanggan)->latest()->first();
