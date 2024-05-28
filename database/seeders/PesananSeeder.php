@@ -20,9 +20,10 @@ class PesananSeeder extends Seeder
             'total_diskon_poin' => 0,
             'total_pesanan' => 4940000, // Mandarin
             'total_setelah_diskon' => 4940000,
-            'total_dibayarkan' => null,
+            'total_dibayarkan' => 4940000 + 25000,
             'total_tip' => 0,
-            'jenis_pengiriman' => 'Kurir Toko'
+            'jenis_pengiriman' => 'Kurir Toko',
+            'bukti_pembayaran' => 'https://atmaimages.blob.core.windows.net/images/uploads/1716877056_5.jpg'
         ]);
 
         // Pesanan selesai
@@ -35,7 +36,8 @@ class PesananSeeder extends Seeder
             'total_setelah_diskon' => 120000,
             'total_dibayarkan' => 150000,
             'total_tip' => 30000,
-            'jenis_pengiriman' => 'Kurir Ojol'
+            'jenis_pengiriman' => 'Kurir Ojol',
+            'accepted_at' => now()
         ]);
 
         // Pesanan selesai
@@ -48,7 +50,8 @@ class PesananSeeder extends Seeder
             'total_setelah_diskon' => 850000,
             'total_dibayarkan' => 900000,
             'total_tip' => 50000,
-            'jenis_pengiriman' => 'Ambil Sendiri'
+            'jenis_pengiriman' => 'Ambil Sendiri',
+            'accepted_at' => now()
         ]);
 
         // Pesanan belum dibayar

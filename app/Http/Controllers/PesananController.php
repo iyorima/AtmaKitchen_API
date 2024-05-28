@@ -27,7 +27,7 @@ class PesananController extends Controller
      */
     public function index()
     {
-        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan', 'status_pesanan_latest', 'pengiriman', 'id_metode_pembayaran'])->get();
+        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan_latest', 'pengiriman', 'id_metode_pembayaran', 'detail_pesanan'])->orderBy('id_pesanan', 'desc')->get();
 
         if (count($pesanan) > 0) {
             return response([
@@ -45,10 +45,10 @@ class PesananController extends Controller
     public function indexPesananPerluDikonfirmasi()
     {
         $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])
-        ->whereDoesntHave('status_pesanan', function ($query) {
-            $query->where('status', 'Pesanan diterima');
-        })
-        ->get();
+            ->whereDoesntHave('status_pesanan', function ($query) {
+                $query->where('status', 'Pesanan diterima');
+            })
+            ->get();
 
         return response()->json([
             'message' => 'Daftar pesanan',
@@ -61,20 +61,26 @@ class PesananController extends Controller
         $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
             ->findOrFail($id);
         $pesanan->status_pesanan()->update([
-            'status' => 'Pesanan diterima'
+            'status' => 'Diterima'
         ]);
 
         $totalPesanan = $pesanan->total_pesanan;
         $additionalPoints = 0;
 
-        if ($totalPesanan >= 1000000) {
-            $additionalPoints = 200;
-        } elseif ($totalPesanan >= 500000) {
-            $additionalPoints = 75;
-        } elseif ($totalPesanan >= 100000) {
-            $additionalPoints = 15;
-        } elseif ($totalPesanan >= 10000) {
-            $additionalPoints = 1;
+        $remainingPesanan = $totalPesanan;
+
+        $pointsTiers = [
+            1000000 => 200,
+            500000 => 75,
+            100000 => 15,
+            10000 => 1,
+        ];
+
+        foreach ($pointsTiers as $threshold => $points) {
+            while ($remainingPesanan >= $threshold) {
+                $remainingPesanan -= $threshold;
+                $additionalPoints += $points;
+            }
         }
 
         $latestPoin = Poin::where('id_pelanggan', $pesanan->pelanggan->id_pelanggan)->latest()->first();
@@ -103,7 +109,7 @@ class PesananController extends Controller
         $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
             ->findOrFail($id);
         $pesanan->status_pesanan()->update([
-            'status' => 'Pesanan ditolak'
+            'status' => 'Ditolak'
         ]);
 
         // Mengembalikan stok produk
@@ -233,51 +239,7 @@ class PesananController extends Controller
         }
     }
 
-    // @Nathan
-    public function getAllPesananNeedConfirmDelivery()
-    {
-        $pesanan = Pesanan::with([
-            'pelanggan',
-            'status_pesanan_latest',
-            'pengiriman',
-            'id_metode_pembayaran'
-        ])->where('jenis_pengiriman', "!=", "Ambil Sendiri")->orderBy('id_pesanan', 'desc')->get();
 
-        if ($pesanan->isEmpty()) {
-            return response()->json([
-                'message' => 'Pesanan tidak tersedia',
-                'data' => null
-            ], 404);
-        }
-
-        return response()->json([
-            'message' => 'Berhasil mendapatkan seluruh pesanan',
-            'data' => $pesanan
-        ], 200);
-    }
-
-    // @Nathan
-    public function getAllPesananNeedConfirmPayment()
-    {
-        $pesanan = Pesanan::with([
-            'pelanggan',
-            'status_pesanan_latest',
-            'pengiriman',
-            'id_metode_pembayaran'
-        ])->where('total_dibayarkan', null)->get();
-
-        if ($pesanan->isEmpty()) {
-            return response()->json([
-                'message' => 'Pesanan tidak tersedia',
-                'data' => null
-            ], 404);
-        }
-
-        return response()->json([
-            'message' => 'Berhasil mendapatkan seluruh pesanan',
-            'data' => $pesanan
-        ], 200);
-    }
 
     // @Nathan
     public function createAcceptedPayment(Request $request, string $id_pesanan)
@@ -304,7 +266,7 @@ class PesananController extends Controller
         $status = StatusPesanan::create([
             'id_pesanan' => $id_pesanan,
             // 'id_karyawan' => $updateData['id_karyawan'],
-            'status' => "Pembayaran diterima"
+            'status' => "Pembayaran valid"
         ]);
 
         $totalTip = $updateData['total_dibayarkan'] - ($pesanan->total_setelah_diskon + $pesanan->pengiriman->harga);
@@ -376,6 +338,56 @@ class PesananController extends Controller
     }
 
     // @Nathan
+    public function getAllPesananNeedConfirmDelivery()
+    {
+        $pesanan = Pesanan::with([
+            'pelanggan',
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran'
+        ])->where('jenis_pengiriman', "!=", "Ambil Sendiri")->whereHas('status_pesanan_latest', function ($query) {
+            return $query->where('status', 'Menunggu Ongkir');
+        })->orderBy('id_pesanan', 'desc')->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => []
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    // @Nathan
+    // Status: Sudah dibayar tapi belum di konfirmasi admin
+    public function getAllPesananNeedConfirmPayment()
+    {
+        $pesanan = Pesanan::with([
+            'status_pesanan_latest',
+            'pelanggan',
+            'id_metode_pembayaran'
+        ])->where('verified_at', null)->whereHas('status_pesanan_latest', function ($query) {
+            return $query->where('status', 'Sudah dibayar');
+        })->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan tidak tersedia',
+                'data' => []
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    // @Nathan
     public function getAllPesananInProcess()
     {
         $pesanan = Pesanan::with([
@@ -428,15 +440,15 @@ class PesananController extends Controller
             'status_pesanan_latest',
             'pelanggan',
             'id_metode_pembayaran'
-        ])->where('verified_at', "!=", null)->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
-            return $query->where('status', 'Pembayaran diterima');
+        ])->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
+            return $query->where('status', 'Pembayaran valid');
         })->get();
 
         if ($pesanan->isEmpty()) {
             return response()->json([
                 'message' => 'Pesanan tidak tersedia',
-                'data' => null
-            ], 404);
+                'data' => []
+            ], 200);
         }
 
         return response()->json([
@@ -515,7 +527,7 @@ class PesananController extends Controller
         $bulan = date('m');
 
         $nomorUrut = Pesanan::count() + 1;
-        $id_pesanan = sprintf('%02d.%02d.%03d', $tahun, $bulan, $nomorUrut);
+        $id_pesanan = sprintf('%02d.%02d.%d', $tahun, $bulan, $nomorUrut);
 
         $total_pesanan = 0;
         if (isset($data['produk']) && count($data['produk']) > 0) {
@@ -637,9 +649,10 @@ class PesananController extends Controller
             ]);
         }
 
+        // TODO: Harusnya status menunggu ongkir kalau dipilih jenis pengiriman selain Ambil sendiri, kalau ambil sendiri harus langsung bayar, dan statusnya 'Sudah dibayar'
         StatusPesanan::create([
             'id_pesanan' => $pesanan->id_pesanan,
-            'status' => "Menunggu",
+            'status' => "Menunggu ongkir",
         ]);
 
         return response([
@@ -653,7 +666,7 @@ class PesananController extends Controller
      */
     public function show(string $id)
     {
-        $pesanan = Pesanan::with('pelanggan', 'pengiriman')->find($id);
+        $pesanan = Pesanan::with('pelanggan', 'pengiriman', 'detail_pesanan')->find($id);
 
         if (is_null($pesanan)) {
             return response()->json([

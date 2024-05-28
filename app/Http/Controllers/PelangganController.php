@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pelanggan;
 use App\Models\Akun;
 use App\Models\Pesanan;
+use App\Models\StatusPesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -68,7 +69,7 @@ class PelangganController extends Controller
     public function uploadBuktiPembayaran(Request $request, $id_pelanggan, $id_pesanan)
     {
         $validator = Validator::make($request->all(), [
-            'bukti_pembayaran' => 'required|file|mimes:jpg,png,pdf,jpeg|max:2048', // Sesuaikan dengan ukuran maksimum file yang diizinkan
+            'bukti_pembayaran' => 'image|mimes:jpg,png,jpeg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -87,15 +88,18 @@ class PelangganController extends Controller
 
         if ($request->hasFile('bukti_pembayaran')) {
             $image = $request->file('bukti_pembayaran');
-                $fileName = time() . '_' . $image->getClientOriginalName();
-                $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $image->storeAs('uploads', $fileName, 'azure'));
+            $fileName = time() . '_' . $image->getClientOriginalName();
+            $filePath = env('AZURE_STORAGE_URL') . env('AZURE_STORAGE_CONTAINER') . '/' . str_replace(' ', '%20', $image->storeAs('uploads', $fileName, 'azure'));
 
-                $pesanan->bukti_pembayaran = $filePath;
-               
-            
+            $pesanan->bukti_pembayaran = $filePath;
         }
 
         $pesanan->save();
+
+        StatusPesanan::create([
+            'id_pesanan' => $id_pesanan,
+            'status' => 'Sudah dibayar'
+        ]);
 
         return response()->json([
             'message' => 'Bukti pembayaran berhasil diunggah',
