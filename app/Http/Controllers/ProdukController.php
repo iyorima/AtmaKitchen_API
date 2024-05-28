@@ -214,6 +214,7 @@ class ProdukController extends Controller
     public function showReadyStockByDateAndId($date, $id)
     {
         $date = Carbon::parse($date);
+        $today = Carbon::today();
 
         $product = Produk::with('images', 'thumbnail')->find($id);
 
@@ -224,39 +225,65 @@ class ProdukController extends Controller
             ], 404);
         }
 
-        $readyStock = 0;
+        if ($date->isSameDay($today)) {
+            $readyStock = 0;
 
-        if (!is_null($product->id_penitip)) {
-            $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                $query->whereDate('tgl_order', $date);
-            })
-                ->where('id_produk', $id)
-                ->sum('jumlah');
+            if (!is_null($product->id_penitip)) {
+                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                    $query->whereDate('tgl_order', $date);
+                })
+                    ->where('id_produk', $id)
+                    ->sum('jumlah');
 
-            $remainingCapacity = $product->kapasitas - $orderCount;
-            $readyStock = $remainingCapacity;
-        } else {
-            $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                $query->whereDate('tgl_order', $date);
-            })
-                ->where('id_produk', $id)
-                ->sum('jumlah');
-
-            if (Str::contains($product->ukuran, '10x20')) {
                 $remainingCapacity = $product->kapasitas - $orderCount;
-                if ($product->kapasitas % 2 == 0) $readyStock = $remainingCapacity % 2;
-                else $readyStock = $remainingCapacity % 2 == 0 ? 1 : 0;
+                $readyStock = $remainingCapacity;
+            } else {
+                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                    $query->whereDate('tgl_order', $date);
+                })
+                    ->where('id_produk', $id)
+                    ->sum('jumlah');
+
+                if (Str::contains($product->ukuran, '10x20')) {
+                    $remainingCapacity = $product->kapasitas - $orderCount;
+                    if ($product->kapasitas % 2 == 0) $readyStock = $remainingCapacity % 2;
+                    else $readyStock = $remainingCapacity % 2 == 0 ? 1 : 0;
+                }
             }
+
+            $result = [
+                'ready_stock' => $readyStock
+            ];
+
+            return response([
+                'message' => 'Ready stock for ' . $product->nama . ' on ' . $date->toDateString(),
+                'data' => $result
+            ], 200);
+        } else {
+            $stock = 0;
+
+            if (!is_null($product->id_penitip)) {
+                $stock = 0;
+            } else {
+                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                    $query->whereDate('tgl_order', $date);
+                })
+                    ->where('id_produk', $id)
+                    ->sum('jumlah');
+
+                $remainingCapacity = $product->kapasitas - $orderCount;
+                $stock = $remainingCapacity;
+            }
+
+            $result = [
+                'ready_stock' => $stock
+            ];
+
+            return response([
+                'message' => 'Stock for ' . $product->nama . ' on ' . $date->toDateString(),
+                'data' => $result
+            ], 200);
         }
-
-        $result = [
-            'ready_stock' => $readyStock
-        ];
-
-        return response([
-            'message' => 'Ready stock for ' . $product->nama . ' on ' . $date->toDateString(),
-            'data' => $result
-        ], 200);
     }
 
     public function showStockByDateAndId($id, $date)

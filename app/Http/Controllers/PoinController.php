@@ -78,6 +78,24 @@ class PoinController extends Controller
         ]);
     }
 
+    public function showByPesanan($id_pelanggan, $id_pesanan)
+    {
+        $poin = Poin::where('id_pelanggan', $id_pelanggan)->where('id_pesanan', $id_pesanan)->orderBy('id_poin', 'desc')
+            ->latest()
+            ->value('total_poin');
+
+        if ($poin) {
+            return response([
+                'message' => 'Berhasil mendapatkan poin',
+                'data' => $poin
+            ]);
+        } else {
+            return response([
+                'message' => 'Poin tidak ditemukan untuk pelanggan yang diberikan',
+                'data' => null
+            ], 404);
+        }
+    }
     /**
      * Show the form for creating a new resource.
      */

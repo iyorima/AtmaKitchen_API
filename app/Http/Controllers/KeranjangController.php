@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\DetailKeranjang;
 use App\Models\Keranjang;
+use App\Models\Produk;
+use App\Models\ProdukHampers;
+use App\Models\DetailPesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class KeranjangController extends Controller
 {
@@ -94,21 +99,96 @@ class KeranjangController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show(int $id, $date)
     {
         $keranjang = Keranjang::with('detail_keranjang.produk.thumbnail', 'detail_keranjang.hampers')->where('id_pelanggan', $id)->first();
 
-        if (!is_null($keranjang)) {
+        if (is_null($keranjang)) {
             return response([
-                'message' => 'Keranjang ditemukan',
-                'data' => $keranjang,
-            ], 200);
+                'message' => 'Keranjang tidak tersedia',
+                'data' => null,
+            ], 400);
+        }
+
+        $date = Carbon::parse($date);
+        $today = Carbon::today();
+        $tomorrow = Carbon::tomorrow();
+        foreach ($keranjang->detail_keranjang as $detail) {
+            if (!is_null($detail->id_produk)) {
+                $product = Produk::with('images', 'thumbnail')->find($detail->id_produk);
+                if ($date->isSameDay($today) || $date->isSameDay($tomorrow)) {
+                    $readyStock = 0;
+
+                    if (!is_null($product->id_penitip)) {
+                        $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                            $query->whereDate('tgl_order', $date);
+                        })
+                            ->where('id_produk', $detail->id_produk)
+                            ->sum('jumlah');
+
+                        $remainingCapacity = $product->kapasitas - $orderCount;
+                        $readyStock = $remainingCapacity;
+                    } else {
+                        $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                            $query->whereDate('tgl_order', $date);
+                        })
+                            ->where('id_produk', $detail->id_produk)
+                            ->sum('jumlah');
+
+                        if (Str::contains($product->ukuran, '10x20')) {
+                            $remainingCapacity = $product->kapasitas - $orderCount;
+                            if ($product->kapasitas % 2 == 0) $readyStock = $remainingCapacity % 2;
+                            else $readyStock = $remainingCapacity % 2 == 0 ? 1 : 0;
+                        }
+                    }
+                    $detail->ready_stock = $readyStock;
+                } else {
+                    $stock = 0;
+
+                    if (!is_null($product->id_penitip)) {
+                        $stock = 0;
+                    } else {
+                        $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
+                            $query->whereDate('tgl_order', $date);
+                        })
+                            ->where('id_produk', $detail->id_produk)
+                            ->sum('jumlah');
+                        $remainingCapacity = $product->kapasitas - $orderCount;
+                        $stock = $remainingCapacity;
+                    }
+                    $detail->ready_stock = $stock;
+                }
+            } else {
+                $hampers = ProdukHampers::with(['detailHampers.produk'])->find($detail->id_produk_hampers);
+                if ($hampers && $date->isSameDay($today) || $date->isSameDay($tomorrow)) {
+                    $minStock = 0;
+                } else {
+                    $minStock = null;
+
+                    foreach ($hampers->detailHampers as $detailHampers) {
+                        $product = $detailHampers->produk;
+
+                        $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
+                            $query->whereDate('tgl_order', $date);
+                        })
+                            ->where('id_produk', $detail->id_produk_hampers)
+                            ->sum('jumlah');
+
+                        $productStock = $product->kapasitas - $orderCount;
+
+                        if (is_null($minStock) || $productStock < $minStock) {
+                            $minStock = $productStock;
+                        }
+                    }
+                }
+                $detail->ready_stock = $minStock;
+            }
         }
 
         return response([
-            'message' => 'Keranjang tidak tersedia',
-            'data' => null,
-        ], 400);
+            'message' => 'Keranjang ditemukan',
+            'data' => $keranjang,
+        ], 200);
     }
 
     /**

@@ -16,6 +16,8 @@ use App\Models\ResepProduk;
 use App\Models\StatusPesanan;
 use App\Models\Pelanggan;
 use App\Models\Pengiriman;
+use App\Models\Keranjang;
+use App\Models\DetailKeranjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -45,10 +47,10 @@ class PesananController extends Controller
     public function indexPesananPerluDikonfirmasi()
     {
         $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])
-        ->whereDoesntHave('status_pesanan', function ($query) {
-            $query->where('status', 'Pesanan diterima');
-        })
-        ->get();
+            ->whereDoesntHave('status_pesanan', function ($query) {
+                $query->where('status', 'Pesanan diterima');
+            })
+            ->get();
 
         return response()->json([
             'message' => 'Daftar pesanan',
@@ -499,9 +501,9 @@ class PesananController extends Controller
             'tgl_order' => 'required|date',
             'total_diskon_poin' => 'required|numeric',
             'jenis_pengiriman' => 'required|string',
-            'nama' => 'required|string',
-            'telepon' => 'required|string',
-            'alamat' => 'required|string',
+            'nama' => 'string',
+            'telepon' => 'string',
+            'alamat' => 'string',
         ]);
 
         $data['produk'] = $data['produk'] ?? [];
@@ -642,6 +644,25 @@ class PesananController extends Controller
             'status' => "Menunggu",
         ]);
 
+        $keranjang = Keranjang::where('id_pelanggan', $pelanggan->id_pelanggan)->first();
+
+        if (is_null($keranjang)) {
+            return response([
+                'message' => 'Tidak ada keranjang untuk dihapus',
+                'data' => null,
+            ], 404);
+        }
+
+        $detail_keranjang = DetailKeranjang::where('id_keranjang', $keranjang->id_keranjang)->get();
+
+        if ($detail_keranjang->isEmpty()) {
+            return response([
+                'message' => 'Tidak ada detail keranjang untuk dihapus',
+                'data' => null,
+            ], 404);
+        }
+
+        $detail_keranjang->each->delete();
         return response([
             'message' => 'Berhasil membuat pesanan',
             'data' => $pesanan

@@ -142,7 +142,7 @@ Route::put('/pelanggan/{id}', [PelangganController::class, 'update']);
 Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
 Route::post('/pelanggan/{id_pelanggan}/pesanan/{id_pesanan}/upload-bukti-pembayaran', [PelangganController::class, 'uploadBuktiPembayaran']);
 
-
+Route::get('/keranjang/{id}/{date}', [KeranjangController::class, 'show']);
 Route::resource('keranjang', KeranjangController::class);
 Route::delete('/detail-keranjang/delete/{id}', [DetailKeranjangController::class, 'destroyAll']);
 Route::resource('detail-keranjang', DetailKeranjangController::class);
@@ -198,6 +198,7 @@ Route::delete('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'destro
 Route::get('/penarikan-saldo/{id}', [PenarikanSaldoController::class, 'show']);
 
 Route::get('/poin/{id}', [PoinController::class, 'showByPelanggan']);
+Route::get('/poin/pesanan/{id_pelanggan}/{id_pesanan}', [PoinController::class, 'showByPesanan']);
 Route::get('/poin/harga/{total_harga}', [PoinController::class, 'showGetPoin']);
 Route::resource('poin', PoinController::class);
 

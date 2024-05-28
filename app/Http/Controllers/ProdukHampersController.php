@@ -100,6 +100,7 @@ class ProdukHampersController extends Controller
     public function showStockByDateAndId($id, $date)
     {
         $date = Carbon::parse($date);
+        $date->addDays(2);
 
         $hamper = ProdukHampers::with(['detailHampers.produk'])->find($id);
 
@@ -144,6 +145,52 @@ class ProdukHampersController extends Controller
         ], 200);
     }
 
+    public function showStockByDateAndIdSingle($id, $date)
+    {
+        $date = Carbon::parse($date);
+        $today = Carbon::today();
+
+        $hamper = ProdukHampers::with(['detailHampers.produk'])->find($id);
+
+        if (is_null($hamper)) {
+            return response([
+                'message' => 'Produk tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        if ($date->isSameDay($today)) {
+            $minStock = 0;
+
+            return response([
+                'message' => 'Ready stock for today',
+                'data' => $minStock
+            ], 200);
+        } else {
+            $minStock = null;
+
+            foreach ($hamper->detailHampers as $detail) {
+                $product = $detail->produk;
+
+                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
+                    $query->whereDate('tgl_order', $date);
+                })
+                    ->where('id_produk', $product->id)
+                    ->sum('jumlah');
+
+                $productStock = $product->kapasitas - $orderCount;
+
+                if (is_null($minStock) || $productStock < $minStock) {
+                    $minStock = $productStock;
+                }
+            }
+
+            return response([
+                'message' => 'Ready stock for the given date',
+                'data' => $minStock
+            ], 200);
+        }
+    }
     /**
      * Mengubah data produk hampers tertentu
      */
