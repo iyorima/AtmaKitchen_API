@@ -690,6 +690,42 @@ class PesananController extends Controller
         ], 200);
     }
 
+    public function showByMonth($date)
+    {
+        // Extract the year and month from the provided date
+        $year = date('Y', strtotime($date));
+        $month = date('m', strtotime($date));
+
+        // Fetch data from the database
+        $data = Pesanan::select([
+            'produks.nama as produk_name',
+            'produks.harga_jual as produk_price',
+            DB::raw('SUM(detail_pesanans.jumlah * detail_pesanans.harga) as total_income'),
+            DB::raw('SUM(detail_pesanans.jumlah) as total_quantity')
+        ])
+            ->join('detail_pesanans', 'pesanans.id_pesanan', '=', 'detail_pesanans.id_pesanan')
+            ->join('produks', 'detail_pesanans.id_produk', '=', 'produks.id_produk')
+            ->whereYear('pesanans.tgl_order', $year)
+            ->whereMonth('pesanans.tgl_order', $month)
+            ->groupBy('produks.nama', 'produks.harga_jual')
+            ->get();
+
+        // Structure the response data
+        $result = $data->map(function ($item) {
+            return [
+                'produk' => $item->produk_name,
+                'kuantitas' => $item->total_quantity,
+                'harga' => $item->produk_price,
+                'jumlah_uang' => $item->total_income,
+            ];
+        });
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan pesanan bulan ' . date('F', strtotime($date)) . ' ' . $year,
+            'data' => $result
+        ], 200);
+    }
+
     /**
      * Update the specified resource in storage.
      */

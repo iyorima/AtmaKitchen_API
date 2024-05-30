@@ -172,6 +172,7 @@ Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, '
 Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
 Route::get('/pesanan/laporan', [PesananController::class, 'getAllPendapatanBulanan']);
 
+
 Route::post('/status', [StatusPesananController::class, 'store']);
 
 //jeha open
@@ -204,6 +205,7 @@ Route::resource('poin', PoinController::class);
 
 Route::resource('metode-pembayaran', MetodePembayaranController::class);
 Route::resource('pesanan', PesananController::class);
+Route::get('/pesanan/laporan/{date}', [PesananController::class, 'showByMonth']);
 
 
 // jeha close
