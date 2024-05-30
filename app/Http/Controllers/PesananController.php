@@ -611,7 +611,8 @@ class PesananController extends Controller
         if ($pelanggan) {
             $tgl_order = new \DateTime($data['tgl_order']);
             $tgl_lahir = new \DateTime($pelanggan->tgl_lahir);
-            $tgl_ultah_tahun_ini = new \DateTime($tgl_lahir->format('Y') . '-' . $tgl_lahir->format('m') . '-' . $tgl_lahir->format('d'));
+
+            $tgl_ultah_tahun_ini = new \DateTime($tgl_order->format('Y') . '-' . $tgl_lahir->format('m') . '-' . $tgl_lahir->format('d'));
 
             $batas_bawah_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('-3 days');
             $batas_atas_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('+3 days');
