@@ -121,6 +121,7 @@ Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, '
 Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
 Route::get('/pesanan/laporan', [PesananController::class, 'getAllPendapatanBulanan']);
 
+
 Route::post('/status', [StatusPesananController::class, 'store']);
 
 Route::get('/pesanan/perlu-dikonfirmasi', [PesananController::class, 'indexPesananPerluDikonfirmasi']);
@@ -151,6 +152,10 @@ Route::resource('poin', PoinController::class);
 
 Route::resource('metode-pembayaran', MetodePembayaranController::class);
 Route::resource('pesanan', PesananController::class);
+Route::get('/pesanan/laporan/{date}', [PesananController::class, 'showByMonth']);
+
+
+// jeha close
 Route::resource('karyawan', KaryawanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);
