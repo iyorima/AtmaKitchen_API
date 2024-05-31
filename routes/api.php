@@ -117,7 +117,7 @@ Route::post('/bahan-baku/laporan/h', [PesananController::class, 'getBahanBakuUsa
 Route::post('/pesanan/auto-update', [PesananController::class, 'autoUpdateStatueAfter2Days']);
 Route::get('/pesanan/late', [PesananController::class, 'getAllPesananLatePayment']);
 
-Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createAcceptedPayment']);
+Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createConfirmPayment']);
 Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
 Route::get('/pesanan/laporan', [PesananController::class, 'getAllPendapatanBulanan']);
 
@@ -127,6 +127,7 @@ Route::post('/status', [StatusPesananController::class, 'store']);
 Route::get('/pesanan/perlu-dikonfirmasi', [PesananController::class, 'indexPesananPerluDikonfirmasi']);
 Route::post('/pesanan/{id}/terima', [PesananController::class, 'terimaPesanan']);
 Route::post('/pesanan/{id}/tolak', [PesananController::class, 'tolakPesanan']);
+Route::post('/pesanan/{id_pesanan}/process', [PesananController::class, 'processPesananByIdPesanan']);
 Route::get('/pesanan/{id}/bahan-baku', [PesananController::class, 'listBahanBakuPerluDibeli']);
 
 Route::get('/saldo', [SaldoPelangganController::class, 'index']);

@@ -66,6 +66,14 @@ class PelangganController extends Controller
         ], 201);
     }
 
+    /**
+     * Upload the payment proof for a specific order of a customer.
+     *
+     * @param \Illuminate\Http\Request $request The HTTP request object.
+     * @param int $id_pelanggan The ID of the customer.
+     * @param int $id_pesanan The ID of the order.
+     * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the upload.
+     */
     public function uploadBuktiPembayaran(Request $request, $id_pelanggan, $id_pesanan)
     {
         $validator = Validator::make($request->all(), [
@@ -75,8 +83,17 @@ class PelangganController extends Controller
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()], 400);
         }
-        $pesanan = Pesanan::where('id_pesanan', $id_pesanan)->where('id_pelanggan', $id_pelanggan)->first();
 
+        /**
+         * Retrieve a specific order for a customer.
+         *
+         * @param int $id_pesanan The ID of the order.
+         * @param int $id_pelanggan The ID of the customer.
+         * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the retrieval.
+         */
+        $pesanan = Pesanan::where('id_pesanan', $id_pesanan)
+            ->where('id_pelanggan', $id_pelanggan)
+            ->first();
 
         if (!$pesanan) {
             return response()->json(['message' => 'Pesanan tidak ditemukan'], 404);
@@ -86,6 +103,12 @@ class PelangganController extends Controller
             return response()->json(['message' => 'Pesanan sudah selesai atau sudah dibayar'], 400);
         }
 
+        /**
+         * Handle the request to upload and store the payment proof file.
+         *
+         * @param  \Illuminate\Http\Request  $request The HTTP request object.
+         * @return void
+         */
         if ($request->hasFile('bukti_pembayaran')) {
             $image = $request->file('bukti_pembayaran');
             $fileName = time() . '_' . $image->getClientOriginalName();
@@ -96,6 +119,13 @@ class PelangganController extends Controller
 
         $pesanan->save();
 
+        /**
+         * Create a new status pesanan.
+         *
+         * @param int $id_pesanan The ID of the order.
+         * @param string $status The status of the order.
+         * @return \App\Models\StatusPesanan The newly created status pesanan.
+         */
         StatusPesanan::create([
             'id_pesanan' => $id_pesanan,
             'status' => 'Sudah dibayar'
@@ -112,40 +142,41 @@ class PelangganController extends Controller
      */
     public function show(int $id_pelanggan)
     {
-        $pelanggan = Pelanggan::with('akun')->find($id_pelanggan);
-
-        if (!$pelanggan) {
-            return response()->json(['message' => 'Pelanggan tidak ditemukan'], 404);
-        }
-
-        try {
-            $response = [
-                'message' => 'Berhasil mendapatkan data pelanggan ' . $pelanggan->nama . '',
-                'data' => [
-                    'pelanggan' => $pelanggan,
-                    'pesanan' => [],
-                    'histori_pesanan' => [],
-                ]
-            ];
-
-            // Mengambil pesanan belum selesai
-            $pesananBelumSelesai = $pelanggan->pesananBelumSelesai()->whereNull('total_dibayarkan')->get();
-            foreach ($pesananBelumSelesai as $pesanan) {
-                $response['data']['pesanan'][] = $pesanan->load('detail_pesanan.produk.thumbnail');
-            }
-
-            // Mengambil histori pesanan yang sudah selesai
-            $historiPesanan = $pelanggan->historiPesanan()->get();
-            foreach ($historiPesanan as $histori) {
-                $response['data']['histori_pesanan'][] = $histori->load('detail_pesanan.produk.thumbnail');
-            }
-
-            return response()->json($response, 200);
-        } catch (\Exception $e) {
+        $pelanggan = Pelanggan::with('id_akun')->find($id_pelanggan);
+        if (is_null($pelanggan)) {
             return response()->json([
-                'message' => 'Gagal mendapatkan data pelanggan: ' . $e->getMessage()
-            ], 500);
+                "message" => "Pengguna tidak ditemukan",
+                "data" => null
+            ], 404);
         }
+        $pesanan = Pesanan::where('id_pelanggan', $id_pelanggan)
+            ->with([
+                'pengiriman',
+                'status_pesanan_latest' => function ($query) {
+                    $query->select('id_status_pesanan', 'status_pesanans.id_pesanan', 'status', 'created_at');
+                },
+                'detail_pesanan.produk.thumbnail',
+                'detail_pesanan.hampers',
+            ])
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                "message" => "Tidak ada pesanan ditemukan",
+                "data" => null
+            ], 404);
+        }
+
+        // Calculate points for each pesanan
+        foreach ($pesanan as $order) {
+            $order->points = $order->calculate_poin();
+        }
+
+        return response()->json([
+            "message" => "Berhasil menampilkan pesanan",
+            "data" => $pesanan
+        ], 200);
     }
 
 

@@ -159,6 +159,72 @@ class PesananController extends Controller
         ]);
     }
 
+    /**
+     * Process a Pesanan by its ID.
+     *
+     * @param string $id_pesanan The ID of the Pesanan to process.
+     * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the process.
+     */
+    public function processPesananByIdPesanan(string $id_pesanan)
+    {
+        /**
+         * Retrieve a specific Pesanan with related data.
+         *
+         * @param int $id_pesanan The ID of the Pesanan to retrieve.
+         * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|null The Pesanan model with related data, or null if not found.
+         */
+        $pesanan = Pesanan::with([
+            'pelanggan',
+            'status_pesanan_latest' => function ($query) {
+                $query->where('status', 'Diterima');
+            }
+        ])
+            ->findOrFail($id_pesanan);
+
+        /**
+         * Check if the pesanan exists and return the appropriate response.
+         *
+         * @param  \App\Pesanan  $pesanan The Pesanan model.
+         * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the check.
+         */
+        if (!$pesanan) {
+            return response()->json([
+                'message' => 'Pesanan tidak ditemukan',
+                'data' => null
+            ], 404);
+        }
+
+        /**
+         * Check if the pesanan has the latest status and return the appropriate response.
+         *
+         * @param  \App\Pesanan  $pesanan The Pesanan model.
+         * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the check.
+         */
+        if ($pesanan->status_pesanan_latest->isEmpty()) {
+            return response()->json([
+                'message' => 'Pesanan harus diterima terlebih dahulu',
+                'data' => $pesanan
+            ]);
+        }
+
+        /**
+         * Create a new status pesanan record.
+         *
+         * @param int $id_pesanan The ID of the pesanan.
+         * @param string $status The status of the pesanan.
+         * @return \App\Models\StatusPesanan The newly created status pesanan record.
+         */
+        StatusPesanan::create([
+            'id_pesanan' => $id_pesanan,
+            'status' => 'Diproses'
+        ]);
+
+        return response()->json([
+            'message' => 'Status pesanan berhasil diubah menjadi `Diproses`',
+            'data' => $pesanan
+        ]);
+    }
+
     public function listBahanBakuPerluDibeli($id) //menampilkan bahan baku yang perlu dibeli per produk dan total yang diperlukan
     {
         $pesanan = Pesanan::findOrFail($id);
@@ -243,9 +309,23 @@ class PesananController extends Controller
     }
 
     // @Nathan
-    public function createAcceptedPayment(Request $request, string $id_pesanan)
+    /**
+     * Create and confirm payment for a pesanan (order).
+     *
+     * @param \Illuminate\Http\Request $request The HTTP request object.
+     * @param string $id_pesanan The ID of the pesanan to create and confirm payment for.
+     * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the payment confirmation.
+     */
+    public function createConfirmPayment(Request $request, string $id_pesanan)
     {
-        $pesanan = Pesanan::with('pengiriman:id_pesanan,harga,jarak')->find($id_pesanan);
+        /**
+         * Retrieve a specific pesanan with its associated pengiriman.
+         *
+         * @param int $id_pesanan The ID of the pesanan to retrieve.
+         * @return \Illuminate\Http\JsonResponse The JSON response containing the pesanan data.
+         */
+        $pesanan = Pesanan::with('pengiriman:id_pesanan,harga,jarak')
+            ->find($id_pesanan);
 
         if (is_null($pesanan)) {
             return response()->json([
@@ -254,29 +334,57 @@ class PesananController extends Controller
             ], 404);
         }
 
+        /**
+         * Update the data of a Pesanan (Order) based on the given request.
+         *
+         * @param  \Illuminate\Http\Request  $request The HTTP request object.
+         * @return \Illuminate\Http\Response The HTTP response object.
+         */
         $updateData = $request->all();
+
         $validate = Validator::make($updateData, [
-            'total_dibayarkan' => 'required|int|min:' . $pesanan->total_setelah_diskon + $pesanan->pengiriman->harga,
-            // 'id_karyawan' => 'required'
+            'total_dibayarkan' => 'required|int|min:' . $pesanan->total_setelah_diskon + isset($pesanan->pengiriman->harga) ? $pesanan->pengiriman->harga : 0,
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
 
+        /**
+         * Create a new status pesanan.
+         *
+         * @param int $id_pesanan The ID of the pesanan.
+         * @param string $status The status of the pesanan.
+         * @return \App\Models\StatusPesanan The newly created status pesanan.
+         */
         $status = StatusPesanan::create([
             'id_pesanan' => $id_pesanan,
-            // 'id_karyawan' => $updateData['id_karyawan'],
             'status' => "Pembayaran valid"
         ]);
 
-        $totalTip = $updateData['total_dibayarkan'] - ($pesanan->total_setelah_diskon + $pesanan->pengiriman->harga);
+        /**
+         * Calculate and update the total tip for a pesanan (order).
+         *
+         * @param array $updateData The updated data for the pesanan.
+         * @param Pesanan $pesanan The pesanan object.
+         * @return void
+         */
+        $totalTip = $updateData['total_dibayarkan'] - ($pesanan->total_setelah_diskon + isset($pesanan->pengiriman->harga) ? $pesanan->pengiriman->harga : 0);
 
         if ($totalTip > 0) {
             $updateData['total_tip'] = $totalTip;
         } else {
             $updateData['total_tip'] = 0;
         }
+
+        /**
+         * Update the verification status of a pesanan and return a JSON response.
+         *
+         * @param  \Illuminate\Http\Request  $request The HTTP request object.
+         * @param  \App\Models\Pesanan  $pesanan The pesanan object.
+         * @return \Illuminate\Http\JsonResponse The JSON response containing the result of the update.
+         */
+        $updateData['verified_at'] = now();
 
         if ($pesanan->update($updateData) && $status) {
             return response()->json([
@@ -711,6 +819,16 @@ class PesananController extends Controller
             'status' => $data['status']
         ]);
 
+        if ($data['status'] === 'Selesai') {
+            $pesanan->accepted_at = now();
+            $pesanan->save();
+
+            return response()->json([
+                'message' => 'Pesanan diterima',
+                'data' => $status
+            ], 200);
+        }
+
         if ($status) {
             return response()->json([
                 'message' => 'Berhasil mengubah status pesanan',
@@ -777,25 +895,38 @@ class PesananController extends Controller
             'id_pelanggan' => 'required',
             'tgl_order' => 'required|date',
             'total_diskon_poin' => 'required|numeric',
-            'jenis_pengiriman' => 'required|string',
+            'jenis_pengiriman' => 'required|string|in:Kurir Toko,Kurir Ojol,Ambil Sendiri',
             'nama' => 'string',
             'telepon' => 'string',
             'alamat' => 'string',
         ]);
 
-        $data['produk'] = $data['produk'] ?? [];
-        $data['produk_hampers'] = $data['produk_hampers'] ?? [];
-
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
 
+        $data['produk'] = $data['produk'] ?? [];
+        $data['produk_hampers'] = $data['produk_hampers'] ?? [];
+
+        /**
+         * Generate a unique ID for a new order.
+         *
+         * This function generates a unique ID for a new order by combining the current year, month, and a sequential number.
+         *
+         * @return string The generated unique ID for the new order.
+         */
         $tahun = date('y');
         $bulan = date('m');
 
         $nomorUrut = Pesanan::count() + 1;
         $id_pesanan = sprintf('%02d.%02d.%d', $tahun, $bulan, $nomorUrut);
 
+        /**
+         * Calculate the total pesanan based on the provided data.
+         *
+         * @param array $data The data containing the produk and produk_hampers information.
+         * @return int The total pesanan value.
+         */
         $total_pesanan = 0;
         if (isset($data['produk']) && count($data['produk']) > 0) {
             foreach ($data['produk'] as $produk) {
@@ -809,15 +940,38 @@ class PesananController extends Controller
             }
         }
 
-        $previous_total_poin = Poin::where('id_pelanggan', $data['id_pelanggan'])->orderBy('id_poin', 'desc')->latest()->value('total_poin') ?? 0;
+
+        /**
+         * Calculate the previous total points of a customer and check if it is sufficient for the discount.
+         *
+         * @param array $data The data containing the customer ID and the total discount points.
+         * @return \Illuminate\Http\JsonResponse The JSON response indicating if the points are sufficient or not.
+         */
+        $previous_total_poin = Poin::where('id_pelanggan', $data['id_pelanggan'])
+            ->orderBy('id_poin', 'desc')
+            ->latest()
+            ->value('total_poin') ?? 0;
 
         if ($data['total_diskon_poin'] > 0) {
             if ($previous_total_poin < $data['total_diskon_poin']) {
-                return response(['message' => 'Poin Tidak Cukup'], 400);
+                return response()->json(['message' => 'Poin tidak mencukupi'], 400);
             }
         }
+
+        /**
+         * Calculate the total after discount based on the provided data.
+         *
+         * @param array $data The data containing the total pesanan and the total discount points.
+         * @return int The total after discount value.
+         */
         $total_setelah_diskon = $total_pesanan - ($data['total_diskon_poin'] * 100);
 
+        /**
+         * Create a new order based on the provided data.
+         *
+         * @param array $data The data containing the order information.
+         * @return \Illuminate\Http\JsonResponse The JSON response indicating the success or failure of the operation.
+         */
         $pesanan = Pesanan::create([
             'id_pesanan' => $id_pesanan,
             'id_metode_pembayaran' => $data['id_metode_pembayaran'],
@@ -828,10 +982,20 @@ class PesananController extends Controller
             'total_setelah_diskon' => $total_setelah_diskon,
             'total_tip' => 0,
             'jenis_pengiriman' => $data['jenis_pengiriman'],
-            'verified_at' => $data['verified_at'] ?? null,
-            'accepted_at' => $data['accepted_at'] ?? null,
+            'verified_at' => null,
+            'accepted_at' => null,
         ]);
 
+
+        /**
+         * Create a new Poin record.
+         *
+         * @param  int  $id_pesanan  The ID of the pesanan.
+         * @param  int  $id_pelanggan  The ID of the pelanggan.
+         * @param  int  $penambahan_poin  The amount of poin to be added (negative value for deduction).
+         * @param  int  $total_poin  The updated total poin after deduction.
+         * @return void
+         */
         Poin::create([
             'id_pesanan' => $pesanan->id_pesanan,
             'id_pelanggan' => $data['id_pelanggan'],
@@ -841,6 +1005,13 @@ class PesananController extends Controller
 
         $previous_total_poin -= $data['total_diskon_poin'];
 
+        /**
+         * Create detail pesanan for each produk in the data array.
+         *
+         * @param array $data The data array containing the produk information.
+         * @param Pesanan $pesanan The pesanan object.
+         * @return void
+         */
         if (isset($data['produk']) && count($data['produk']) > 0) {
             foreach ($data['produk'] as $produk) {
                 DetailPesanan::create([
@@ -855,6 +1026,13 @@ class PesananController extends Controller
             }
         }
 
+        /**
+         * Create detail pesanan for each produk hampers in the data array.
+         *
+         * @param array $data The data array containing the produk hampers information.
+         * @param Pesanan $pesanan The pesanan object.
+         * @return void
+         */
         if (isset($data['produk_hampers']) && count($data['produk_hampers']) > 0) {
             foreach ($data['produk_hampers'] as $hampers) {
                 DetailPesanan::create([
@@ -869,44 +1047,50 @@ class PesananController extends Controller
             }
         }
 
-        $poin = 0;
-        if ($total_pesanan >= 1000000) {
-            $poin += (int)($total_pesanan / 1000000) * 200;
-            $total_pesanan %= 1000000;
-        }
-        if ($total_pesanan >= 500000) {
-            $poin += (int)($total_pesanan / 500000) * 75;
-            $total_pesanan %= 500000;
-        }
-        if ($total_pesanan >= 100000) {
-            $poin += (int)($total_pesanan / 100000) * 15;
-            $total_pesanan %= 100000;
-        }
-        if ($total_pesanan >= 10000) $poin += (int)($total_pesanan / 10000) * 1;
+        /**
+         * Calculate the points based on the total order amount.
+         *
+         * @param int $total_pesanan The total order amount.
+         * @return int The calculated points.
+         */
+        // $poin = 0;
+        // if ($total_pesanan >= 1000000) {
+        //     $poin += (int)($total_pesanan / 1000000) * 200;
+        //     $total_pesanan %= 1000000;
+        // }
+        // if ($total_pesanan >= 500000) {
+        //     $poin += (int)($total_pesanan / 500000) * 75;
+        //     $total_pesanan %= 500000;
+        // }
+        // if ($total_pesanan >= 100000) {
+        //     $poin += (int)($total_pesanan / 100000) * 15;
+        //     $total_pesanan %= 100000;
+        // }
+        // if ($total_pesanan >= 10000) $poin += (int)($total_pesanan / 10000) * 1;
 
         $pelanggan = Pelanggan::find($data['id_pelanggan']);
-        if ($pelanggan) {
-            $tgl_order = new \DateTime($data['tgl_order']);
-            $tgl_lahir = new \DateTime($pelanggan->tgl_lahir);
+        // if ($pelanggan) {
+        //     $tgl_order = new \DateTime($data['tgl_order']);
+        //     $tgl_lahir = new \DateTime($pelanggan->tgl_lahir);
 
-            $tgl_ultah_tahun_ini = new \DateTime($tgl_order->format('Y') . '-' . $tgl_lahir->format('m') . '-' . $tgl_lahir->format('d'));
+        //     $tgl_ultah_tahun_ini = new \DateTime($tgl_order->format('Y') . '-' . $tgl_lahir->format('m') . '-' . $tgl_lahir->format('d'));
 
-            $batas_bawah_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('-3 days');
-            $batas_atas_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('+3 days');
+        //     $batas_bawah_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('-3 days');
+        //     $batas_atas_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('+3 days');
 
-            if ($tgl_order >= $batas_bawah_tgl_lahir && $tgl_order <= $batas_atas_tgl_lahir) {
-                $poin *= 2;
-            }
-        }
+        //     if ($tgl_order >= $batas_bawah_tgl_lahir && $tgl_order <= $batas_atas_tgl_lahir) {
+        //         $poin *= 2;
+        //     }
+        // }
 
-        $new_total_poin = $previous_total_poin + $poin;
+        // $new_total_poin = $previous_total_poin + $poin;
 
-        Poin::create([
-            'id_pesanan' => $pesanan->id_pesanan,
-            'id_pelanggan' => $data['id_pelanggan'],
-            'penambahan_poin' => $poin,
-            'total_poin' => $new_total_poin,
-        ]);
+        // Poin::create([
+        //     'id_pesanan' => $pesanan->id_pesanan,
+        //     'id_pelanggan' => $data['id_pelanggan'],
+        //     'penambahan_poin' => $poin,
+        //     'total_poin' => $new_total_poin,
+        // ]);
 
         if ($data['jenis_pengiriman'] == "Kurir Toko" || $data['jenis_pengiriman'] == "Kurir Ojol") {
             Pengiriman::create([
@@ -915,23 +1099,39 @@ class PesananController extends Controller
                 'telepon' => $data['telepon'],
                 'alamat' => $data['alamat'],
             ]);
+
+            StatusPesanan::create([
+                'id_pesanan' => $pesanan->id_pesanan,
+                'status' => "Menunggu ongkir",
+            ]);
+        } else {
+            StatusPesanan::create([
+                'id_pesanan' => $pesanan->id_pesanan,
+                'status' => "Menunggu pembayaran",
+            ]);
         }
 
-        // TODO: Harusnya status menunggu ongkir kalau dipilih jenis pengiriman selain Ambil sendiri, kalau ambil sendiri harus langsung bayar, dan statusnya 'Sudah dibayar'
-        StatusPesanan::create([
-            'id_pesanan' => $pesanan->id_pesanan,
-            'status' => "Menunggu ongkir",
-        ]);
-
+        /**
+         * Retrieve the cart for the specified customer and check if it exists.
+         *
+         * @param  \App\Models\Pelanggan  $pelanggan
+         * @return \Illuminate\Http\Response
+         */
         $keranjang = Keranjang::where('id_pelanggan', $pelanggan->id_pelanggan)->first();
 
         if (is_null($keranjang)) {
             return response([
-                'message' => 'Tidak ada keranjang untuk dihapus',
+                'message' => 'Keranjang tidak ditemukan',
                 'data' => null,
             ], 404);
         }
 
+        /**
+         * Delete all detail keranjang associated with a keranjang.
+         *
+         * @param  \App\Models\Keranjang  $keranjang
+         * @return \Illuminate\Http\Response
+         */
         $detail_keranjang = DetailKeranjang::where('id_keranjang', $keranjang->id_keranjang)->get();
 
         if ($detail_keranjang->isEmpty()) {
@@ -942,8 +1142,9 @@ class PesananController extends Controller
         }
 
         $detail_keranjang->each->delete();
+
         return response([
-            'message' => 'Berhasil membuat pesanan',
+            'message' => 'Pesanan berhasil dibuat',
             'data' => $pesanan
         ], 200);
     }
