@@ -27,8 +27,6 @@ use App\Http\Controllers\PengirimanController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\StatusPesananController;
 use App\Http\Controllers\MetodePembayaranController;
-use App\Models\MetodePembayaran;
-use App\Models\PemesananBahanBaku;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,7 +38,7 @@ use App\Models\PemesananBahanBaku;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-//laporan jeha
+
 Route::get('laporan-pengeluaran-pemasukkan', [LaporanPengeluaranPemasukkanController::class, 'laporanPengeluaranPemasukkan']);
 Route::get('laporan-pengeluaran-pemasukkan/{tahun}/{bulan}', [LaporanPengeluaranPemasukkanController::class, 'getPengeluaranPemasukkan']);
 Route::get('laporan-penitip', [LaporanPenitipController::class, 'rekapTransaksiPenitip']);
@@ -48,26 +46,7 @@ Route::get('laporan-penitip/{tahun}/{bulan}', [LaporanPenitipController::class, 
 Route::get('laporan-presensi', [LaporanPresensiGajiController::class, 'generateLaporan']);
 Route::get('laporan-presensi/{tahun}/{bulan}', [LaporanPresensiGajiController::class, 'generateLaporan']);
 
-// Simple AUTHENTICATION
-// Route::post('/register', [authController::class, 'register']);
-// Route::get('/register/verify/{verify_key}', [authController::class, 'verify']);
-// Route::post('/login', [authController::class, 'login']);
-
-// Route::post('/send-otp',  [ForgotPasswordController::class, 'sendOTP']);
-// Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
-// Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
-// Route::post('/auth/register', [AkunController::class, 'register']);
-// Route::post('/auth/send-otp', [AkunController::class, 'sendOTP']);
-// Route::post('/auth/verify', [AkunController::class, 'verifyOTP']);
-// Route::post('/auth/reset', [AkunController::class, 'resetPassword']);
-
-
 Route::resource('role', roleController::class);
-// Route::get('/role', [roleController::class, 'index']);
-// Route::post('/role', [roleController::class, 'store']);
-// Route::get('/role/{id}', [roleController::class, 'show']);
-// Route::put('/role/{id}', [roleController::class, 'update']);
-// Route::delete('/role/{id}', [roleController::class, 'destroy']);
 
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::post('/produk', [ProdukController::class, 'store']);
@@ -88,52 +67,19 @@ Route::post('/hampers/{id}', [ProdukHampersController::class, 'update']);
 Route::delete('/hampers/{id}', [ProdukHampersController::class, 'destroy']);
 
 Route::resource('bahan-baku/pemesanan', PemesananBahanBakuController::class);
-// Route::get('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'index']);
-// Route::post('/bahan-baku/pemesanan', [PemesananBahanBakuController::class, 'store']);
-// Route::get('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'show']);
-// Route::post('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'update']);
-// Route::delete('/bahan-baku/pemesanan/{id}', [PemesananBahanBakuController::class, 'destroy']);
-
 Route::resource('penitip', PenitipController::class);
-// Route::get('/penitip', [PenitipController::class, 'index']);
-// Route::post('/penitip', [PenitipController::class, 'store']);
-// Route::get('/penitip/{id}', [PenitipController::class, 'show']);
-// Route::put('/penitip/{id}', [PenitipController::class, 'update']);
-// Route::delete('/penitip/{id}', [PenitipController::class, 'destroy']);
-
 Route::resource('bahan-baku', BahanBakuController::class);
-// Route::get('/bahan-baku', [BahanBakuController::class, 'index']);
-// Route::post('/bahan-baku', [BahanBakuController::class, 'store']);
-// Route::get('/bahan-baku/{id}', [BahanBakuController::class, 'show']);
-// Route::put('/bahan-baku/{id}', [BahanBakuController::class, 'update']);
-// Route::delete('/bahan-baku/{id}', [BahanBakuController::class, 'destroy']);
-
-// Route::get('/karyawan', [KaryawanController::class, 'index']);
-// Route::post('/karyawan', [KaryawanController::class, 'store']);
-// Route::get('/karyawan/{id}', [KaryawanController::class, 'show']);
-// Route::put('/karyawan/{id}', [KaryawanController::class, 'update']);
-// Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
-
 Route::resource('resep', ResepProdukController::class);
-// Route::get('/resep', [ResepProdukController::class, 'index']);
-// Route::post('/resep', [ResepProdukController::class, 'store']);
-// Route::get('/resep/{id}', [ResepProdukController::class, 'show']); // id: id produk @Produk
-// Route::put('/resep/{id}', [ResepProdukController::class, 'update']); // id: id produk @Produk
-// Route::delete('/resep/{id}', [ResepProdukController::class, 'destroy']); // id: id resep @ResepProduk ⛔ It doesnt needed anymore!
+Route::resource('keranjang', KeranjangController::class);
+Route::resource('detail-keranjang', DetailKeranjangController::class);
+Route::resource('pengiriman', PengirimanController::class);
+Route::resource('alamat', AlamatController::class);
 
 Route::get('presensi/karyawan', [PresensiAbsenController::class, 'showByDate']);
 Route::resource('presensi', PresensiAbsenController::class);
 
 Route::resource('pelanggan', PelangganController::class);
-
 Route::resource('pengeluaran-lainnya', PengeluaranLainnyaController::class);
-// Route::get('/pengeluaran-lainnya', [PengeluaranLainnyaController::class, 'index']);
-// Route::post('/pengeluaran-lainnya', [PengeluaranLainnyaController::class, 'store']);
-// Route::get('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'show']);
-// Route::put('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'update']);
-// Route::delete('/pengeluaran-lainnya/{id}', [PengeluaranLainnyaController::class, 'destroy']);
-
-// Route::resource('pesanan', PesananController::class);
 
 Route::get('/pelanggan', [PelangganController::class, 'index']);
 Route::post('/pelanggan', [PelangganController::class, 'store']);
@@ -143,11 +89,7 @@ Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
 Route::post('/pelanggan/{id_pelanggan}/pesanan/{id_pesanan}/upload-bukti-pembayaran', [PelangganController::class, 'uploadBuktiPembayaran']);
 
 Route::get('/keranjang/{id}/{date}', [KeranjangController::class, 'show']);
-Route::resource('keranjang', KeranjangController::class);
 Route::delete('/detail-keranjang/delete/{id}', [DetailKeranjangController::class, 'destroyAll']);
-Route::resource('detail-keranjang', DetailKeranjangController::class);
-Route::resource('pengiriman', PengirimanController::class);
-Route::resource('alamat', AlamatController::class);
 
 Route::group([
 
@@ -169,13 +111,17 @@ Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInPro
 Route::get('/pesanan/rejected', [PesananController::class, 'getAllPesananRejected']);
 Route::get('/pesanan/paymentverified', [PesananController::class, 'getAllPesananPaymentVerified']);
 
+Route::post('/pesanan/status/{id_pesanan}', [PesananController::class, 'updateStatusPesanan']);
+Route::post('/bahan-baku/laporan', [PesananController::class, 'getBahanBakuUsageByPeriod']);
+Route::post('/bahan-baku/laporan/h', [PesananController::class, 'getBahanBakuUsageOfHampersByPeriod']);
+Route::post('/pesanan/auto-update', [PesananController::class, 'autoUpdateStatueAfter2Days']);
+Route::get('/pesanan/late', [PesananController::class, 'getAllPesananLatePayment']);
+
 Route::put('/pesanan/confirmpayments/{id_pesanan}', [PesananController::class, 'createAcceptedPayment']);
 Route::put('/pesanan/confirm/{id_pesanan}', [PesananController::class, 'pesananAcceptedByCustomer']);
 Route::get('/pesanan/laporan', [PesananController::class, 'getAllPendapatanBulanan']);
 
 Route::post('/status', [StatusPesananController::class, 'store']);
-
-//jeha open
 
 Route::get('/pesanan/perlu-dikonfirmasi', [PesananController::class, 'indexPesananPerluDikonfirmasi']);
 Route::post('/pesanan/{id}/terima', [PesananController::class, 'terimaPesanan']);
@@ -205,9 +151,6 @@ Route::resource('poin', PoinController::class);
 
 Route::resource('metode-pembayaran', MetodePembayaranController::class);
 Route::resource('pesanan', PesananController::class);
-
-
-// jeha close
 Route::resource('karyawan', KaryawanController::class);
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/logout', [authController::class, 'logout']);

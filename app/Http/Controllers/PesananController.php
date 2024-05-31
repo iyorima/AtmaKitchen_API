@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
-use App\Http\Requests\StorePesananRequest;
 use App\Http\Requests\UpdatePesananRequest;
 use App\Models\Poin;
 use App\Models\SaldoPelanggan;
@@ -21,6 +20,8 @@ use App\Models\DetailKeranjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+
 
 class PesananController extends Controller
 {
@@ -241,8 +242,6 @@ class PesananController extends Controller
         }
     }
 
-
-
     // @Nathan
     public function createAcceptedPayment(Request $request, string $id_pesanan)
     {
@@ -389,30 +388,6 @@ class PesananController extends Controller
         ], 200);
     }
 
-    // @Nathan
-    public function getAllPesananInProcess()
-    {
-        $pesanan = Pesanan::with([
-            'status_pesanan_latest',
-            'pelanggan',
-            'id_metode_pembayaran'
-        ])->where('verified_at', "!=", null)->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
-            return $query->where('status', 'Pesanan diproses');
-        })->get();
-
-        if ($pesanan->isEmpty()) {
-            return response()->json([
-                'message' => 'Pesanan tidak tersedia',
-                'data' => []
-            ], 200);
-        }
-
-        return response()->json([
-            'message' => 'Berhasil mendapatkan seluruh pesanan',
-            'data' => $pesanan
-        ], 200);
-    }
-
     public function getAllPesananRejected()
     {
         $pesanan = Pesanan::with([
@@ -457,6 +432,296 @@ class PesananController extends Controller
             'message' => 'Berhasil mendapatkan seluruh pesanan',
             'data' => $pesanan
         ], 200);
+    }
+
+    // @Nathan Week 3
+    /** 
+     * Menampilkan daftar pesanan yang sedang diproses (Admin)
+     **/
+    public function getAllPesananInProcess()
+    {
+        $pesanan = Pesanan::with([
+            'status_pesanan_latest',
+            'pelanggan',
+            'id_metode_pembayaran'
+        ])->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
+            return $query->select('id_status_pesanan', 'status')->where('status', 'Diterima');
+        })->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->noContent();
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan yang sedang diproses',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    /**
+     * Get all pesanan with late payment.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getAllPesananLatePayment()
+    {
+        $pesanan = Pesanan::with([
+            'status_pesanan_latest',
+            'pelanggan',
+            'id_metode_pembayaran'
+        ])->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
+            return $query->select('id_status_pesanan', 'status')->where('status', 'Dibatalkan otomatis');
+        })->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->noContent();
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan yang sedang diproses',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    /**
+     * Get the usage of raw materials by period.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBahanBakuUsageByPeriod(Request $request)
+    {
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        $start_date = $data['start_date'];
+        $end_date = $data['end_date'];
+
+        // Subquery to handle the specific case where ukuran is 10x20 cm
+        $subQuery = DB::table('detail_pesanans as dp')
+            ->join('produk_hampers as ph', 'dp.id_produk_hampers', '=', 'ph.id_produk_hampers')
+            ->join('detail_hampers as dh', 'ph.id_produk_hampers', '=', 'dh.id_produk_hampers')
+            ->join('produks as p', 'dh.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', function ($join) {
+                $join->on('p.id_produk', '=', 'rp.id_produk')
+                    ->orWhere(function ($query) {
+                        $query->where('p.ukuran', '10x20 cm')
+                            ->whereIn('rp.id_produk', function ($subQuery) {
+                                $subQuery->select('p2.id_produk')
+                                    ->from('produks as p2')
+                                    ->where('p2.ukuran', '20x20 cm')
+                                    ->whereColumn('p2.nama', 'p.nama');
+                            });
+                    });
+            })
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('bb.nama', DB::raw('SUM(CEIL(dp.jumlah/2) * rp.jumlah) as total'), 'bb.satuan')
+            ->whereBetween('dp.created_at', [$start_date, $end_date])
+            ->groupBy('bb.nama', 'bb.satuan');
+
+        $bahanBakuUsage = DB::table('detail_pesanans as dp')
+            ->join('produks as p', 'dp.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', function ($join) {
+                $join->on('p.id_produk', '=', 'rp.id_produk')
+                    ->orWhere(function ($query) {
+                        $query->where('p.ukuran', '10x20 cm')
+                            ->whereIn('rp.id_produk', function ($subQuery) {
+                                $subQuery->select('p2.id_produk')
+                                    ->from('produks as p2')
+                                    ->where('p2.ukuran', '20x20 cm')
+                                    ->whereColumn('p2.nama', 'p.nama');
+                            });
+                    });
+            })
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->whereBetween('dp.created_at', [$start_date, $end_date])
+            ->select('bb.nama', DB::raw('SUM(IF(p.ukuran = "10x20 cm", CEIL(dp.jumlah/2), dp.jumlah) * rp.jumlah) as total'), 'bb.satuan')
+            ->groupBy('bb.nama', 'bb.satuan')
+            ->unionAll($subQuery)
+            ->get();
+
+        // Group by nama and sum the totals
+        $groupedBahanBakuUsage = [];
+        foreach ($bahanBakuUsage as $item) {
+            if (isset($groupedBahanBakuUsage[$item->nama])) {
+                $groupedBahanBakuUsage[$item->nama]['total'] += $item->total;
+            } else {
+                $groupedBahanBakuUsage[$item->nama] = [
+                    'total' => $item->total,
+                    'satuan' => $item->satuan
+                ];
+            }
+        }
+
+        // Convert to the desired output format
+        $result = [];
+        foreach ($groupedBahanBakuUsage as $nama => $data) {
+            $result[] = [
+                'nama' => $nama,
+                'total' => $data['total'],
+                'satuan' => $data['satuan']
+            ];
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan penggunaan bahan baku',
+            'data' => $result
+        ], 200);
+    }
+
+    public function getBahanBakuUsageOfHampersByPeriod(Request $request)
+    {
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        $start_date = $data['start_date'];
+        $end_date = $data['end_date'];
+
+        // $bahanBakuUsage = DB::table('detail_pesanans')
+        //     ->join('produk_hampers', 'detail_pesanans.id_produk_hampers', '=', 'produk_hampers.id_produk_hampers')
+        //     ->join('detail_hampers', 'produk_hampers.id_produk_hampers', '=', 'detail_hampers.id_produk_hampers')
+        //     ->join('produks', 'detail_hampers.id_produk', '=', 'produks.id_produk')
+        //     ->join('resep_produks', 'produks.id_produk', '=', 'resep_produks.id_produk')
+        //     ->join('bahan_bakus', 'resep_produks.id_bahan_baku', '=', 'bahan_bakus.id_bahan_baku')
+        //     ->select('bahan_bakus.nama', DB::raw('SUM(detail_pesanans.jumlah * resep_produks.jumlah) as total'))
+        //     ->whereBetween('detail_hampers.created_at', [$start_date, $end_date])
+        //     ->groupBy('bahan_bakus.nama')
+        //     ->unionAll(function ($query) use ($start_date, $end_date) {
+        //         $query->select('bahan_bakus.nama', DB::raw('SUM(detail_pesanans.jumlah * resep_produks.jumlah) as total'))
+        //             ->from('detail_pesanans')
+        //             ->join('produk_hampers', 'detail_pesanans.id_produk_hampers', '=', 'produk_hampers.id_produk_hampers')
+        //             ->join('detail_hampers', 'produk_hampers.id_produk_hampers', '=', 'detail_hampers.id_produk_hampers')
+        //             ->join('produks', 'detail_hampers.id_produk', '=', 'produks.id_produk')
+        //             ->join('resep_produks', 'produks.id_produk', '=', 'resep_produks.id_produk')
+        //             ->join('bahan_bakus', 'resep_produks.id_bahan_baku', '=', 'bahan_bakus.id_bahan_baku')
+        //             ->whereBetween('detail_pesanans.created_at', [$start_date, $end_date])
+        //             ->orWhere(function ($query) {
+        //                 $query->where('produks.ukuran', '10x20 cm')
+        //                     ->whereIn('produks.nama', function ($subquery) {
+        //                         $subquery->select('produks.nama')
+        //                             ->from('produks')
+        //                             ->where('produks.ukuran', '20x20 cm');
+        //                     });
+        //             })
+        //             ->groupBy('bahan_bakus.nama');
+        //     })
+        //     ->get();
+
+        $bahanBakuUsage = DB::table('detail_pesanans as dp')
+            ->join('produk_hampers as ph', 'dp.id_produk_hampers', '=', 'ph.id_produk_hampers')
+            ->join('detail_hampers as dh', 'ph.id_produk_hampers', '=', 'dh.id_produk_hampers')
+            ->join('produks as p', 'dh.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', function ($join) {
+                $join->on('p.id_produk', '=', 'rp.id_produk')
+                    ->orWhere(function ($query) {
+                        $query->where('p.ukuran', '10x20 cm')
+                            ->whereIn('rp.id_produk', function ($subQuery) {
+                                $subQuery->select('p2.id_produk')
+                                    ->from('produks as p2')
+                                    ->where('p2.ukuran', '20x20 cm')
+                                    ->whereColumn('p2.nama', 'p.nama');
+                            });
+                    });
+            })
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('bb.nama', DB::raw('SUM(dp.jumlah * rp.jumlah) as total'))
+            ->whereBetween('dp.created_at', [$start_date, $end_date])
+            ->groupBy('bb.nama')->get();
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan penggunaan bahan baku hampers',
+            'data' => $bahanBakuUsage
+        ], 200);
+    }
+
+    /**
+     * Automatically updates the status of orders to "Pesanan dibatalkan" after 2 days
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function autoUpdateStatueAfter2Days()
+    {
+        $expired = Carbon::now()->subDays(2);
+
+        $pesanan = Pesanan::with('status_pesanan_latest')
+            ->whereHas('status_pesanan_latest', function ($query) {
+                $query->where('status', 'Menunggu ongkir');
+            })
+            ->where('tgl_order', '<', $expired)
+            ->get();
+
+        foreach ($pesanan as $p) {
+            StatusPesanan::create([
+                'id_pesanan' => $p->id_pesanan,
+                'status' => 'Dibatalkan otomatis'
+            ]);
+        }
+
+        return response()->json([
+            'data' => $pesanan
+        ]);
+    }
+
+    /**
+     * Update the status of a pesanan (order).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $id_pesanan
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatusPesanan(Request $request, string $id_pesanan)
+    {
+        $pesanan = Pesanan::find($id_pesanan);
+
+        if (!$pesanan) {
+            return response()->json([
+                'message' => 'Pesanan tidak ditemukan',
+                'data' => null
+            ], 200);
+        }
+
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'status' => 'required|in:Siap dipickup,Sedang dikirim kurir,Sudah dipickup,Selesai'
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        $status = StatusPesanan::create([
+            'id_pesanan' => $id_pesanan,
+            'status' => $data['status']
+        ]);
+
+        if ($status) {
+            return response()->json([
+                'message' => 'Berhasil mengubah status pesanan',
+                'data' => $status
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Gagal mengubah status pesanan',
+            'data' => null
+        ], 404);
     }
 
     // @Nathan
