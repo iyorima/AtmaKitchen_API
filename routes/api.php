@@ -105,9 +105,9 @@ Route::group([
 });
 
 
+Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInProcess']);
 Route::get('/pesanan/delivery', [PesananController::class, 'getAllPesananNeedConfirmDelivery']);
 Route::get('/pesanan/confirmpayments', [PesananController::class, 'getAllPesananNeedConfirmPayment']);
-Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInProcess']);
 Route::get('/pesanan/rejected', [PesananController::class, 'getAllPesananRejected']);
 Route::get('/pesanan/paymentverified', [PesananController::class, 'getAllPesananPaymentVerified']);
 

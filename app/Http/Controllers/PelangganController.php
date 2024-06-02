@@ -77,7 +77,7 @@ class PelangganController extends Controller
     public function uploadBuktiPembayaran(Request $request, $id_pelanggan, $id_pesanan)
     {
         $validator = Validator::make($request->all(), [
-            'bukti_pembayaran' => 'image|mimes:jpg,png,jpeg|max:2048',
+            'bukti_pembayaran' => 'image|mimes:jpg,png,jpeg|max:10240 ',
         ]);
 
         if ($validator->fails()) {

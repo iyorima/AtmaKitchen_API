@@ -227,86 +227,57 @@ class PesananController extends Controller
 
     public function listBahanBakuPerluDibeli($id) //menampilkan bahan baku yang perlu dibeli per produk dan total yang diperlukan
     {
-        $pesanan = Pesanan::findOrFail($id);
-        $listBahanBakuPerluDibeli = []; //init
-        $totalKekuranganPerBahanBaku = []; //init
+        // Common part of the query used in both subQuery and mainQuery
+        $commonJoin = function ($join) {
+            $join->on('p.id_produk', '=', 'rp.id_produk')
+                ->orWhere(function ($query) {
+                    $query->where('p.ukuran', '10x20 cm')
+                        ->whereIn('rp.id_produk', function ($subQuery) {
+                            $subQuery->select('p2.id_produk')
+                                ->from('produks as p2')
+                                ->where('p2.ukuran', '20x20 cm')
+                                ->whereColumn('p2.nama', 'p.nama');
+                        });
+                });
+        };
 
-        $detailPesanan = DetailPesanan::where('id_pesanan', $pesanan->id_pesanan)->get();
-        foreach ($detailPesanan as $detail) {
-            $produk = Produk::findOrFail($detail->id_produk);
-            $resepProduk = ResepProduk::where('id_produk', $produk->id_produk)->get();
+        // subQuery part
+        $subQuery = DB::table('detail_pesanans as dp')
+            ->join('produk_hampers as ph', 'dp.id_produk_hampers', '=', 'ph.id_produk_hampers')
+            ->join('detail_hampers as dh', 'ph.id_produk_hampers', '=', 'dh.id_produk_hampers')
+            ->join('produks as p', 'dh.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', $commonJoin)
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('dp.id_pesanan', 'bb.nama', DB::raw('SUM(CEIL(dp.jumlah/2) * rp.jumlah) as total'), 'bb.satuan')
+            ->where('dp.id_pesanan', $id)
+            ->groupBy('dp.id_pesanan', 'bb.nama', 'bb.satuan');
 
-            // init
-            $dataProduk = [
-                'id_produk' => $produk->id_produk,
-                'stok' => $produk->kapasitas,
-                'total_dibutuhkan' => 0,
-                'total_kekurangan' => 0,
-                'bahan_baku_perlu_dibeli' => []
-            ];
+        // mainQuery part
+        $mainQuery = DB::table('detail_pesanans as dp')
+            ->join('produks as p', 'dp.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', $commonJoin)
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('dp.id_pesanan', 'bb.nama', DB::raw('SUM(IF(p.ukuran = "10x20 cm", CEIL(dp.jumlah/2), dp.jumlah) * rp.jumlah) as total'), 'bb.satuan')
+            ->where('dp.id_pesanan', $id)
+            ->groupBy('dp.id_pesanan', 'bb.nama', 'bb.satuan');
 
-            if (!$resepProduk->isEmpty()) {
-                foreach ($resepProduk as $resep) {
-                    $bahanBaku = BahanBaku::findOrFail($resep->id_bahan_baku);
-                    $stok = $bahanBaku->stok;
-                    $jumlahBahanBakuDibutuhkan = $resep->jumlah * $detail->jumlah;
-                    if ($stok < $jumlahBahanBakuDibutuhkan) {
-                        $dataProduk['total_dibutuhkan'] += $jumlahBahanBakuDibutuhkan;
-                        $kekurangan = $jumlahBahanBakuDibutuhkan - $stok;
-                        $dataProduk['total_kekurangan'] += $kekurangan;
-                        //data yang bakal di push ke array
-                        $dataBahanBaku = [
-                            'id_bahan_baku' => $bahanBaku->id_bahan_baku,
-                            'nama_bahan_baku' => $bahanBaku->nama,
-                            'total_kekurangan' => $kekurangan
-                        ];
-                        $dataProduk['bahan_baku_perlu_dibeli'][] = $dataBahanBaku; //data yg perlu di beli per produk
+        // Union all subQuery and mainQuery
+        $unionQuery = $mainQuery->unionAll($subQuery);
 
-                        if (!isset($totalKekuranganPerBahanBaku[$bahanBaku->id_bahan_baku])) {
-                            $totalKekuranganPerBahanBaku[$bahanBaku->id_bahan_baku] = 0;
-                        }
-                        $totalKekuranganPerBahanBaku[$bahanBaku->id_bahan_baku] += $kekurangan;
-                    }
-                }
-            }
+        // Final query to show only bahan baku where usage > stok
+        $bahanBakuUsage = DB::table(DB::raw("({$unionQuery->toSql()}) as combinedQuery"))
+            ->mergeBindings($unionQuery) // Bindings are necessary for subqueries
+            ->join('bahan_bakus as bb', 'combinedQuery.nama', '=', 'bb.nama')
+            ->select('combinedQuery.id_pesanan', 'combinedQuery.nama', 'combinedQuery.total', 'bb.stok', 'combinedQuery.satuan')
+            ->havingRaw('combinedQuery.total > bb.stok')
+            ->get();
 
-            if ($dataProduk['total_kekurangan'] > 0) {
-                $listBahanBakuPerluDibeli[] = $dataProduk;
-            }
-        }
-
-        //gabung semua biar tau total kekurangan berapa
-        $totalKekuranganPerBahanBakuMerged = [];
-        foreach ($totalKekuranganPerBahanBaku as $idBahanBaku => $totalKekurangan) {
-            $bahanBaku = BahanBaku::findOrFail($idBahanBaku);
-            $totalKekuranganPerBahanBakuMerged[] = [
-                'id_bahan_baku' => $idBahanBaku,
-                'nama_bahan_baku' => $bahanBaku->nama,
-                'total_kekurangan' => $totalKekurangan
-            ];
-        }
-
-        if (empty($listBahanBakuPerluDibeli)) { //kalau gada yang kurang
-            return response()->json([
-                'message' => 'Tidak ada bahan baku yang perlu dibeli untuk pesanan ini',
-                'data' => [
-                    'id_pesanan' => $pesanan->id_pesanan,
-                    'nama_pelanggan' => $pesanan->pelanggan->nama,
-                    'detail_pesanan' => $pesanan->detail_pesanan
-                ]
-            ]);
-        } else {
-            return response()->json([
-                'message' => 'List bahan baku yang perlu dibeli',
-                'data' => [
-                    'id_pesanan' => $pesanan->id_pesanan,
-                    'nama_pelanggan' => $pesanan->pelanggan->nama,
-                    'list_produk_dan_bahan_baku' => $listBahanBakuPerluDibeli,
-                    'total_kekurangan_per_bahan_baku' => $totalKekuranganPerBahanBakuMerged
-                ]
-            ]);
-        }
+        return response()->json([
+            'message' => 'Berhasil mendapatkan penggunaan bahan baku',
+            'data' => $bahanBakuUsage
+        ], 200);
     }
+
 
     // @Nathan
     /**
@@ -342,8 +313,11 @@ class PesananController extends Controller
          */
         $updateData = $request->all();
 
+        $biaya_kirim = isset($pesanan->pengiriman->harga) ? $pesanan->pengiriman->harga : 0;
+
         $validate = Validator::make($updateData, [
-            'total_dibayarkan' => 'required|int|min:' . $pesanan->total_setelah_diskon + isset($pesanan->pengiriman->harga) ? $pesanan->pengiriman->harga : 0,
+            'total_dibayarkan' => 'required|int|min:' . $pesanan->total_setelah_diskon +
+                $biaya_kirim,
         ]);
 
         if ($validate->fails()) {
@@ -447,16 +421,24 @@ class PesananController extends Controller
     }
 
     // @Nathan
+    /**
+     * Get all pesanan that need to confirm delivery.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getAllPesananNeedConfirmDelivery()
     {
         $pesanan = Pesanan::with([
             'pelanggan',
             'status_pesanan_latest',
             'pengiriman',
-            'id_metode_pembayaran'
-        ])->where('jenis_pengiriman', "!=", "Ambil Sendiri")->whereHas('status_pesanan_latest', function ($query) {
-            return $query->where('status', 'Menunggu Ongkir');
-        })->orderBy('id_pesanan', 'desc')->get();
+            'id_metode_pembayaran',
+            'detail_pesanan'
+        ])->where('jenis_pengiriman', '!=', 'Ambil Sendiri')
+            ->whereHas('status_pesanan_latest', function ($query) {
+                return $query->where('status', 'Menunggu ongkir');
+            })
+            ->orderBy('id_pesanan', 'desc')->get();
 
         if ($pesanan->isEmpty()) {
             return response()->json([
@@ -466,22 +448,31 @@ class PesananController extends Controller
         }
 
         return response()->json([
-            'message' => 'Berhasil mendapatkan seluruh pesanan',
+            'message' => 'Berhasil mendapatkan pesanan',
             'data' => $pesanan
         ], 200);
     }
 
     // @Nathan
     // Status: Sudah dibayar tapi belum di konfirmasi admin
+    /**
+     * Get all pesanan that need to confirm payment.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getAllPesananNeedConfirmPayment()
     {
         $pesanan = Pesanan::with([
-            'status_pesanan_latest',
             'pelanggan',
-            'id_metode_pembayaran'
-        ])->where('verified_at', null)->whereHas('status_pesanan_latest', function ($query) {
-            return $query->where('status', 'Sudah dibayar');
-        })->get();
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran',
+            'detail_pesanan'
+        ])
+            ->whereHas('status_pesanan_latest', function ($query) {
+                return $query->where('status', 'Sudah dibayar');
+            })
+            ->orderBy('id_pesanan', 'desc')->get();
 
         if ($pesanan->isEmpty()) {
             return response()->json([
@@ -499,12 +490,16 @@ class PesananController extends Controller
     public function getAllPesananRejected()
     {
         $pesanan = Pesanan::with([
-            'status_pesanan_latest',
             'pelanggan',
-            'id_metode_pembayaran'
-        ])->where('verified_at', "!=", null)->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
-            return $query->where('status', 'Pesanan ditolak');
-        })->get();
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran',
+            'detail_pesanan'
+        ])
+            ->whereHas('status_pesanan_latest', function ($query) {
+                return $query->where('status', 'Ditolak');
+            })
+            ->orderBy('id_pesanan', 'desc')->get();
 
         if ($pesanan->isEmpty()) {
             return response()->json([
@@ -522,12 +517,16 @@ class PesananController extends Controller
     public function getAllPesananPaymentVerified()
     {
         $pesanan = Pesanan::with([
-            'status_pesanan_latest',
             'pelanggan',
-            'id_metode_pembayaran'
-        ])->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
-            return $query->where('status', 'Pembayaran valid');
-        })->get();
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran',
+            'detail_pesanan'
+        ])
+            ->whereHas('status_pesanan_latest', function ($query) {
+                return $query->where('status', 'Pembayaran valid');
+            })
+            ->orderBy('id_pesanan', 'desc')->get();
 
         if ($pesanan->isEmpty()) {
             return response()->json([
@@ -549,12 +548,16 @@ class PesananController extends Controller
     public function getAllPesananInProcess()
     {
         $pesanan = Pesanan::with([
-            'status_pesanan_latest',
             'pelanggan',
-            'id_metode_pembayaran'
-        ])->where('accepted_at', null)->whereHas('status_pesanan_latest', function ($query) {
-            return $query->select('id_status_pesanan', 'status')->where('status', 'Diterima');
-        })->get();
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran',
+            'detail_pesanan'
+        ])
+            ->whereHas('status_pesanan_latest', function ($query) {
+                return $query->where('status', 'Diproses');
+            })
+            ->orderBy('id_pesanan', 'desc')->get();
 
         if ($pesanan->isEmpty()) {
             return response()->noContent();
