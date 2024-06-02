@@ -229,7 +229,13 @@ class PesananController extends Controller
         ]);
     }
 
-    public function listBahanBakuPerluDibeli($id) //menampilkan bahan baku yang perlu dibeli per produk dan total yang diperlukan
+    /**
+     * Display the list of raw materials that need to be purchased per product and the total required.
+     *
+     * @param  int  $id  The ID of the order.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function listBahanBakuPerluDibeli($id)
     {
         // Common part of the query used in both subQuery and mainQuery
         $commonJoin = function ($join) {
