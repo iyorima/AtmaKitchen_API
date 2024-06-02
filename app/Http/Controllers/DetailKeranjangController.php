@@ -44,7 +44,6 @@ class DetailKeranjangController extends Controller
         $validate = Validator::make(
             $storeData,
             [
-                'id_produk' => 'required',
                 'jumlah' => 'required|int|min:1'
             ],
             [

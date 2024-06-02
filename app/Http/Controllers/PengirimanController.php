@@ -65,6 +65,12 @@ class PengirimanController extends Controller
      */
     public function update(Request $request, int $id_pengiriman)
     {
+        /**
+         * Retrieve a specific pengiriman by its ID.
+         *
+         * @param int $id_pengiriman The ID of the pengiriman to retrieve.
+         * @return \Illuminate\Http\JsonResponse The JSON response containing the pengiriman data or an error message.
+         */
         $pengiriman = Pengiriman::find($id_pengiriman);
 
         if (is_null($pengiriman)) {
@@ -76,38 +82,56 @@ class PengirimanController extends Controller
 
         $updateData = $request->all();
         $validate = Validator::make($updateData, [
-            'jarak' => 'required',
-            // 'harga' => 'required',
-            // 'id_kurir' => 'required',
+            'jarak' => 'required'
         ]);
 
         if ($validate->fails()) {
             return response(['message' => $validate->errors()], 400);
         }
 
-        if ($updateData['jarak'] <= 5) {
-            $updateData['harga'] = 10000;
-        } else if ($updateData['jarak'] <= 10) {
-            $updateData['harga'] = 15000;
-        } else if ($updateData['jarak'] <= 15) {
-            $updateData['harga'] = 20000;
+        /**
+         * Calculate the delivery price based on the distance.
+         *
+         * @param array $updateData The data containing the distance and price to be updated.
+         * @return void
+         */
+        $jarak = $updateData['jarak'];
+        if ($jarak <= 5) {
+            $harga = 10000;
+        } else if ($jarak <= 10) {
+            $harga = 15000;
+        } else if ($jarak <= 15) {
+            $harga = 20000;
         } else {
-            $updateData['harga'] = 25000;
+            $harga = 25000;
         }
+        $updateData['harga'] = $harga;
 
-        $statusPesanan = StatusPesanan::where('id_pesanan', $pengiriman->id_pesanan)->where('status', 'Menunggu pembayaran')->first();
+        /**
+         * Check if a status for the order is already created with the status "Menunggu pembayaran".
+         * If not, create a new status for the order with the status "Menunggu pembayaran".
+         *
+         * @param  \App\Models\Pengiriman  $pengiriman
+         * @return void
+         */
+        $isStatusCreated = StatusPesanan::where('id_pesanan', $pengiriman->id_pesanan)
+            ->where('status', 'Menunggu pembayaran')
+            ->first();
 
-        // return response()->json([
-        //     'data' => $statusPesanan
-        // ], 200);
-
-        if (!$statusPesanan) {
+        if (!$isStatusCreated) {
             StatusPesanan::create([
                 'id_pesanan' => $pengiriman->id_pesanan,
                 'status' => 'Menunggu pembayaran'
             ]);
         }
 
+        /**
+         * Update the delivery distance and return a JSON response.
+         *
+         * @param  \Illuminate\Http\Request  $request
+         * @param  int  $id
+         * @return \Illuminate\Http\JsonResponse
+         */
         if ($pengiriman->update($updateData)) {
             return response()->json([
                 "message" => "Berhasil menambahkan jarak kirim",

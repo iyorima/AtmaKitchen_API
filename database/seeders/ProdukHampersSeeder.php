@@ -20,7 +20,7 @@ class ProdukHampersSeeder extends Seeder
         ]);
         ProdukHampers::factory()->create([
             'nama' => 'Paket B',
-            'harga_jual' => '50000',
+            'harga_jual' => '500000',
             'image' => 'https://atmaimages.blob.core.windows.net/images/PAKET B.png'
         ]);
         ProdukHampers::factory()->create([

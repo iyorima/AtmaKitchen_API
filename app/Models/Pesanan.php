@@ -74,4 +74,43 @@ class Pesanan extends Model
     {
         return $this->hasOne(Poin::class, 'id_pesanan');
     }
+
+    /**
+     * Calculate the points earned from a pesanan (order).
+     *
+     * @return int The total points earned.
+     */
+    public function calculate_poin()
+    {
+        $points = 0;
+        $total = $this->total_pesanan;
+
+        $points += intdiv($total, 1000000) * 200;
+        $total %= 1000000;
+
+        $points += intdiv($total, 500000) * 75;
+        $total %= 500000;
+
+        $points += intdiv($total, 100000) * 15;
+        $total %= 100000;
+
+        $points += intdiv($total, 10000) * 1;
+
+        // Handle double points if tgl_order is within 3 days after and before the customer's birthday.
+        $customerBirthday = $this->pelanggan->tgl_lahir;
+        $tglOrder = $this->tgl_order;
+
+        $customerBirthday = date('Y') . substr($customerBirthday, 4); // Set the year of the customer's birthday to the current year for comparison.
+        $customerBirthday = date_create($customerBirthday);
+        $tglOrder = date_create($tglOrder);
+
+        $diff = date_diff($customerBirthday, $tglOrder);
+        $daysDifference = $diff->days;
+
+        if ($daysDifference >= -3 && $daysDifference <= 3) {
+            $points *= 2;
+        }
+
+        return ['poin' => $points, 'is_double_poin' => $daysDifference >= -3 && $daysDifference <= 3];
+    }
 }

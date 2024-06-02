@@ -37,6 +37,12 @@ class KeranjangController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    /**
+     * Store a new item in the shopping cart.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(Request $request)
     {
         $storeData = $request->all();
@@ -67,32 +73,30 @@ class KeranjangController extends Controller
             } else {
                 $data['id_produk_hampers'] = $storeData['id_produk_hampers'];
             }
-
-            $detail_keranjang = DetailKeranjang::create($data);
-
-            return response([
-                'message' => 'Produk berhasil ditambahkan ke keranjang',
-                'data' => $detail_keranjang,
-            ], 200);
         }
 
-        $keranjang = Keranjang::create([
-            'id_pelanggan' => $request->id_pelanggan,
-        ]);
+        if (is_null($keranjang)) {
+            $keranjang = Keranjang::create([
+                'id_pelanggan' => $request->id_pelanggan,
+            ]);
 
-        $detail_keranjang = DetailKeranjang::create([
-            'id_keranjang' => $keranjang->id_keranjang,
-            'jumlah' => $request->jumlah
-        ]);
+            $data = [
+                'id_keranjang' => $keranjang->id_keranjang,
+                'jumlah' => $request->jumlah,
+            ];
+
+            if (isset($storeData['id_produk'])) {
+                $data['id_produk'] = $storeData['id_produk'];
+            } else {
+                $data['id_produk_hampers'] = $storeData['id_produk_hampers'];
+            }
+        }
+
+        $detail_keranjang = DetailKeranjang::create($data);
 
         return response([
             'message' => 'Produk berhasil ditambahkan ke keranjang',
             'data' => $detail_keranjang,
-        ], 200);
-
-        return response([
-            'message' => 'Keranjang berhasil ditambahkan',
-            'data' => $keranjang,
         ], 200);
     }
 
