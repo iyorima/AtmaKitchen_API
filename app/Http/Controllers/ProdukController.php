@@ -170,7 +170,9 @@ class ProdukController extends Controller
 
             if (!is_null($product->id_penitip)) {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
-                    $query->whereDate('tgl_order', $date);
+                    $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                        $query->where('status', '!=', 'ditolak');
+                    });;
                 })
                     ->where('id_produk', $product->id_produk)
                     ->sum('jumlah');
@@ -180,7 +182,9 @@ class ProdukController extends Controller
                 $readyStock = $remainingCapacity;
             } else {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
-                    $query->whereDate('tgl_order', $date);
+                    $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                        $query->where('status', '!=', 'ditolak');
+                    });;
                 })
                     ->where('id_produk', $product->id_produk)
                     ->sum('jumlah');
@@ -230,7 +234,9 @@ class ProdukController extends Controller
 
             if (!is_null($product->id_penitip)) {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                    $query->whereDate('tgl_order', $date);
+                    $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                        $query->where('status', '!=', 'ditolak');
+                    });;
                 })
                     ->where('id_produk', $id)
                     ->sum('jumlah');
@@ -239,7 +245,9 @@ class ProdukController extends Controller
                 $readyStock = $remainingCapacity;
             } else {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                    $query->whereDate('tgl_order', $date);
+                    $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                        $query->where('status', '!=', 'ditolak');
+                    });;
                 })
                     ->where('id_produk', $id)
                     ->sum('jumlah');
@@ -266,7 +274,9 @@ class ProdukController extends Controller
                 $stock = 0;
             } else {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                    $query->whereDate('tgl_order', $date);
+                    $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                        $query->where('status', '!=', 'ditolak');
+                    });;
                 })
                     ->where('id_produk', $id)
                     ->sum('jumlah');

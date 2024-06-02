@@ -49,7 +49,7 @@ class PesananController extends Controller
     {
         $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan', 'pengiriman', 'id_metode_pembayaran'])
             ->whereDoesntHave('status_pesanan', function ($query) {
-                $query->where('status', 'Pesanan diterima');
+                $query->where('status', 'Diterima');
             })
             ->get();
 
@@ -59,51 +59,63 @@ class PesananController extends Controller
         ]);
     }
 
-    public function terimaPesanan(Request $request, $id)
+    public function terimaPesanan($id)
     {
         $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
             ->findOrFail($id);
-        $pesanan->status_pesanan()->update([
-            'status' => 'Diterima'
+        StatusPesanan::create([
+            'id_pesanan' => $pesanan->id_pesanan,
+            'status' => "Diterima"
         ]);
 
-        $totalPesanan = $pesanan->total_pesanan;
-        $additionalPoints = 0;
+        $previous_total_poin = Poin::where('id_pelanggan', $pesanan->id_pelanggan)
+            ->orderBy('id_poin', 'desc')
+            ->latest()
+            ->value('total_poin') ?? 0;
 
-        $remainingPesanan = $totalPesanan;
+        $poin = 0;
+        if ($pesanan->total_pesanan >= 1000000) {
+            $poin += (int)($pesanan->total_pesanan / 1000000) * 200;
+            $pesanan->total_pesanan %= 1000000;
+        }
+        if ($pesanan->total_pesanan >= 500000) {
+            $poin += (int)($pesanan->total_pesanan / 500000) * 75;
+            $pesanan->total_pesanan %= 500000;
+        }
+        if ($pesanan->total_pesanan >= 100000) {
+            $poin += (int)($pesanan->total_pesanan / 100000) * 15;
+            $pesanan->total_pesanan %= 100000;
+        }
+        if ($pesanan->total_pesanan >= 10000) $poin += (int)($pesanan->total_pesanan / 10000) * 1;
 
-        $pointsTiers = [
-            1000000 => 200,
-            500000 => 75,
-            100000 => 15,
-            10000 => 1,
-        ];
+        $pelanggan = Pelanggan::find($pesanan->id_pelanggan);
 
-        foreach ($pointsTiers as $threshold => $points) {
-            while ($remainingPesanan >= $threshold) {
-                $remainingPesanan -= $threshold;
-                $additionalPoints += $points;
+        if ($pelanggan) {
+            $tgl_order = new \DateTime($pesanan->tgl_order);
+            $tgl_lahir = new \DateTime($pelanggan->tgl_lahir);
+
+            $tgl_ultah_tahun_ini = new \DateTime($tgl_order->format('Y') . '-' . $tgl_lahir->format('m') . '-' . $tgl_lahir->format('d'));
+
+            $batas_bawah_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('-3 days');
+            $batas_atas_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('+3 days');
+
+            if ($tgl_order >= $batas_bawah_tgl_lahir && $tgl_order <= $batas_atas_tgl_lahir) {
+                $poin *= 2;
             }
         }
 
-        $latestPoin = Poin::where('id_pelanggan', $pesanan->pelanggan->id_pelanggan)->latest()->first();
+        $new_total_poin = $previous_total_poin + $poin;
 
-        $totalPoin = $latestPoin ? $latestPoin->total_poin + $additionalPoints : $additionalPoints;
-
-        $poin = new Poin([
+        $poin_new = Poin::create([
             'id_pesanan' => $pesanan->id_pesanan,
-            'id_pelanggan' => $pesanan->pelanggan->id_pelanggan,
-            'total_poin' => $totalPoin,
-            'penambahan_poin' => $additionalPoints,
+            'id_pelanggan' => $pesanan->id_pelanggan,
+            'penambahan_poin' => $poin,
+            'total_poin' => $new_total_poin,
         ]);
-
-        $poin->save();
-
-
 
         return response()->json([
             'message' => 'Pesanan diterima',
-            'data' => $pesanan, $poin
+            'data' => $pesanan, $poin_new
         ]);
     }
 
@@ -111,51 +123,43 @@ class PesananController extends Controller
     {
         $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
             ->findOrFail($id);
-        $pesanan->status_pesanan()->update([
-            'status' => 'Ditolak'
+        StatusPesanan::create([
+            'id_pesanan' => $pesanan->id_pesanan,
+            'status' => "Ditolak"
         ]);
-
-        // Mengembalikan stok produk
-        foreach ($pesanan->detail_pesanan as $detailPesanan) {
-            $produk = $detailPesanan->produk;
-            $produk->kapasitas += $detailPesanan->jumlah;
-            $produk->save();
-        }
 
         $pelanggan = $pesanan->pelanggan;
 
         $akun = Akun::where('id_akun', $pelanggan->id_akun)->first();
-        $latestSaldo = SaldoPelanggan::where('id_akun', $pesanan->pelanggan->id_akun)->latest()->first();
 
-        // Hitung total yang dibayarkan dari pesanan
-        $totalDibayarkan = $pesanan->total_dibayarkan;
+        $saldoPelanggan = SaldoPelanggan::where('id_akun', $akun->id_akun)
+            ->orderBy('id_akun', 'desc')
+            ->latest()
+            ->value('total_saldo') ?? 0;;
 
-        $saldoPelanggan = SaldoPelanggan::where('id_akun', $akun->id_akun)->first();
-
-        $saldoPelanggan = $latestSaldo ? $latestSaldo->total_saldo + $totalDibayarkan : $totalDibayarkan;
-
-
-        $saldoPelanggan = new SaldoPelanggan([
+        SaldoPelanggan::create([
             'id_pesanan' => $pesanan->id_pesanan,
             'id_akun' => $akun->id_akun,
-            'id_pelanggan' => $pesanan->pelanggan->id_pelanggan,
-            'total_saldo' => $saldoPelanggan,
-            'saldo' => $totalDibayarkan,
+            'total_saldo' => $pesanan->total_setelah_diskon + $saldoPelanggan,
+            'saldo' => $pesanan->total_setelah_diskon,
         ]);
 
-        $saldoPelanggan->save();
-
         //poin
-        $poins = Poin::where('id_pesanan', $pesanan->id_pesanan)->get();
-        foreach ($poins as $poin) {
-            $poin->total_poin -= $poin->penambahan_poin;
-            $poin->penambahan_poin = 0;
-            $poin->save();
-        }
+        $previous_total_poin = Poin::where('id_pelanggan', $pesanan->id_pelanggan)
+            ->orderBy('id_poin', 'desc')
+            ->latest()
+            ->value('total_poin') ?? 0;
+
+        Poin::create([
+            'id_pesanan' => $pesanan->id_pesanan,
+            'id_pelanggan' => $pesanan->id_pelanggan,
+            'penambahan_poin' => ($pesanan->total_diskon_poin / 100),
+            'total_poin' => $previous_total_poin + ($pesanan->total_diskon_poin / 100),
+        ]);
 
         return response()->json([
             'message' => 'Pesanan ditolak',
-            'data' => $pesanan, $poins, $saldoPelanggan
+            'data' => $pesanan, $saldoPelanggan
         ]);
     }
 
@@ -810,7 +814,7 @@ class PesananController extends Controller
         $data = $request->all();
 
         $validate = Validator::make($data, [
-            'status' => 'required|in:Siap dipickup,Sedang dikirim kurir,Sudah dipickup,Selesai'
+            'status' => 'required|in:Siap dipickup,Sedang dikirim kurir,Sudah dipickup,Selesai,Diterima,Diproses,Ditolak'
         ]);
 
         if ($validate->fails()) {
@@ -1050,50 +1054,7 @@ class PesananController extends Controller
             }
         }
 
-        /**
-         * Calculate the points based on the total order amount.
-         *
-         * @param int $total_pesanan The total order amount.
-         * @return int The calculated points.
-         */
-        // $poin = 0;
-        // if ($total_pesanan >= 1000000) {
-        //     $poin += (int)($total_pesanan / 1000000) * 200;
-        //     $total_pesanan %= 1000000;
-        // }
-        // if ($total_pesanan >= 500000) {
-        //     $poin += (int)($total_pesanan / 500000) * 75;
-        //     $total_pesanan %= 500000;
-        // }
-        // if ($total_pesanan >= 100000) {
-        //     $poin += (int)($total_pesanan / 100000) * 15;
-        //     $total_pesanan %= 100000;
-        // }
-        // if ($total_pesanan >= 10000) $poin += (int)($total_pesanan / 10000) * 1;
-
         $pelanggan = Pelanggan::find($data['id_pelanggan']);
-        // if ($pelanggan) {
-        //     $tgl_order = new \DateTime($data['tgl_order']);
-        //     $tgl_lahir = new \DateTime($pelanggan->tgl_lahir);
-
-        //     $tgl_ultah_tahun_ini = new \DateTime($tgl_order->format('Y') . '-' . $tgl_lahir->format('m') . '-' . $tgl_lahir->format('d'));
-
-        //     $batas_bawah_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('-3 days');
-        //     $batas_atas_tgl_lahir = (clone $tgl_ultah_tahun_ini)->modify('+3 days');
-
-        //     if ($tgl_order >= $batas_bawah_tgl_lahir && $tgl_order <= $batas_atas_tgl_lahir) {
-        //         $poin *= 2;
-        //     }
-        // }
-
-        // $new_total_poin = $previous_total_poin + $poin;
-
-        // Poin::create([
-        //     'id_pesanan' => $pesanan->id_pesanan,
-        //     'id_pelanggan' => $data['id_pelanggan'],
-        //     'penambahan_poin' => $poin,
-        //     'total_poin' => $new_total_poin,
-        // ]);
 
         if ($data['jenis_pengiriman'] == "Kurir Toko" || $data['jenis_pengiriman'] == "Kurir Ojol") {
             Pengiriman::create([
@@ -1208,6 +1169,33 @@ class PesananController extends Controller
         ], 200);
     }
 
+    public function showToday()
+    {
+        $date = date('Y-m-d', strtotime('-1 day'));
+
+        $data = Pesanan::with([
+            'pelanggan',
+            'pengiriman',
+            'id_metode_pembayaran',
+            'status_pesanan_latest',
+            'detail_pesanan' => function ($query) {
+                $query->with([
+                    'hampers',
+                    'produk.thumbnail'
+                ]);
+            }
+        ])
+            ->where('tgl_order', $date)
+            ->whereHas('status_pesanan_latest', function ($query) {
+                $query->where('status', 'Diterima');
+            })
+            ->get();
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan pesanan yang harus diproses hari ini',
+            'data' => $data
+        ], 200);
+    }
     /**
      * Update the specified resource in storage.
      */
