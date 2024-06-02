@@ -151,6 +151,7 @@ Route::get('/poin/harga/{total_harga}', [PoinController::class, 'showGetPoin']);
 Route::resource('poin', PoinController::class);
 
 Route::resource('metode-pembayaran', MetodePembayaranController::class);
+Route::get('/pesanan/hari-ini', [PesananController::class, 'showToday']);
 Route::resource('pesanan', PesananController::class);
 Route::get('/pesanan/laporan/{date}', [PesananController::class, 'showByMonth']);
 

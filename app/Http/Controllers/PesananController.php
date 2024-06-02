@@ -166,6 +166,7 @@ class PesananController extends Controller
         $totalKekuranganPerBahanBaku = []; //init
 
         $detailPesanan = DetailPesanan::where('id_pesanan', $pesanan->id_pesanan)->get();
+
         foreach ($detailPesanan as $detail) {
             $produk = Produk::findOrFail($detail->id_produk);
             $resepProduk = ResepProduk::where('id_produk', $produk->id_produk)->get();
@@ -203,6 +204,7 @@ class PesananController extends Controller
                     }
                 }
             }
+
 
             if ($dataProduk['total_kekurangan'] > 0) {
                 $listBahanBakuPerluDibeli[] = $dataProduk;
@@ -699,7 +701,7 @@ class PesananController extends Controller
         $data = $request->all();
 
         $validate = Validator::make($data, [
-            'status' => 'required|in:Siap dipickup,Sedang dikirim kurir,Sudah dipickup,Selesai'
+            'status' => 'required|in:Siap dipickup,Sedang dikirim kurir,Sudah dipickup,Selesai,Diterima,Diproses,Ditolak'
         ]);
 
         if ($validate->fails()) {
@@ -1004,6 +1006,33 @@ class PesananController extends Controller
         ], 200);
     }
 
+    public function showToday()
+    {
+        $date = date('Y-m-d', strtotime('-1 day'));
+
+        $data = Pesanan::with([
+            'pelanggan',
+            'pengiriman',
+            'id_metode_pembayaran',
+            'status_pesanan_latest',
+            'detail_pesanan' => function ($query) {
+                $query->with([
+                    'hampers',
+                    'produk.thumbnail'
+                ]);
+            }
+        ])
+            ->where('tgl_order', $date)
+            ->whereHas('status_pesanan_latest', function ($query) {
+                $query->where('status', 'Diterima');
+            })
+            ->get();
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan pesanan yang harus diproses hari ini',
+            'data' => $data
+        ], 200);
+    }
     /**
      * Update the specified resource in storage.
      */
