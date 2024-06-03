@@ -278,8 +278,9 @@ class PesananController extends Controller
         $bahanBakuUsage = DB::table(DB::raw("({$unionQuery->toSql()}) as combinedQuery"))
             ->mergeBindings($unionQuery) // Bindings are necessary for subqueries
             ->join('bahan_bakus as bb', 'combinedQuery.nama', '=', 'bb.nama')
-            ->select('combinedQuery.id_pesanan', 'combinedQuery.nama', 'combinedQuery.total', 'bb.stok', 'combinedQuery.satuan')
-            ->havingRaw('combinedQuery.total > bb.stok')
+            ->select('combinedQuery.id_pesanan', 'combinedQuery.nama', DB::raw('SUM(combinedQuery.total) as total'), 'bb.stok', 'combinedQuery.satuan')
+            ->groupBy('combinedQuery.id_pesanan', 'combinedQuery.nama', 'combinedQuery.satuan', 'bb.stok')
+            ->havingRaw('SUM(combinedQuery.total) > bb.stok')
             ->get();
 
         return response()->json([
@@ -1202,6 +1203,121 @@ class PesananController extends Controller
             'data' => $data
         ], 200);
     }
+
+    public function showBahanBakuUsage($id)
+    {
+        // Common part of the query used in both subQuery and mainQuery
+        $commonJoin = function ($join) {
+            $join->on('p.id_produk', '=', 'rp.id_produk')
+                ->orWhere(function ($query) {
+                    $query->where('p.ukuran', '10x20 cm')
+                        ->whereIn('rp.id_produk', function ($subQuery) {
+                            $subQuery->select('p2.id_produk')
+                                ->from('produks as p2')
+                                ->where('p2.ukuran', '20x20 cm')
+                                ->whereColumn('p2.nama', 'p.nama');
+                        });
+                });
+        };
+
+        // subQuery part
+        $subQuery = DB::table('detail_pesanans as dp')
+            ->join('produk_hampers as ph', 'dp.id_produk_hampers', '=', 'ph.id_produk_hampers')
+            ->join('detail_hampers as dh', 'ph.id_produk_hampers', '=', 'dh.id_produk_hampers')
+            ->join('produks as p', 'dh.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', $commonJoin)
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('dp.id_pesanan', 'bb.nama', DB::raw('SUM(CEIL(dp.jumlah/2) * rp.jumlah) as total'), 'bb.satuan')
+            ->where('dp.id_pesanan', $id)
+            ->groupBy('dp.id_pesanan', 'bb.nama', 'bb.satuan');
+
+        // mainQuery part
+        $mainQuery = DB::table('detail_pesanans as dp')
+            ->join('produks as p', 'dp.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', $commonJoin)
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('dp.id_pesanan', 'bb.nama', DB::raw('SUM(IF(p.ukuran = "10x20 cm", CEIL(dp.jumlah/2), dp.jumlah) * rp.jumlah) as total'), 'bb.satuan')
+            ->where('dp.id_pesanan', $id)
+            ->groupBy('dp.id_pesanan', 'bb.nama', 'bb.satuan');
+
+        // Union all subQuery and mainQuery
+        $unionQuery = $mainQuery->unionAll($subQuery);
+
+        // Final query to show only bahan baku where usage > stok
+        $bahanBakuUsage = DB::table(DB::raw("({$unionQuery->toSql()}) as combinedQuery"))
+            ->mergeBindings($unionQuery) // Bindings are necessary for subqueries
+            ->join('bahan_bakus as bb', 'combinedQuery.nama', '=', 'bb.nama')
+            ->select('combinedQuery.nama', DB::raw('SUM(combinedQuery.total) as total'), 'combinedQuery.satuan')
+            ->groupBy('combinedQuery.nama', 'combinedQuery.satuan')
+            // ->havingRaw('SUM(combinedQuery.total) > bb.stok')
+            ->get();
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan penggunaan bahan baku',
+            'data' => $bahanBakuUsage
+        ], 200);
+    }
+
+    public function useBahanBaku($id)
+    {
+        // Common part of the query used in both subQuery and mainQuery
+        $commonJoin = function ($join) {
+            $join->on('p.id_produk', '=', 'rp.id_produk')
+                ->orWhere(function ($query) {
+                    $query->where('p.ukuran', '10x20 cm')
+                        ->whereIn('rp.id_produk', function ($subQuery) {
+                            $subQuery->select('p2.id_produk')
+                                ->from('produks as p2')
+                                ->where('p2.ukuran', '20x20 cm')
+                                ->whereColumn('p2.nama', 'p.nama');
+                        });
+                });
+        };
+
+        // subQuery part
+        $subQuery = DB::table('detail_pesanans as dp')
+            ->join('produk_hampers as ph', 'dp.id_produk_hampers', '=', 'ph.id_produk_hampers')
+            ->join('detail_hampers as dh', 'ph.id_produk_hampers', '=', 'dh.id_produk_hampers')
+            ->join('produks as p', 'dh.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', $commonJoin)
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('dp.id_pesanan', 'bb.nama', DB::raw('SUM(CEIL(dp.jumlah/2) * rp.jumlah) as total'), 'bb.satuan')
+            ->where('dp.id_pesanan', $id)
+            ->groupBy('dp.id_pesanan', 'bb.nama', 'bb.satuan');
+
+        // mainQuery part
+        $mainQuery = DB::table('detail_pesanans as dp')
+            ->join('produks as p', 'dp.id_produk', '=', 'p.id_produk')
+            ->join('resep_produks as rp', $commonJoin)
+            ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
+            ->select('dp.id_pesanan', 'bb.nama', DB::raw('SUM(IF(p.ukuran = "10x20 cm", CEIL(dp.jumlah/2), dp.jumlah) * rp.jumlah) as total'), 'bb.satuan')
+            ->where('dp.id_pesanan', $id)
+            ->groupBy('dp.id_pesanan', 'bb.nama', 'bb.satuan');
+
+        // Union all subQuery and mainQuery
+        $unionQuery = $mainQuery->unionAll($subQuery);
+
+        // Final query to get all bahan baku usage
+        $bahanBakuUsage = DB::table(DB::raw("({$unionQuery->toSql()}) as combinedQuery"))
+            ->mergeBindings($unionQuery) // Bindings are necessary for subqueries
+            ->join('bahan_bakus as bb', 'combinedQuery.nama', '=', 'bb.nama')
+            ->select('combinedQuery.nama', DB::raw('SUM(combinedQuery.total) as total'), 'bb.stok', 'combinedQuery.satuan')
+            ->groupBy('combinedQuery.nama', 'combinedQuery.satuan', 'bb.stok')
+            ->get();
+
+        // Update the stok for each bahan baku
+        foreach ($bahanBakuUsage as $usage) {
+            DB::table('bahan_bakus')
+                ->where('nama', $usage->nama)
+                ->update(['stok' => DB::raw('stok - ' . $usage->total)]);
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mengurangi stok bahan baku',
+            'data' => $bahanBakuUsage
+        ], 200);
+    }
+
     /**
      * Update the specified resource in storage.
      */
