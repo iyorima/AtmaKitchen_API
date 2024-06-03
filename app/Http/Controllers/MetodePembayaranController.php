@@ -13,7 +13,19 @@ class MetodePembayaranController extends Controller
      */
     public function index()
     {
-        //
+        $metodePembayaran = MetodePembayaran::all();
+
+        if (count($metodePembayaran) > 0) {
+            return response([
+                'message' => 'Berhasil Mendapatkan semua metode pembayaran.',
+                'data' => $metodePembayaran
+            ], 200);
+        }
+
+        return response([
+            'message' => 'metode pembayaran masih kosong',
+            'data' => null
+        ], 400);
     }
 
     /**

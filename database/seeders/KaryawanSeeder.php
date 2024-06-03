@@ -13,9 +13,14 @@ class KaryawanSeeder extends Seeder
      */
     public function run(): void
     {
-        Karyawan::factory()->create([
-            'id_akun' => 3,
-        ]);
-        Karyawan::factory()->count(10)->create();
+        // Karyawan::factory()->create([
+        //     'id_akun' => 3,
+        // ]);
+
+        for ($i = 3; $i < 6; $i++) {
+            Karyawan::factory()->create([
+                'id_akun' => $i,
+            ]);
+        }
     }
 }

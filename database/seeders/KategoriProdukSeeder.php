@@ -12,7 +12,6 @@ class KategoriProdukSeeder extends Seeder
      */
     public function run(): void
     {
-        // TODO: Buat apa ya ini? titipan bisa di cek dari produk kan ada id_penitip :(
         KategoriProduk::factory()->create([
             'kategori' => 'Cake'
         ]);

@@ -12,80 +12,107 @@ class StatusPesananSeeder extends Seeder
      */
     public function run(): void
     {
-        // 07.03.24.001 | Waiting state
+        // status:
+        // - menunggu ongkir *
+        // - sudah dibayar
+        // - pembayaran valid
+        // - ditolak
+        // - diterima
+        // - diproses
+        // - siap di-pickup
+        // - sedang dikirim kurir
+        // - sudah di-pickup
+        // - selesai
+
+        // 24.03.1 | Waiting state
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.001',
+            'id_pesanan' => '24.03.1',
             'id_karyawan' => 1,
             'status' => 'Menunggu ongkir'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.001',
+            'id_pesanan' => '24.03.1',
             'id_karyawan' => 1,
-            'status' => 'Menunggu pembayaran'
+            'status' => 'Sudah dibayar'
         ]);
 
-        // 17.03.24.002 | Success state
+        // 24.03.2 | Success state
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.002',
+            'id_pesanan' => '24.03.2',
             'id_karyawan' => 1,
             'status' => 'Menunggu ongkir'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.002',
+            'id_pesanan' => '24.03.2',
             'id_karyawan' => 1,
-            'status' => 'Menunggu pembayaran'
+            'status' => 'Sudah dibayar'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.002',
+            'id_pesanan' => '24.03.2',
             'id_karyawan' => 1,
-            'status' => 'Menunggu konfirmasi pembayaran'
+            'status' => 'Pembayaran valid'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.002',
+            'id_pesanan' => '24.03.2',
             'id_karyawan' => 1,
-            'status' => 'Pesanan diproses'
+            'status' => 'Diterima'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.002',
+            'id_pesanan' => '24.03.2',
             'id_karyawan' => 1,
-            'status' => 'Pesanan dikirim'
+            'status' => 'Diproses'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.002',
+            'id_pesanan' => '24.03.2',
             'id_karyawan' => 1,
-            'status' => 'Pesanan diterima'
-        ]);
-
-        // 17.03.24.003 | Rejected State
-        // StatusPesanan::factory()->create([
-        //     'id_pesanan' => '17.03.24.003',
-        //     'id_karyawan' => 1,
-        //     'status' => 'Menunggu ongkir'
-        // ]);
-        StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.003',
-            'id_karyawan' => 1,
-            'status' => 'Menunggu pembayaran'
+            'status' => 'Sedang dikirim kurir'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.003',
+            'id_pesanan' => '24.03.2',
             'id_karyawan' => 1,
-            'status' => 'Menunggu konfirmasi pembayaran'
-        ]);
-        StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.003',
-            'id_karyawan' => 1,
-            'status' => 'Pesanan diproses'
-        ]);
-        StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.003',
-            'id_karyawan' => 1,
-            'status' => 'Pesanan ditolak'
+            'status' => 'Selesai'
         ]);
 
-        // 17.03.24.004 | Success
+        // 24.03.3 | Rejected State
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.004',
+            'id_pesanan' => '24.03.3',
+            'id_karyawan' => 1,
+            'status' => 'Sudah dibayar'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.3',
+            'id_karyawan' => 1,
+            'status' => 'Pembayaran valid'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.3',
+            'id_karyawan' => 1,
+            'status' => 'Diterima'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.3',
+            'id_karyawan' => 1,
+            'status' => 'Diproses'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.3',
+            'id_karyawan' => 1,
+            'status' => 'Siap dipickup'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.3',
+            'id_karyawan' => 1,
+            'status' => 'Sudah dipickup'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.3',
+            'id_karyawan' => 1,
+            'status' => 'Selesai'
+        ]);
+
+        // 24.03.4 | Menunggu ongkir
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.4',
             'id_karyawan' => 1,
             'status' => 'Menunggu ongkir'
         ]);
@@ -110,23 +137,58 @@ class StatusPesananSeeder extends Seeder
         //     'status' => 'Pesanan telah diambil'
         // ]);
 
-        // 17.03.24.005 | Success
+        // 24.03.5 | Ditolak
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.005',
+            'id_pesanan' => '24.03.5',
             'id_karyawan' => 1,
             'status' => 'Menunggu ongkir'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.5',
+            'id_karyawan' => 1,
+            'status' => 'Sudah dibayar'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.5',
+            'id_karyawan' => 1,
+            'status' => 'Pembayaran valid'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.5',
+            'id_karyawan' => 1,
+            'status' => 'Ditolak'
         ]);
 
-        // 17.03.24.006 | Waiting state
+        // 24.03.6 | Waiting kurir state
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.006',
+            'id_pesanan' => '24.03.6',
             'id_karyawan' => 1,
             'status' => 'Menunggu ongkir'
         ]);
         StatusPesanan::factory()->create([
-            'id_pesanan' => '17.03.24.006',
+            'id_pesanan' => '24.03.6',
             'id_karyawan' => 1,
-            'status' => 'Menunggu pembayaran'
+            'status' => 'Sudah dibayar'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.6',
+            'id_karyawan' => 1,
+            'status' => 'Pembayaran valid'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.6',
+            'id_karyawan' => 1,
+            'status' => 'Diterima'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.6',
+            'id_karyawan' => 1,
+            'status' => 'Diproses'
+        ]);
+        StatusPesanan::factory()->create([
+            'id_pesanan' => '24.03.6',
+            'id_karyawan' => 1,
+            'status' => 'Sedang dikirim kurir'
         ]);
     }
 }

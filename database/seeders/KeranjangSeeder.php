@@ -16,17 +16,17 @@ class KeranjangSeeder extends Seeder
             'id_pelanggan' => 1
         ]);
         Keranjang::factory()->create([
-            'id_pelanggan' => 1
-        ]);
-        Keranjang::factory()->create([
-            'id_pelanggan' => 1
-        ]);
-        Keranjang::factory()->create([
             'id_pelanggan' => 2
         ]);
-        Keranjang::factory()->create([
-            'id_pelanggan' => 2
-        ]);
-        Keranjang::factory()->count(5)->create();
+        // Keranjang::factory()->create([
+        //     'id_pelanggan' => 1
+        // ]);
+        // Keranjang::factory()->create([
+        //     'id_pelanggan' => 1
+        // ]);
+        // Keranjang::factory()->create([
+        //     'id_pelanggan' => 2
+        // ]);
+        // Keranjang::factory()->count(5)->create();
     }
 }

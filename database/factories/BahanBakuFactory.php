@@ -17,8 +17,9 @@ class BahanBakuFactory extends Factory
     public function definition(): array
     {
         return [
-            'stok' => $this->faker->numberBetween(1, 10000),
-            'stok_minumum' => $this->faker->numberBetween(1, 10000),
+            // 'stok' => $this->faker->numberBetween(1, 10000),
+            'stok' => 1000,
+            'stok_minumum' => 10,
             'updated_at' => $this->faker->dateTimeThisMonth()->format('Y-m-d H:i:s'),
         ];
     }

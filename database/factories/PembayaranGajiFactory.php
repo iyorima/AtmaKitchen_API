@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PembayaranGaji>
  */
@@ -15,11 +16,11 @@ class PembayaranGajiFactory extends Factory
      */
     public function definition(): array
     {
-       
+
         return [
-            'id_karyawan' => $this->faker->numberBetween(1, 10),
+            'id_karyawan' => $this->faker->numberBetween(1, 3),
             'total' => $this->faker->randomFloat(2, 50000, 3000000),
-            'bonus' => $this->faker->numberBetween(10000, 200000), 
+            'bonus' => $this->faker->numberBetween(10000, 200000),
         ];
     }
 }
