@@ -24,4 +24,12 @@ class SaldoPelanggan extends Model
     {
         return $this->belongsTo(Akun::class, 'id_akun', 'id_akun');
     }
+
+    public static function saldoPelangganLatest()
+    {
+        return self::orderBy('created_at', 'desc')
+            ->get()
+            ->unique('id_akun')
+            ->values();
+    }
 }

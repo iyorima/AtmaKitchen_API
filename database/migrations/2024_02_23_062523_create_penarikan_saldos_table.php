@@ -16,6 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_akun');
             $table->foreign('id_akun')->references('id_akun')->on('akuns')->onDelete('cascade');
             $table->double('jumlah_penarikan', 10, 2);
+            $table->enum('nama_bank', ['bca', 'mandiri'])->nullable(); // Changed default('bca')->nullable() to nullable()
+            $table->string('nomor_rekening')->nullable();
             $table->enum('status', ['menunggu', 'selesai', 'ditolak'])->default('menunggu');
             $table->timestamp('transfer_at')->nullable();
             $table->timestamps();

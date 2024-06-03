@@ -41,12 +41,12 @@ class PesananController extends Controller
 
     public function indexPesananPerluDikonfirmasi()
     {
-        $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan_latest', 'pengiriman', 'id_metode_pembayaran'])
+        $pesananPerluDikonfirmasi = Pesanan::with(['pelanggan', 'status_pesanan_latest', 'pengiriman', 'metode_pembayaran'])
         ->whereDoesntHave('status_pesanan', function ($query) {
-            $query->where('status', 'Pesanan diterima');
+            $query->whereIn('status', ['Pesanan diterima', 'Pesanan ditolak']);
         })
         ->get();
-
+    
         return response()->json([
             'message' => 'Daftar pesanan',
             'data' => $pesananPerluDikonfirmasi
@@ -55,8 +55,9 @@ class PesananController extends Controller
 
     public function terimaPesanan(Request $request, $id)
     {
-        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
+        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan_latest'])
             ->findOrFail($id);
+            
         $pesanan->status_pesanan()->update([
             'status' => 'Pesanan diterima'
         ]);
@@ -102,7 +103,7 @@ class PesananController extends Controller
 
     public function tolakPesanan($id)
     {
-        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan'])
+        $pesanan = Pesanan::with(['pelanggan', 'status_pesanan_latest'])
             ->findOrFail($id);
         $pesanan->status_pesanan()->update([
             'status' => 'Pesanan ditolak'

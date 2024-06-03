@@ -13,7 +13,7 @@ class SaldoPelangganController extends Controller
      */
     public function index()
     {
-        $saldoPelanggan = SaldoPelanggan::all();
+        $saldoPelanggan = SaldoPelanggan::saldoPelangganLatest();
         if ($saldoPelanggan->isEmpty()) {
             return response()->json([
                 'message' => 'Tidak ada data saldo pelanggan',
@@ -29,7 +29,9 @@ class SaldoPelangganController extends Controller
 
     public function show(int $id_akun) //ini aku tampilin berdasarkan id_akun jadi get by customer gtu
 {
-    $saldoPelanggan = SaldoPelanggan::where('id_akun', $id_akun)->first();
+    $saldoPelanggan = SaldoPelanggan::where('id_akun', $id_akun)
+    ->latest('created_at')
+    ->first();
 
     if (!$saldoPelanggan) {
         return response()->json(['message' => 'Saldo tidak ditemukan untuk akun ini'], 404);
