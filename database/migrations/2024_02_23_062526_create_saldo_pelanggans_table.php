@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id_saldo_pelanggan');
             $table->unsignedBigInteger('id_akun');
             $table->foreign('id_akun')->references('id_akun')->on('akuns')->onDelete('cascade');
-            $table->string('id_pesanan', 15);
+            $table->string('id_pesanan', 15)->nullable();
             $table->foreign('id_pesanan')->references('id_pesanan')->on('pesanans')->nullable();
             $table->double('saldo', 15, 2)->default(0);
             $table->double('total_saldo', 15, 2)->default(0);

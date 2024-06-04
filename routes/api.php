@@ -156,7 +156,8 @@ Route::resource('metode-pembayaran', MetodePembayaranController::class);
 Route::get('/pesanan/hari-ini', [PesananController::class, 'showToday']);
 Route::resource('pesanan', PesananController::class);
 Route::get('/pesanan/laporan/{date}', [PesananController::class, 'showByMonth']);
-
+Route::get('/pesanan/bahan-baku-usage/{id}', [PesananController::class, 'showBahanBakuUsage']);
+Route::post('/pesanan/bahan-baku/use/{id}', [PesananController::class, 'useBahanBaku']);
 
 // jeha close
 Route::resource('karyawan', KaryawanController::class);
