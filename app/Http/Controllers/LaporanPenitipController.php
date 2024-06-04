@@ -47,7 +47,8 @@ class LaporanPenitipController extends Controller
            //init
             $produkTransaksi = [];
     
-           
+            $totalDiterima = 0; // Total yang diterima oleh penitip
+    
             foreach ($pesananPenitip as $pesanan) {
                 foreach ($pesanan->detail_pesanan as $detailPesanan) {
                     $produkId = $detailPesanan->produk->id_produk;
@@ -65,6 +66,9 @@ class LaporanPenitipController extends Controller
                     $produkTransaksi[$produkId]['total'] += $detailPesanan->jumlah * $detailPesanan->produk->harga_jual;
                     $produkTransaksi[$produkId]['komisi'] += $detailPesanan->jumlah * $detailPesanan->produk->harga_jual * 0.2;
                     $produkTransaksi[$produkId]['yang_diterima'] += $detailPesanan->jumlah * $detailPesanan->produk->harga_jual * 0.8;
+    
+                    // Tambahkan total yang diterima dari transaksi ini ke totalDiterima penitip
+                    $totalDiterima += $detailPesanan->jumlah * $detailPesanan->produk->harga_jual * 0.8;
                 }
             }
     
@@ -90,10 +94,12 @@ class LaporanPenitipController extends Controller
                 'tahun' => $tahun,
                 'tanggal_cetak' => now()->format('Y-m-d'),
                 'transaksi' => $transaksiPenitip,
+                'total_diterima' => $totalDiterima, // Total yang diterima oleh penitip
             ];
         }
     
         return $rekapTransaksi;
     }
+    
     
 }
