@@ -103,9 +103,10 @@ Route::group([
     Route::post('refresh', [AkunController::class, 'refresh']);
     Route::get('me', [AkunController::class, 'me']);
 });
-
-
+Route::get('/hey', [PesananController::class, 'autoUpdateStatueAfter2Days']);
+Route::post('/push-notification', [PesananController::class, 'pushNotification']);
 Route::get('/pesanan/in-process', [PesananController::class, 'getAllPesananInProcess']);
+Route::get('/pesanan/pickup', [PesananController::class, 'getAllPesananPickupAndDelivery']);
 Route::get('/pesanan/delivery', [PesananController::class, 'getAllPesananNeedConfirmDelivery']);
 Route::get('/pesanan/confirmpayments', [PesananController::class, 'getAllPesananNeedConfirmPayment']);
 Route::get('/pesanan/rejected', [PesananController::class, 'getAllPesananRejected']);

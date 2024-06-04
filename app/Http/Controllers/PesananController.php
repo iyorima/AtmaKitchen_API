@@ -21,7 +21,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-
+use DateTime;
+use onesignal\client\api\DefaultApi;
+use onesignal\client\Configuration;
+use onesignal\client\model\GetNotificationRequestBody;
+use onesignal\client\model\Notification;
+use onesignal\client\model\StringMap;
+use onesignal\client\model\Player;
+use onesignal\client\model\Filter;
+use onesignal\client\model\UpdatePlayerTagsRequestBody;
+use onesignal\client\model\ExportPlayersRequestBody;
+use onesignal\client\model\Segment;
+use onesignal\client\model\FilterExpressions;
+use PHPUnit\Framework\TestCase;
+use GuzzleHttp;
 
 class PesananController extends Controller
 {
@@ -579,6 +592,30 @@ class PesananController extends Controller
         ], 200);
     }
 
+    public function getAllPesananPickupAndDelivery()
+    {
+        $pesanan = Pesanan::with([
+            'pelanggan',
+            'status_pesanan_latest',
+            'pengiriman',
+            'id_metode_pembayaran',
+            'detail_pesanan'
+        ])
+            ->whereHas('status_pesanan_latest', function ($query) {
+                return $query->where('status', 'Sedang dikirim kurir')->orWhere('status', 'Dipickup');
+            })
+            ->orderBy('id_pesanan', 'desc')->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->noContent();
+        }
+
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh pesanan yang sedang diproses',
+            'data' => $pesanan
+        ], 200);
+    }
+
     /**
      * Get all pesanan with late payment.
      *
@@ -631,6 +668,8 @@ class PesananController extends Controller
             ->join('produk_hampers as ph', 'dp.id_produk_hampers', '=', 'ph.id_produk_hampers')
             ->join('detail_hampers as dh', 'ph.id_produk_hampers', '=', 'dh.id_produk_hampers')
             ->join('produks as p', 'dh.id_produk', '=', 'p.id_produk')
+            ->join('pesanans', 'dp.id_pesanan', '=', 'pesanans.id_pesanan')
+
             ->join('resep_produks as rp', function ($join) {
                 $join->on('p.id_produk', '=', 'rp.id_produk')
                     ->orWhere(function ($query) {
@@ -645,7 +684,7 @@ class PesananController extends Controller
             })
             ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
             ->select('bb.nama', DB::raw('SUM(CEIL(dp.jumlah/2) * rp.jumlah) as total'), 'bb.satuan')
-            ->whereBetween('dp.created_at', [$start_date, $end_date])
+            ->whereBetween('pesanans.tgl_order', [$start_date, $end_date])
             ->groupBy('bb.nama', 'bb.satuan');
 
         $bahanBakuUsage = DB::table('detail_pesanans as dp')
@@ -663,7 +702,9 @@ class PesananController extends Controller
                     });
             })
             ->join('bahan_bakus as bb', 'rp.id_bahan_baku', '=', 'bb.id_bahan_baku')
-            ->whereBetween('dp.created_at', [$start_date, $end_date])
+            ->join('pesanans', 'dp.id_pesanan', '=', 'pesanans.id_pesanan')
+            ->where('pesanans.accepted_at', '!=', null)
+            ->whereBetween('pesanans.tgl_order', [$start_date, $end_date])
             ->select('bb.nama', DB::raw('SUM(IF(p.ukuran = "10x20 cm", CEIL(dp.jumlah/2), dp.jumlah) * rp.jumlah) as total'), 'bb.satuan')
             ->groupBy('bb.nama', 'bb.satuan')
             ->unionAll($subQuery)
@@ -778,13 +819,13 @@ class PesananController extends Controller
      */
     public function autoUpdateStatueAfter2Days()
     {
-        $expired = Carbon::now()->subDays(2);
+        $expired = Carbon::now()->addDay()->toDateString();
 
         $pesanan = Pesanan::with('status_pesanan_latest')
             ->whereHas('status_pesanan_latest', function ($query) {
                 $query->where('status', 'Menunggu ongkir');
             })
-            ->where('tgl_order', '<', $expired)
+            ->where('tgl_order', $expired)
             ->get();
 
         foreach ($pesanan as $p) {
@@ -820,7 +861,7 @@ class PesananController extends Controller
         $data = $request->all();
 
         $validate = Validator::make($data, [
-            'status' => 'required|in:Siap dipickup,Sedang dikirim kurir,Sudah dipickup,Selesai,Diterima,Diproses,Ditolak'
+            'status' => 'required|in:Siap dipickup,Sedang dikirim kurir,Sudah dipickup,Selesai,Diterima,Diproses,Ditolak,Siap dikirim'
         ]);
 
         if ($validate->fails()) {
@@ -853,6 +894,49 @@ class PesananController extends Controller
             'message' => 'Gagal mengubah status pesanan',
             'data' => null
         ], 404);
+    }
+
+    public function pushNotification(Request $request)
+    {
+        $data = $request->all();
+
+        $validate = Validator::make($data, [
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'user_id' => 'required|int'
+        ]);
+
+        if ($validate->fails()) {
+            return response(['message' => $validate->errors()], 400);
+        }
+
+        $config = Configuration::getDefaultConfiguration()
+            ->setAppKeyToken(env('ONESIGNAL_REST_API_KEYS'));
+
+        $apiInstance = new DefaultApi(
+            new GuzzleHttp\Client(),
+            $config
+        );
+
+        $header = new StringMap();
+        $header->setEn($data['title']);
+
+        $content = new StringMap();
+        $content->setEn($data['description']);
+
+        $notification = new Notification();
+        $notification->setAppId(env('ONESIGNAL_APP_ID'));
+        $notification->setHeadings($header);
+        $notification->setContents($content);
+
+        $userFilter = new Filter();
+        $userFilter->setField('tag');
+        $userFilter->setKey('user_id');
+        $userFilter->setRelation('=');
+        $userFilter->setValue($data['user_id']);
+        $notification->setFilters([$userFilter]);
+
+        return $apiInstance->createNotification($notification);
     }
 
     // @Nathan
