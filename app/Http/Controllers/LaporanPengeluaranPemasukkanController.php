@@ -19,10 +19,9 @@ class LaporanPengeluaranPemasukkanController extends Controller
         $namaBulan = Carbon::createFromDate(null, $bulan, null)->monthName;
 
         $pemasukkanPesanan = Pesanan::whereYear('tgl_order', $tahun)
-        ->whereMonth('tgl_order', $bulan)
-        ->whereNotNull('total_dibayarkan') 
-        ->sum('total_setelah_diskon');
-
+            ->whereMonth('tgl_order', $bulan)
+            ->whereNotNull('total_dibayarkan')
+            ->sum('total_setelah_diskon');
 
         $tipPesanan = Pesanan::whereYear('tgl_order', $tahun)
             ->whereMonth('tgl_order', $bulan)
@@ -57,7 +56,7 @@ class LaporanPengeluaranPemasukkanController extends Controller
             'total_pengeluaran' => $totalPengeluaran
         ];
 
-        return response()->json($output);
+        return $output; // Mengembalikan array tanpa menggunakan response()->json()
     }
 
     public function getPengeluaranPemasukkan($tahun, $bulan)
@@ -69,8 +68,9 @@ class LaporanPengeluaranPemasukkanController extends Controller
 
         $laporan = $this->laporanPengeluaranPemasukkan($request);
 
+        // Menghapus kunci 'original' dari laporan saat memanggil getPengeluaranPemasukkan
+        unset($laporan['original']);
+
         return response()->json($laporan, 200);
     }
-
-
 }
