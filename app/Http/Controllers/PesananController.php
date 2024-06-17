@@ -991,10 +991,11 @@ class PesananController extends Controller
         $data = Pesanan::select([
             DB::raw('MONTHNAME(tgl_order) as month'),
             DB::raw('count(*) as total_orders'),
-            DB::raw('sum(total_setelah_diskon + COALESCE(pengirimen.harga, 0)) as total_sales'),
+            DB::raw('sum(total_pesanan + COALESCE(pengirimen.harga, 0)) as total_sales'),
         ])
             ->join('pengirimen', 'pesanans.id_pesanan', '=', 'pengirimen.id_pesanan')
             ->whereYear('tgl_order', $currentYear)
+            ->where('accepted_at', '!=', null)
             ->groupBy('month')
             ->orderBy('month', 'asc')
             ->get()
