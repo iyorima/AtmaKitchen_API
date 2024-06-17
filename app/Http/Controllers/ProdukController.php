@@ -171,7 +171,7 @@ class ProdukController extends Controller
             if (!is_null($product->id_penitip)) {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
                     $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
-                        $query->where('status', '!=', 'ditolak');
+                        $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                     });;
                 })
                     ->where('id_produk', $product->id_produk)
@@ -183,7 +183,7 @@ class ProdukController extends Controller
             } else {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
                     $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
-                        $query->where('status', '!=', 'ditolak');
+                        $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                     });;
                 })
                     ->where('id_produk', $product->id_produk)
@@ -235,7 +235,7 @@ class ProdukController extends Controller
             if (!is_null($product->id_penitip)) {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
                     $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
-                        $query->where('status', '!=', 'ditolak');
+                        $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                     });;
                 })
                     ->where('id_produk', $id)
@@ -246,7 +246,7 @@ class ProdukController extends Controller
             } else {
                 $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
                     $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
-                        $query->where('status', '!=', 'ditolak');
+                        $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                     });;
                 })
                     ->where('id_produk', $id)
@@ -284,7 +284,7 @@ class ProdukController extends Controller
                         $orderCountBase = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $baseProduct) {
                             $query->whereDate('tgl_order', $date)
                                 ->whereHas('status_pesanan', function ($query) {
-                                    $query->where('status', '!=', 'ditolak');
+                                    $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                                 });
                         })
                             ->where('id_produk', $baseProduct->id_produk)
@@ -297,7 +297,7 @@ class ProdukController extends Controller
                         $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $product) {
                             $query->whereDate('tgl_order', $date)
                                 ->whereHas('status_pesanan', function ($query) {
-                                    $query->where('status', '!=', 'ditolak');
+                                    $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                                 });
                         })
                             ->where('id_produk', $product->id_produk)
@@ -309,7 +309,7 @@ class ProdukController extends Controller
                     $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $product) {
                         $query->whereDate('tgl_order', $date)
                             ->whereHas('status_pesanan', function ($query) {
-                                $query->where('status', '!=', 'ditolak');
+                                $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                             });
                     })
                         ->where('id_produk', $product->id_produk)
@@ -362,7 +362,7 @@ class ProdukController extends Controller
                         $orderCountBase = DetailPesanan::whereHas('pesanan', function ($query) use ($currentDate) {
                             $query->whereDate('tgl_order', $currentDate)
                                 ->whereHas('status_pesanan_latest', function ($query) {
-                                    $query->where('status', '!=', 'Dibatalkan otomatis');
+                                    $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                                 });
                         })
                             ->where('id_produk', $baseProduct->id_produk)
@@ -374,7 +374,7 @@ class ProdukController extends Controller
                         $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($currentDate, $id) {
                             $query->whereDate('tgl_order', $currentDate)
                                 ->whereHas('status_pesanan_latest', function ($query) {
-                                    $query->where('status', '!=', 'Dibatalkan otomatis');
+                                    $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                                 });
                         })
                             ->where('id_produk', $id)
@@ -385,7 +385,7 @@ class ProdukController extends Controller
                     $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($currentDate, $id) {
                         $query->whereDate('tgl_order', $currentDate)
                             ->whereHas('status_pesanan_latest', function ($query) {
-                                $query->where('status', '!=', 'Dibatalkan otomatis');
+                                $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
                             });
                     })
                         ->where('id_produk', $id)

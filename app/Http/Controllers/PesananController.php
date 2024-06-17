@@ -153,8 +153,8 @@ class PesananController extends Controller
         SaldoPelanggan::create([
             'id_pesanan' => $pesanan->id_pesanan,
             'id_akun' => $akun->id_akun,
-            'total_saldo' => $pesanan->total_setelah_diskon + $saldoPelanggan,
-            'saldo' => $pesanan->total_setelah_diskon,
+            'total_saldo' => $pesanan->total_dibayarkan + $saldoPelanggan,
+            'saldo' => $pesanan->total_dibayarkan,
         ]);
 
         //poin
