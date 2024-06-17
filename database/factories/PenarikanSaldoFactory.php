@@ -22,12 +22,12 @@ class PenarikanSaldoFactory extends Factory
     public function definition()
     {
         return [
-            'id_akun' => $this->faker->numberBetween(3, 5),
-            'jumlah_penarikan' => $this->faker->randomFloat(2, 100, 500000),
-            'status' => 'menunggu',
-            'transfer_at' => $this->faker->dateTimeThisMonth(),
-            'nama_bank' => $this->faker->randomElement(['bca', 'mandiri']),
-            'nomor_rekening' => $this->faker->bankAccountNumber,
+            // 'id_akun' => $this->faker->numberBetween(3, 5),
+            // 'jumlah_penarikan' => $this->faker->randomFloat(2, 100, 500000),
+            // 'status' => 'menunggu',
+            // 'transfer_at' => $this->faker->dateTimeThisMonth(),
+            // 'nama_bank' => $this->faker->randomElement(['bca', 'mandiri']),
+            // 'nomor_rekening' => $this->faker->bankAccountNumber,
         ];
     }
 }

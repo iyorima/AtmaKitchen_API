@@ -15,13 +15,13 @@ class PengeluaranLainnyaFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
         $karyawanIds = Karyawan::pluck('id_karyawan')->toArray();
         return [
             'id_karyawan' => $this->faker->numberBetween(1, 3),
             // 'nama' => Karyawan::find($this->faker->randomElement($karyawanIds))->nama,
-            'nama' => $this->faker->randomKey(['Listrik' => 1, 'Iuran RT' => 2, 'Bensin' => 3, 'Gas' => 4, 'Gaji Karyawan' => 5]),
+            'nama' => $this->faker->randomKey(['Listrik' => 1, 'Iuran RT' => 2, 'Bensin' => 3, 'Gas' => 4]),
             'biaya' => $this->faker->randomFloat(2, 500, 2000000),
             'tanggal' => $this->faker->dateTimeThisMonth(),
             'kategori' => "Pengeluaran"

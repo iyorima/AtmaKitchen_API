@@ -12,6 +12,6 @@ class PenarikanSaldoSeeder extends Seeder
      */
     public function run(): void
     {
-        PenarikanSaldo::factory()->count(10)->create();
+        // PenarikanSaldo::factory()->count(10)->create();
     }
 }

@@ -21,10 +21,13 @@ class PenarikanSaldo extends Model
         'status',
     ];
 
-    public function akun(){
-        return $this->hasOne(Akun::class, "id_akun");
+    public function akun()
+    {
+        return $this->belongsTo(Akun::class, "id_akun");
     }
-    public function pelanggan(){
-        return $this->hasOne(Pelanggan::class, "id_akun");
+
+    public function pelanggan()
+    {
+        return $this->belongsTo(Pelanggan::class, "id_akun");
     }
 }

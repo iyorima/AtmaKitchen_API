@@ -20,7 +20,7 @@ class LaporanPengeluaranPemasukkanController extends Controller
 
         $pemasukkanPesanan = Pesanan::whereYear('tgl_order', $tahun)
             ->whereMonth('tgl_order', $bulan)
-            ->whereNotNull('total_dibayarkan')
+            ->where('acccepted_at', '!=', null)
             ->sum('total_setelah_diskon');
 
         $tipPesanan = Pesanan::whereYear('tgl_order', $tahun)
