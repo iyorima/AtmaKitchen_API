@@ -367,7 +367,7 @@ class PesananController extends Controller
          * @param Pesanan $pesanan The pesanan object.
          * @return void
          */
-        $totalTip = $updateData['total_dibayarkan'] - ($pesanan->total_setelah_diskon + isset($pesanan->pengiriman->harga) ? $pesanan->pengiriman->harga : 0);
+        $totalTip = $updateData['total_dibayarkan'] - ($pesanan->total_setelah_diskon + (isset($pesanan->pengiriman->harga) ? $pesanan->pengiriman->harga : 0));
 
         if ($totalTip > 0) {
             $updateData['total_tip'] = $totalTip;
@@ -670,6 +670,7 @@ class PesananController extends Controller
             ->join('detail_hampers as dh', 'ph.id_produk_hampers', '=', 'dh.id_produk_hampers')
             ->join('produks as p', 'dh.id_produk', '=', 'p.id_produk')
             ->join('pesanans', 'dp.id_pesanan', '=', 'pesanans.id_pesanan')
+            ->where('pesanans.accepted_at', '!=', null)
 
             ->join('resep_produks as rp', function ($join) {
                 $join->on('p.id_produk', '=', 'rp.id_produk')
@@ -687,6 +688,7 @@ class PesananController extends Controller
             ->select('bb.nama', DB::raw('SUM(CEIL(dp.jumlah/2) * rp.jumlah) as total'), 'bb.satuan')
             ->whereBetween('pesanans.tgl_order', [$start_date, $end_date])
             ->groupBy('bb.nama', 'bb.satuan');
+        // CHANGE CEIL(dp.jumlah/2)
 
         $bahanBakuUsage = DB::table('detail_pesanans as dp')
             ->join('produks as p', 'dp.id_produk', '=', 'p.id_produk')
@@ -822,12 +824,18 @@ class PesananController extends Controller
     {
         $expired = Carbon::now()->addDay()->toDateString();
 
+
         $pesanan = Pesanan::with('status_pesanan_latest')
             ->whereHas('status_pesanan_latest', function ($query) {
-                $query->where('status', 'Menunggu ongkir');
+                $query->where('status', 'Menunggu ongkir')->orWhere('status', 'Menunggu pembayaran');
             })
             ->where('tgl_order', $expired)
             ->get();
+
+        // return response()->json([
+        //     'message' => 'Pesanan yang dibatalkan otomatis',
+        //     'data' => $pesanan
+        // ]);
 
         foreach ($pesanan as $p) {
             StatusPesanan::create([
@@ -1262,7 +1270,7 @@ class PesananController extends Controller
 
     public function showToday()
     {
-        $date = date('Y-m-d', strtotime('-1 day'));
+        $date = date('Y-m-d', strtotime('+1 day'));
 
         $data = Pesanan::with([
             'pelanggan',

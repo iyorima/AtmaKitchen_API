@@ -69,6 +69,11 @@ class Pelanggan extends Model
         return $this->hasOne(Poin::class, 'id_pelanggan')->latestOfMany('id_poin');
     }
 
+    public function saldo()
+    {
+        return $this->hasOne(SaldoPelanggan::class, 'id_akun')->latestOfMany('id_saldo_pelanggan');
+    }
+
     public function alamat()
     {
         return $this->hasMany(Alamat::class, 'id_pelanggan');
