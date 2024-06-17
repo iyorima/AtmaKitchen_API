@@ -50,6 +50,8 @@ class PemesananBahanBakuController extends Controller
             $bahanBaku = BahanBaku::find($request->id_bahan_baku);
             if ($bahanBaku) {
                 $storeData['nama'] = $bahanBaku->nama;
+                $bahanBaku->stok += $request->jumlah;
+                $bahanBaku->save();
             }
         }
 
@@ -126,6 +128,10 @@ class PemesananBahanBakuController extends Controller
             $bahanBaku = BahanBaku::find($request->id_bahan_baku);
             if ($bahanBaku) {
                 $updateData['nama'] = $bahanBaku->nama;
+
+                $stokDifference = $updateData['jumlah'] - $pemesananBahanBaku->jumlah;
+                $bahanBaku->stok += $stokDifference;
+                $bahanBaku->save();
             }
         }
 
@@ -156,16 +162,17 @@ class PemesananBahanBakuController extends Controller
             ], 404);
         }
 
-        if ($pemesananBahanBaku->delete()) {
-            return response([
-                'message' => 'hapus pemesanan bahan baku berhasil',
-                'data' => $pemesananBahanBaku
-            ], 200);
+        $bahanBaku = BahanBaku::find($pemesananBahanBaku->id_bahan_baku);
+        if ($bahanBaku) {
+            $bahanBaku->stok -= $pemesananBahanBaku->jumlah;
+            $bahanBaku->save();
         }
 
+        $pemesananBahanBaku->delete();
+
         return response([
-            'message' => 'hapus pemesanan bahan baku gagal',
-            'data' => null
-        ], 400);
+            'message' => 'Hapus pemesanan bahan baku berhasil',
+            'data' => $pemesananBahanBaku
+        ], 200);
     }
 }
