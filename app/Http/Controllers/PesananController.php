@@ -153,8 +153,8 @@ class PesananController extends Controller
         SaldoPelanggan::create([
             'id_pesanan' => $pesanan->id_pesanan,
             'id_akun' => $akun->id_akun,
-            'total_saldo' => $pesanan->total_setelah_diskon + $saldoPelanggan,
-            'saldo' => $pesanan->total_setelah_diskon,
+            'total_saldo' => $pesanan->total_dibayarkan + $saldoPelanggan,
+            'saldo' => $pesanan->total_dibayarkan,
         ]);
 
         //poin
@@ -905,6 +905,34 @@ class PesananController extends Controller
         ], 404);
     }
 
+    public function updateAllPesananDiterimaToDiproses()
+    {
+        // Retrieve all pesanan with status "Diterima"
+        $pesanan = Pesanan::with('status_pesanan_latest')
+            ->whereHas('status_pesanan_latest', function ($query) {
+                $query->where('status', 'Diterima');
+            })
+            ->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Tidak ada pesanan dengan status Diterima',
+                'data' => null
+            ], 200);
+        }
+
+        foreach ($pesanan as $pesanan) {
+            StatusPesanan::create([
+                'id_pesanan' => $pesanan->id_pesanan,
+                'status' => 'Diproses'
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Semua status pesanan Diterima berhasil diperbarui menjadi Diproses'
+        ], 200);
+    }
+
     public function pushNotification(Request $request)
     {
         $data = $request->all();
@@ -963,10 +991,11 @@ class PesananController extends Controller
         $data = Pesanan::select([
             DB::raw('MONTHNAME(tgl_order) as month'),
             DB::raw('count(*) as total_orders'),
-            DB::raw('sum(total_setelah_diskon + COALESCE(pengirimen.harga, 0)) as total_sales'),
+            DB::raw('sum(total_pesanan + COALESCE(pengirimen.harga, 0)) as total_sales'),
         ])
             ->join('pengirimen', 'pesanans.id_pesanan', '=', 'pengirimen.id_pesanan')
             ->whereYear('tgl_order', $currentYear)
+            ->where('accepted_at', '!=', null)
             ->groupBy('month')
             ->orderBy('month', 'asc')
             ->get()

@@ -125,7 +125,9 @@ class KeranjangController extends Controller
 
                     if (!is_null($product->id_penitip)) {
                         $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                            $query->whereDate('tgl_order', $date);
+                            $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                                $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
+                            });;
                         })
                             ->where('id_produk', $detail->id_produk)
                             ->sum('jumlah');
@@ -134,7 +136,9 @@ class KeranjangController extends Controller
                         $readyStock = $remainingCapacity;
                     } else {
                         $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                            $query->whereDate('tgl_order', $date);
+                            $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                                $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
+                            });;
                         })
                             ->where('id_produk', $detail->id_produk)
                             ->sum('jumlah');
@@ -152,13 +156,47 @@ class KeranjangController extends Controller
                     if (!is_null($product->id_penitip)) {
                         $stock = 0;
                     } else {
-                        $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $id) {
-                            $query->whereDate('tgl_order', $date);
-                        })
-                            ->where('id_produk', $detail->id_produk)
-                            ->sum('jumlah');
-                        $remainingCapacity = $product->kapasitas - $orderCount;
-                        $stock = $remainingCapacity;
+                        $ukuran = $product->ukuran;
+
+                        if ($ukuran === '20x20 cm') {
+                            $baseProduct = Produk::where('nama', $product->nama)
+                                ->where('ukuran', '10x20 cm')
+                                ->first();
+
+                            if ($baseProduct) {
+                                $orderCountBase = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $baseProduct) {
+                                    $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                                        $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
+                                    });;
+                                })
+                                    ->where('id_produk', $baseProduct->id_produk)
+                                    ->sum('jumlah');
+                                $remainingCapacityBase = $baseProduct->kapasitas - $orderCountBase;
+                                $baseStock = $remainingCapacityBase;
+
+                                $stock = floor($baseStock / 2);
+                            } else {
+                                $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $product) {
+                                    $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                                        $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
+                                    });;
+                                })
+                                    ->where('id_produk', $product->id_produk)
+                                    ->sum('jumlah');
+                                $remainingCapacity = $product->kapasitas - $orderCount;
+                                $stock = $remainingCapacity;
+                            }
+                        } else {
+                            $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date, $product) {
+                                $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                                    $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
+                                });;
+                            })
+                                ->where('id_produk', $product->id_produk)
+                                ->sum('jumlah');
+                            $remainingCapacity = $product->kapasitas - $orderCount;
+                            $stock = $remainingCapacity;
+                        }
                     }
                     $detail->ready_stock = $stock;
                 }
@@ -173,7 +211,9 @@ class KeranjangController extends Controller
                         $product = $detailHampers->produk;
 
                         $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
-                            $query->whereDate('tgl_order', $date);
+                            $query->whereDate('tgl_order', $date)->whereHas('status_pesanan', function ($query) {
+                                $query->whereNotIn('status', ['Dibatalkan otomatis', 'Ditolak']);
+                            });;
                         })
                             ->where('id_produk', $detail->id_produk_hampers)
                             ->sum('jumlah');
