@@ -110,6 +110,7 @@ Route::get('/pesanan/delivery', [PesananController::class, 'getAllPesananNeedCon
 Route::get('/pesanan/confirmpayments', [PesananController::class, 'getAllPesananNeedConfirmPayment']);
 Route::get('/pesanan/rejected', [PesananController::class, 'getAllPesananRejected']);
 Route::get('/pesanan/paymentverified', [PesananController::class, 'getAllPesananPaymentVerified']);
+Route::post('/pesanan/diterima-to-diproses', [PesananController::class, 'updateAllPesananDiterimaToDiproses']);
 
 Route::post('/pesanan/status/{id_pesanan}', [PesananController::class, 'updateStatusPesanan']);
 Route::post('/bahan-baku/laporan', [PesananController::class, 'getBahanBakuUsageByPeriod']);

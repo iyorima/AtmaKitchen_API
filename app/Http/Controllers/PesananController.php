@@ -856,6 +856,34 @@ class PesananController extends Controller
         ], 404);
     }
 
+    public function updateAllPesananDiterimaToDiproses()
+    {
+        // Retrieve all pesanan with status "Diterima"
+        $pesanan = Pesanan::with('status_pesanan_latest')
+            ->whereHas('status_pesanan_latest', function ($query) {
+                $query->where('status', 'Diterima');
+            })
+            ->get();
+
+        if ($pesanan->isEmpty()) {
+            return response()->json([
+                'message' => 'Tidak ada pesanan dengan status Diterima',
+                'data' => null
+            ], 200);
+        }
+
+        foreach ($pesanan as $pesanan) {
+            StatusPesanan::create([
+                'id_pesanan' => $pesanan->id_pesanan,
+                'status' => 'Diproses'
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Semua status pesanan Diterima berhasil diperbarui menjadi Diproses'
+        ], 200);
+    }
+
     // @Nathan
     public function getAllPendapatanBulanan()
     {
@@ -1178,7 +1206,7 @@ class PesananController extends Controller
 
     public function showToday()
     {
-        $date = date('Y-m-d', strtotime('-1 day'));
+        $date = date('Y-m-d', strtotime('+1 day'));
 
         $data = Pesanan::with([
             'pelanggan',
