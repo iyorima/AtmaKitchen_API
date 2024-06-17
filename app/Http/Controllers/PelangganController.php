@@ -142,7 +142,7 @@ class PelangganController extends Controller
      */
     public function show(int $id_pelanggan)
     {
-        $pelanggan = Pelanggan::with('id_akun')->find($id_pelanggan);
+        $pelanggan = Pelanggan::with(['id_akun', 'saldo', 'poins'])->find($id_pelanggan);
         if (is_null($pelanggan)) {
             return response()->json([
                 "message" => "Pengguna tidak ditemukan",
@@ -173,9 +173,11 @@ class PelangganController extends Controller
             $order->points = $order->calculate_poin();
         }
 
+        $pelanggan['pesanan'] = $pesanan;
+
         return response()->json([
             "message" => "Berhasil menampilkan pesanan",
-            "data" => $pesanan
+            "data" => $pelanggan
         ], 200);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Akun;
 use App\Models\Karyawan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -66,7 +67,8 @@ class KaryawanController extends Controller
         $akun = Akun::create([
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'id_role' => $request->id_role
+            'id_role' => $request->id_role,
+            'email_verified_at' => Carbon::now()
         ]);
 
         $karyawan = Karyawan::create([

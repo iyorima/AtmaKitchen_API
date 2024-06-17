@@ -314,7 +314,10 @@ class ProdukController extends Controller
 
         for ($i = 0; $i < 7; $i++) {
             $orderCount = DetailPesanan::whereHas('pesanan', function ($query) use ($date) {
-                $query->whereDate('tgl_order', $date->addDays());
+                $query->whereDate('tgl_order', $date->addDays())
+                    ->whereHas('status_pesanan_latest', function ($query) {
+                        $query->where('status', '!=', 'Dibatalkan otomatis'); // Exclude Dibatalkan otomatis
+                    });
             })
                 ->where('id_produk', $id)
                 ->sum('jumlah');

@@ -9,10 +9,7 @@ use App\Models\Akun;
 use App\Models\Pelanggan;
 use App\Models\Alamat;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use App\Mail\MailSend;
 use App\Models\Karyawan;
 use Illuminate\Support\Facades\Cookie;
 

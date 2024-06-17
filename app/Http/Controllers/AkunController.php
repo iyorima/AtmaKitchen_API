@@ -58,7 +58,7 @@ class AkunController extends Controller
     {
         $akun = auth()->user();
 
-        $user = Pelanggan::with('akun.role', 'poins:id_poin,total_poin,poins.id_pelanggan')->with(['count_keranjang' => function ($query) {
+        $user = Pelanggan::with('akun.role', 'poins:id_poin,total_poin,poins.id_pelanggan', 'saldo')->with(['count_keranjang' => function ($query) {
             $query->withCount('detail_keranjang');
         }])->where('id_akun', $akun->id_akun)->first();
 
