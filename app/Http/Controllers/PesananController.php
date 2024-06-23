@@ -1278,6 +1278,7 @@ class PesananController extends Controller
             ->join('produks', 'detail_pesanans.id_produk', '=', 'produks.id_produk')
             ->whereYear('pesanans.tgl_order', $year)
             ->whereMonth('pesanans.tgl_order', $month)
+            ->where('accepted_at', '!=', null)
             ->groupBy('produks.nama', 'produks.harga_jual')
             ->get();
 

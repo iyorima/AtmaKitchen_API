@@ -20,18 +20,12 @@ class PenarikanSaldoController extends Controller
      */
     public function index()
     {
-        try {
-            $penarikanSaldos = PenarikanSaldo::with(['akun', 'pelanggan'])->orderBy()->get();
+        $penarikanSaldos = PenarikanSaldo::with(['akun', 'pelanggan'])->orderBy('id_penarikan_saldo', 'DESC')->get();
 
-            return response()->json([
-                'message' => 'Berhasil mendapatkan seluruh data pengajuan penarikan saldo',
-                'data' => $penarikanSaldos
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Berhasil mendapatkan seluruh data pengajuan penarikan saldo',
+            'data' => $penarikanSaldos
+        ]);
     }
 
 
